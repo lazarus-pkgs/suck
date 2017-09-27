@@ -9,7 +9,8 @@
 
 int main(int argc,char *argv[]) {
 	FILE *pfp=NULL;
-	char line[1024];
+	const int max_len = 1024;
+	char line[max_len];
 	int count=0,verbose=0, retval=0;
 	size_t len;
 
@@ -17,7 +18,7 @@ int main(int argc,char *argv[]) {
 		verbose=1;
 	}
 
-	while(gets(line) != NULL && retval == 0) {
+    while(fgets(line, max_len, stdin) != NULL && retval == 0) {
   		len=strlen(line);
 		if (pfp == NULL) {
 			if (verbose != 0) {
@@ -40,8 +41,7 @@ int main(int argc,char *argv[]) {
 			}
 		}
 		else {
-			(void) fputs(line, pfp);
-			(void) putc('\n', pfp);
+			(void) fput(line, pfp);
 		}
 	} /* end while */
 	exit(retval);
