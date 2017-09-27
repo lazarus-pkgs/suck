@@ -161,7 +161,7 @@ struct hostent *get_hostent(const char *host) {
 }
 /*--------------------------------------------*/
 int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsigned short int portnr, int do_ssl, void **ssl) {
-	char *ptr;
+	char *ptr, *realhost;
 	struct in_addr *aptr;
 	struct in_addr saddr;
 	struct sockaddr_in address;
@@ -183,16 +183,32 @@ int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsig
 		}
 	}
 #endif
+	/* handle host:port type syntax */
+	realhost = strdup(host);
+	if(realhost == NULL) {
+		MyPerror("out of memory copying host name");
+		return sockfd;
+	}
+	ptr = strchr(realhost, ':');
+	if(ptr != NULL) {
+		*ptr = '\0';  /* null terminate host name */
+		portnr = atoi(++ptr); /* get port number */
+	}
+	
+	
+	
 	sprintf(sport, "%hu", portnr);	/* cause print_phrases wants all strings */
 	print_phrases(msgs, both_phrases[1], sport, NULL);
 
 	/* Find the internet address of the NNTP server */
- 	*hi = get_hostent(host);
+ 	*hi = get_hostent(realhost);
  	if(*hi == NULL) {
-		error_log(ERRLOG_REPORT,"%v1%: ",host, NULL);
+		error_log(ERRLOG_REPORT,"%v1%: ",realhost, NULL);
   		MyPerror(both_phrases[2]);
+		free(realhost);
  	}
 	else {
+		free(realhost);
 		print_phrases(msgs, both_phrases[3], (*hi)->h_name, NULL);
  		while((ptr = *((*hi)->h_aliases)) != NULL) {
 			print_phrases(msgs, both_phrases[4], ptr, NULL );
@@ -413,13 +429,22 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 			signal_block(MYSIGNAL_BLOCK);
 			/* block so we can't get interrupted by our signal defined in config.h */
 #endif
+#ifdef HAVE_LIBSSL
+			if(do_ssl == TRUE && fd == SSL_get_fd((SSL *)ssl_buf) && SSL_pending((SSL *)ssl_buf)) {
+				i = 1;
+			}
+			else {
+#endif
 			/* the fd+1 so we only scan our needed fd not all 1024 in set */
-			/*if((i = select(fd+1, &myset, (fd_set *) NULL, (fd_set *) NULL, &mytimes)) == 1) { */
-			if((i = select(fd+1, &myset, (fd_set *) NULL, (fd_set *) NULL, &mytimes)) > 0) {
+			i = select(fd+1, &myset, (fd_set *) NULL, (fd_set *) NULL, &mytimes);
+#ifdef HAVE_LIBSSL
+			}
+#endif
+			if(i>0) {
+#ifdef HAVE_LIBSSL
 #ifdef DEBUG1
 				do_debug("SELECT got: %d\n", i);
 #endif
-#ifdef HAVE_LIBSSL
 				if(do_ssl == TRUE) {
 					if(fd == SSL_get_fd((SSL *)ssl_buf)) {
 						i = SSL_read((SSL *)ssl_buf, eob, MAXLINLEN-len);

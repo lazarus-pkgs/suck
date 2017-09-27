@@ -403,6 +403,11 @@ int main(int argc, char *argv[]) {
 		retval = RETVAL_ERROR;
 		error_log(ERRLOG_REPORT, suck_phrases[6], NULL);
 	}
+	else if(master.host == NULL) {
+		retval = RETVAL_ERROR;
+		error_log(ERRLOG_REPORT, suck_phrases[74], NULL);
+	}
+	
 	
 	/* okay now the main stuff */
 	if(retval == RETVAL_OK) {
@@ -425,7 +430,9 @@ int main(int argc, char *argv[]) {
 		sigemptyset(&(sigs.sa_mask));
 		sigs.sa_handler = sighandler;
 		sigs.sa_flags = 0;
-		if(sigaction(MYSIGNAL, &sigs, NULL) == -1 || sigaction(PAUSESIGNAL, &sigs, NULL) == -1) {
+		if(sigaction(MYSIGNAL, &sigs, NULL) == -1
+			     || sigaction(MYSIGNAL2, &sigs, NULL) == -1
+			     || sigaction(PAUSESIGNAL, &sigs, NULL) == -1) {
 			MyPerror(suck_phrases[67]);
 		}
 		else {
@@ -435,6 +442,7 @@ int main(int argc, char *argv[]) {
 #else
 		/* the old-fashioned way */
 		signal(MYSIGNAL, sighandler);
+		signal(MYSIGNAL2, sighandler);
 		signal(PAUSESIGNAL, sighander);
 		pause_signal(PAUSE_SETUP, &master);
 #endif	
@@ -1356,7 +1364,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 				retval = RETVAL_ERROR;
 			}
 			else if(strlen(st_ptr) >= MAX_MSGID_LEN) {
-				error_log(ERRLOG_REPORT, suck_phrases[63], NULL);
+				error_log(ERRLOG_REPORT, suck_phrases[63], group, msgnr, NULL);
 				free(ptr);
 			}
 			else {
@@ -1413,7 +1421,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 	 static char cmd[MAXLINLEN+1];
 	 static int warned = FALSE;
 	 char *resp;
-	 char grpcmd[MAXLINLEN];
+	 char grpcmd[MAXLINLEN+1];
 	 
 	 PGroups grps;
 	 
@@ -1452,7 +1460,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 	 }
 	 /* the if is in case we changed it above */
 	 if(master->nrmode == FALSE) {
-		 sprintf(cmd, "%s %s\r\n", cmdstart, article->msgnr);
+		 snprintf(cmd, MAXLINLEN, "%s %s\r\n", cmdstart, article->msgnr);
 	 }
 	 return cmd;
  }
@@ -1619,10 +1627,8 @@ int get_a_chunk(PMaster master, FILE *fptr) {
 			if(len == 2 && inbuf[1] == '\n') {
 				done = TRUE;
 			}
-			else if(fptr != stdout) {
+			else {
 				/* handle double dots IAW RFC977 2.4.1*/
-				/* if we are going to stdout, we have to leave double dots alone */
-				/* since it might mess up the .\n for EOM */
 				inbuf++;	/* move past first dot */
 				len--;
 			}
@@ -1694,6 +1700,7 @@ RETSIGTYPE sighandler(int what) {
 /*		signal_block(MYSIGNAL_SETUP); */	/* just to be on the safe side */ 
 		break;
 	  case MYSIGNAL:
+	  case MYSIGNAL2:
 	  default:
 		error_log(ERRLOG_REPORT, suck_phrases[24], NULL);
 		GotSignal = TRUE;

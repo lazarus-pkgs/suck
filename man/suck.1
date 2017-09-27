@@ -189,6 +189,11 @@ number_to_read
 ]
 
 Options valid in all modes
+\hostname
+
+The hostname may optionally include the port number, in the form
+.BI Host:Port.  If this option is used, any port number specified
+via the -N option is ignored.
 
 \@filename 
 
@@ -214,6 +219,10 @@ file "active-ignore", one per line, and suck will ignore these newsgroups when i
 If your system supports regex(), you may use regular expressions in the active-ignore file to skip multiple groups, eg: fred\.*.
 If you use the -p (postfix) option, suck will check for the existence of an active-ignore file with the
 postfix.  If that doesn't exist, then suck will check for the existence of the file without the postfix.
+
+NOTE: If the localhost is on a non-standard port, the port number may be specified as part of the hostname,
+in the form 
+.BI Host:Port.
 
 NOTE: If you use regular expressions, suck will silently add a "^" to the beginning of the group name, 
 and a "$" to the end of the group name if they aren't already present, so that if you have "comp.os.linux",

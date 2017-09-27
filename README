@@ -15,7 +15,7 @@ to download the latest version or view the README file.
 FTP Sites:
 Site1	     = sunsite.unc.edu
 Path1        = /pub/Linux/system/news/transport
-File1        = suck-4.3.1.tar.gz
+File1        = suck-4.3.2.tar.gz
 
 INTRODUCTION
 ============
@@ -45,14 +45,20 @@ testhost        	Check to see what commands your host recognizes or
 
 lmove 			put articles in news/group/number format.
 
-MAJOR CHANGES FROM 4.3.0 -> 4.3.1
+MAJOR CHANGES FROM 4.3.1 -> 4.3.2
 
-* - Major changes to the configure stuff, to hopefully automatically
-	pick up where SSL, Perl, Inn, and history live.
+* - Wherever a hostname is specified on the command line, the form Host:Port
+may be used to specify a port number.  If this form is used, the -N port
+option will be ignored.  
 
-* - fixes to Socks stuff
+* - various bug/buffer overflow conditions fixed, thanks to the Debian folks.
 
-rpost, suck - added -Q option to allow specification of userid/passwd for
+suck - Handle SIGINT in addition to SIGTERM
+
+configure - added -with-perl-exe to allow specification of the path to the
+	perl exe, for use on systems with multiple perl installs.
+
+testhost  - added -Q option to allow specification of userid/passwd for
 	authentication via environment variables.
 
 LICENSING INFO

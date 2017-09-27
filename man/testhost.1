@@ -34,6 +34,9 @@ userid
 password
 ]
 [
+.BI -Q
+]
+[
 .BI -l
 phrase_file
 ]
@@ -111,6 +114,13 @@ waits for data from the remote host before timing out and aborting.
 These two options let you specify a userid and password, if your NNTP server
 requires them.
 
+\-Q
+
+This option tells testhost to use the environment variable NNTP_USER & NNTP_PASS
+to specify a userid and password, if your NNTP server requires them.  This option
+is provided so that the userid & password can't be seen with the ps command, a
+potential security problem.
+
 \-z
 
 This options tells testhost to use SSL to talk to the remote server, if testhost
@@ -120,6 +130,11 @@ was compiled with SSL.
 .I Testhost
 will query a NNTP news server, specified by
 .I hostname.
+
+The hostname may optionally include the port number in the form
+.BI Host:Port.  If the port number is included, the port number specified
+by the -N option will be ignored.
+
 The default action is to issue the 
 .I help
 command to the server, to see what software it is running

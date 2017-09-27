@@ -7,7 +7,7 @@
 #define LOCAL_SSL_PORT 563       /* if using SSL, for local host */
 
 /* Max length of a Message-ID that is possbile */
-#define MAX_MSGID_LEN 196
+#define MAX_MSGID_LEN 512
 /* Max length of a Group Name */
 #define MAX_GRP_LEN 128
 
@@ -54,6 +54,7 @@
 /* then leave this in.  If you don't, and the child program dies unexpectedly */
 /* suck will also die. */
 #define MYSIGNAL SIGTERM
+#define MYSIGNAL2 SIGINT
 #define PAUSESIGNAL SIGUSR1
 
 /* If you want to have suck check in your history file for articles */

@@ -151,7 +151,7 @@ const char *default_suck_phrases[] = {
 	"Restart: Skipping first article\n", /*60*/
 	"No kill log file name provided\n",
 	"No post filter provided\n",
-	"----Message-ID too long----\nincrease MAX_MSGID_LEN in suck_config.h, recompile, and re-run.\n",
+	"-%v1%-%v2%-Message-ID too long, ignoring\n",
 	"No history file path provided\n",
 	"No default read for new active groups provided\n", /* 65 */
 	"Invalid default read for new active group, must be <= 0\n",
@@ -162,6 +162,7 @@ const char *default_suck_phrases[] = {
 	"%v1% - %v2%... High Number article is low, resetting last read to %v3%\n",
 	"No batch_post count provide\n",
 	"Userid or Password not provided, unable to authenticate\n",
+	"No host name on command line, aborting\n",
 };
 
 const char *default_batch_phrases[] = {

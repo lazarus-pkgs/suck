@@ -236,43 +236,50 @@ int main(int argc, char *argv[], char *env[]) {
 		
 
 		/* we processed args okay */
-		myargs.sockfd = connect_to_nntphost( myargs.host, &hi, myargs.status_fptr, myargs.portnr, myargs.do_ssl, &myargs.ssl_struct);
-		if(myargs.sockfd < 0) {
+		if(myargs.host == NULL) {
+			error_log(ERRLOG_REPORT, rpost_phrases[20], NULL);
 			retval = RETVAL_ERROR;
 		}
 		else {
-			/* Get the announcement line */
-			if((i = sgetline(myargs.sockfd, &inbuf, myargs.do_ssl, myargs.ssl_struct)) < 0) {
+			myargs.sockfd = connect_to_nntphost( myargs.host, &hi, myargs.status_fptr, myargs.portnr, myargs.do_ssl, &myargs.ssl_struct);
+			if(myargs.sockfd < 0) {
 				retval = RETVAL_ERROR;
 			}
 			else {
-				fputs(inbuf, myargs.status_fptr );
-				number(inbuf, &response);
-				if(response == 480) {
-					retval = do_authenticate(&myargs);
-				}
-			}
-			if(retval == RETVAL_OK && myargs.do_modereader == TRUE) {
-				retval = send_command(&myargs, "mode reader\r\n", &inbuf, 0);
-				if( retval  == RETVAL_OK) {				
-					/* Again the announcement */
-					fputs(inbuf, myargs.status_fptr );
-					number(inbuf, &response);
-				}
-			}
-			if(response == 201 && myargs.ignore_readonly == FALSE) {
-			/*	if((response != 200) && (response != 480)) {*/
-				error_log(ERRLOG_REPORT, rpost_phrases[3], NULL);
-				retval = RETVAL_ERROR;
-			}
-			else if(myargs.auth.autoauth == TRUE) {
-				if(myargs.auth.passwd == NULL || myargs.auth.userid == NULL) {
-					error_log(ERRLOG_REPORT, rpost_phrases[32], NULL);
+				/* Get the announcement line */
+				if((i = sgetline(myargs.sockfd, &inbuf, myargs.do_ssl, myargs.ssl_struct)) < 0) {
 					retval = RETVAL_ERROR;
 				}
 				else {
-					retval = do_authenticate(&myargs);
+					fputs(inbuf, myargs.status_fptr );
+					number(inbuf, &response);
+					if(response == 480) {
+						retval = do_authenticate(&myargs);
+					}
 				}
+				if(retval == RETVAL_OK && myargs.do_modereader == TRUE) {
+					retval = send_command(&myargs, "mode reader\r\n", &inbuf, 0);
+					if( retval  == RETVAL_OK) {				
+						/* Again the announcement */
+						fputs(inbuf, myargs.status_fptr );
+						number(inbuf, &response);
+					}
+				}
+				if(response == 201 && myargs.ignore_readonly == FALSE) {
+					/*	if((response != 200) && (response != 480)) {*/
+					error_log(ERRLOG_REPORT, rpost_phrases[3], NULL);
+					retval = RETVAL_ERROR;
+				}
+				else if(myargs.auth.autoauth == TRUE) {
+					if(myargs.auth.passwd == NULL || myargs.auth.userid == NULL) {
+						error_log(ERRLOG_REPORT, rpost_phrases[32], NULL);
+						retval = RETVAL_ERROR;
+					}
+					else {
+						retval = do_authenticate(&myargs);
+					}
+				}
+				
 			}
 		}
 		if(retval == RETVAL_OK) {
@@ -312,7 +319,7 @@ int main(int argc, char *argv[], char *env[]) {
 int do_article(Pargs myargs, FILE *fptr) {
 
 	int len, response, retval, longline, dupeyn, i;
-	char buf[MAXLINLEN+4], *inbuf, *ptr;
+	char buf[MAXLINLEN+4], *inbuf, *ptr = NULL;
 	/* the +4 in NL, CR, if have to double . in first pos */
 	retval = RETVAL_OK;
 	longline = FALSE;
@@ -667,7 +674,7 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 					myargs->auth.passwd = argv[++loop];
 				}
 				break;
-			case 'Q':     /* get userid/passwd from env */
+			  case 'Q':     /* get userid/passwd from env */
 				myargs->auth.use_env = TRUE;
 				myargs->auth.passwd = getenv("NNTP_PASS");
 				myargs->auth.userid = getenv("NNTP_USER");

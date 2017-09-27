@@ -1,6 +1,34 @@
 
 CHANGES
 =======
+-- Changes from suck-4.3.1 -> Suck-4.3.2
+
+configure.in - add -with-perl-exe option to specify an
+	alternate path to the perl exe.
+
+suck.c, killfile.c - get_a_chunk(), get_chunk_mem()
+	changed to handle lines beginning with .
+	correctly in stdout mode.
+
+suck.c, rpost.c - main() - error handling if host isn't
+	specified on command line.
+
+* - various patches from Debian folks
+configure.in - check for configdata.h in inn include directory
+
+both.c - sgetline() - changes to fix SSL bug with the select,
+	connect_to_nntphost() - add code to handle
+	host:port syntax.   This fix also allows you to
+	specify a port number for the local host.
+
+suck.c - to handle SIGINT in addition to SIGTERM,
+	build_command() fix in potential buffer overflow
+
+testhost.c - added -Q option, to allow user to specify
+	NNTP authentiation via env variables.
+
+March 28, 2003 - Suck-4.3.2 released
+
 -- Changes from Suck-4.3.0 -> Suck-4.3.1
 
 * as of this version, my e-mail address has changed

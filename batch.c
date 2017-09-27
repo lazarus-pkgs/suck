@@ -224,7 +224,7 @@ void do_lmovebatch(PMaster master) {
 	pid = fork();
 	if(pid == 0) {
 		/* in child */
-		execvp(args[0], args);
+		execvp(args[0], (char *const *) args);
 		MyPerror(batch_phrases[2]);	/* only get here on errors */
 		exit(-1); /* so we aren't running two sucks */
 	}

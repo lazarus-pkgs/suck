@@ -185,6 +185,10 @@ int main(int argc, char *argv[]) {
 					passwd = argv[++loop];
 				}
 				break;
+			  case 'Q':   /* get from env */
+				userid = getenv("NNTP_USER");
+				passwd = getenv("NNTP_PASS");
+				break;
 			  case 'l': 	/* next arg is phrases file */
 				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, test_phrases[11], NULL);

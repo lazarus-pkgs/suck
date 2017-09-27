@@ -9,4 +9,4 @@ int db_mark_dled(PMaster, PList);
 int db_open(PMaster);
 void db_close(PMaster);
 
-#endif _SUCK_DB_H
+#endif /* _SUCK_DB_H */

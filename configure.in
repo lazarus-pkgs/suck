@@ -6,6 +6,7 @@ AC_CONFIG_HEADER(config.h)
 
 AC_ARG_WITH(inn-lib, [ --with-inn-lib=path location of libinn.a])
 AC_ARG_WITH(inn-include, [ --with-inn-include=path location of inn include files])
+AC_ARG_WITH(perl-exe, [ --with-perl-exe=full path to perl executable eg: /usr/bin])
 
 # we want these before the checks, so the checks can modify their values
 test -z "$CFLAGS" && CFLAGS=-O2 AC_SUBST(CFLAGS)
@@ -22,7 +23,8 @@ AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(socks, Rconnect)
 AC_CHECK_LIB(socks5, SOCKSconnect)
 AC_CHECK_LIB(cV, fprintf)
-AC_CHECK_LIB(ssl, SSL_get_error, [SSL_LIB="-lssl -lcrypto"; SSL_DEFS="-DHAVE_LIBSSL"])
+dnl Do I need -lcrypto????? for SSL
+AC_CHECK_LIB(ssl, SSL_get_error, [SSL_LIB="-lssl"; SSL_DEFS="-DHAVE_LIBSSL"])
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -64,6 +66,9 @@ AC_CHECK_LIB(inn, main, [
       AC_MSG_RESULT($path)
       found="yes"
       CPPFLAGS="$CPPFLAGS -I$path"
+      if test ! -f $path/configdata.h ; then
+	CPPFLAGS="$CPPFLAGS -DNO_CONFIGDATA"
+      fi
       break
     fi
   done
@@ -76,11 +81,17 @@ AC_CHECK_LIB(inn, main, [
          HISTORY="chkhistory.o"])])])])
 ])
 
-AC_CHECK_PROG(PERL, perl, true, false)
+if test "$with_perl_exe" ; then
+	AC_CHECK_PROG(PERL, perl, true, false, [$with_perl_exe])
+	whichperl=${with_perl_exe}/perl
+else
+	AC_CHECK_PROG(PERL, perl, true, false)
+	whichperl=perl
+fi
 if test "$PERL" = "true"; then
   found="no"
   AC_MSG_CHECKING([for libperl.a])
-  for path in `perl -e 'foreach $i (@INC) { printf("%s ", $i) }'`; do
+  for path in `$whichperl -e 'foreach $i (@INC) { printf("%s ", $i) }'`; do
     if test -f $path/libperl.a; then
       AC_MSG_RESULT($path)
       found="yes"

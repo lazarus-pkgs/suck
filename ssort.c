@@ -4,6 +4,8 @@
 #include <dmalloc.h>
 #endif
 
+#include <string.h>
+
 #include "suck_config.h"
 #include "suck.h"
 #include "suckutils.h"
@@ -123,23 +125,23 @@ void ssort(PList *a, int n, int depth) {
 /*-------------------------------------------------------------------------------*/
 PList my_bsearch(PList *arr, char *matchnr, int nrin) {
 
-	int val, index, left = 0, right = nrin ;
+	int val, my_index, left = 0, right = nrin ;
 	
 	PList retval = NULL;
 	
 	while( left < right ) {
-		index = ( right + left) / 2;  /* find halfway pt */
+		my_index = ( right + left) / 2;  /* find halfway pt */
 		
-		val = qcmp_msgid(matchnr, arr[index]->msgnr);
+		val = qcmp_msgid(matchnr, arr[my_index]->msgnr);
 		
 		if(val < 0) {
-			right = index ;
+			right = my_index ;
 		}
 		else if(val > 0) {
-			left = index + 1;
+			left = my_index + 1;
 		}
 		else {
-			retval = arr[index];
+			retval = arr[my_index];
 			break;
 		}
 		

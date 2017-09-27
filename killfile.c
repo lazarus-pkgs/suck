@@ -577,10 +577,8 @@ int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf)
 			if(len == 2 && inbuf[1] == '\n') {
 				done = TRUE;
 			}
-			else if(master->MultiFile == TRUE) {
+			else {
 				/* handle double dots IAW RFC977 2.4.1*/
-				/* don't do if we aren't doing multifile, since */
-				/* stdout needs the .. to distinguish dots and EOM */
 				inbuf++;	/* move past first dot */
 				len--;
 			}
