@@ -1,5 +1,6 @@
 #include <config.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #ifdef HAVE_UNISTD_H
