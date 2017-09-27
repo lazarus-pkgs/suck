@@ -71,6 +71,9 @@ typedef struct {
 	char *rnews_path;
 	int sockfd;
 	int show_name;
+	int ignore_readonly;
+	int do_ssl;
+	void *ssl_struct;
 #ifdef PERL_EMBED
 	PerlInterpreter *perl_int;
 #endif
@@ -138,8 +141,9 @@ int main(int argc, char *argv[], char *env[]) {
 	myargs.filter_infilenr = -1;
 	myargs.filter_outfile = NULL;
 	myargs.show_name = FALSE;
-	
-	
+	myargs.ignore_readonly = FALSE;
+	myargs.do_ssl = FALSE;
+	myargs.ssl_struct = NULL;
 #ifdef PERL_EMBED
 	myargs.perl_int = NULL;
 #endif
@@ -218,20 +222,24 @@ int main(int argc, char *argv[], char *env[]) {
 			do_debug("myargs.rnews_file = %s\n", null_str(myargs.rnews_file));
 			do_debug("myargs.rnews_path = %s\n", null_str(myargs.rnews_path));
 			do_debug("myargs.show_name = %s\n", true_str(myargs.show_name));
+			do_debug("myargs.ignore_readonly = %s\n", true_str(myargs.ignore_readonly));
+			do_debug("myargs.do_ssl = %s\n", true_str(myargs.do_ssl));
 #ifdef TIMEOUT
 			do_debug("TimeOut = %d\n", TimeOut);
 #endif
 			do_debug("myargs.debug = TRUE\n");
 		}
 
+		
+
 		/* we processed args okay */
-		myargs.sockfd = connect_to_nntphost( myargs.host, &hi, myargs.status_fptr, myargs.portnr);
+		myargs.sockfd = connect_to_nntphost( myargs.host, &hi, myargs.status_fptr, myargs.portnr, myargs.do_ssl, &myargs.ssl_struct);
 		if(myargs.sockfd < 0) {
 			retval = RETVAL_ERROR;
 		}
 		else {
 			/* Get the announcement line */
-			if((i = sgetline(myargs.sockfd, &inbuf)) < 0) {
+			if((i = sgetline(myargs.sockfd, &inbuf, myargs.do_ssl, myargs.ssl_struct)) < 0) {
 				retval = RETVAL_ERROR;
 			}
 			else {
@@ -249,7 +257,8 @@ int main(int argc, char *argv[], char *env[]) {
 					number(inbuf, &response);
 				}
 			}
-			if(response != 200 && response != 480) {
+			if(response == 201 && myargs.ignore_readonly == FALSE) {
+			/*	if((response != 200) && (response != 480)) {*/
 				error_log(ERRLOG_REPORT, rpost_phrases[3], NULL);
 				retval = RETVAL_ERROR;
 			}
@@ -282,7 +291,7 @@ int main(int argc, char *argv[], char *env[]) {
 				do_debug("Sending quit");
 			}
 			send_command(&myargs, "quit\r\n", NULL, 0);
- 			close(myargs.sockfd);
+			disconnect_from_nntphost(myargs.sockfd, myargs.do_ssl, &myargs.ssl_struct);
 		}
 	}
 #ifdef PERL_EMBED
@@ -336,7 +345,7 @@ int do_article(Pargs myargs, FILE *fptr) {
 			else {
 				longline = TRUE;
 			}
-   			sputline(myargs->sockfd, buf);
+   			sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
 			if(myargs->debug == TRUE) {
 				do_debug("ARTICLE: %s", buf);
 			}
@@ -344,14 +353,14 @@ int do_article(Pargs myargs, FILE *fptr) {
 		/* if the last line didn't have a nl on it, we need to */
 		/* put one so that the eom is recognized */
 		if(longline == TRUE) {
-			sputline(myargs->sockfd, "\r\n");
+			sputline(myargs->sockfd, "\r\n", myargs->do_ssl, myargs->ssl_struct);
 		}
-		sputline(myargs->sockfd, ".\r\n");
+		sputline(myargs->sockfd, ".\r\n", myargs->do_ssl, myargs->ssl_struct);
 		if(myargs->debug == TRUE) {
 			do_debug("ARTICLE END\n");
 		}
 
-		if((i = sgetline(myargs->sockfd, &inbuf)) < 0) {
+		if((i = sgetline(myargs->sockfd, &inbuf, myargs->do_ssl, myargs->ssl_struct)) < 0) {
 			retval = RETVAL_ERROR;
 		}
 		else {
@@ -404,8 +413,8 @@ int send_command(Pargs myargs, const char *cmd, char **ret_response, int good_re
 	if(myargs->debug == TRUE) {
 		do_debug("sending command: %s", cmd);
 	}
-	sputline(myargs->sockfd, cmd);
-	len = sgetline(myargs->sockfd, &resp);	
+	sputline(myargs->sockfd, cmd, myargs->do_ssl, myargs->ssl_struct);
+	len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);	
 	if( len < 0) {	
 		retval = RETVAL_ERROR;		  	
 	}					
@@ -420,11 +429,11 @@ int send_command(Pargs myargs, const char *cmd, char **ret_response, int good_re
 		  retval = do_authenticate(myargs);
 		  if(retval == RETVAL_OK) {
 			  /* resend command */
-			  sputline(myargs->sockfd, cmd);
+			  sputline(myargs->sockfd, cmd, myargs->do_ssl, myargs->ssl_struct);
 			  if(myargs->debug == TRUE) {
 				  do_debug("sending command: %s", cmd);
 			  }
-			  len = sgetline(myargs->sockfd, &resp);
+			  len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
 			  if( len < 0) {	
 				  retval = RETVAL_ERROR;		  	
 			  }
@@ -454,12 +463,15 @@ int do_authenticate(Pargs myargs) {
 	 char *resp, buf[MAXLINLEN];
 
 	 /* we must do authorization */
+
+	 print_phrases(myargs->status_fptr, rpost_phrases[41], NULL);
+	 
 	 sprintf(buf, "AUTHINFO USER %s\r\n", (myargs->auth).userid);
 	 if(myargs->debug == TRUE) {
 		 do_debug("sending command: %s", buf);
 	 }
-	 sputline(myargs->sockfd, buf);
-	 len = sgetline(myargs->sockfd, &resp);
+	 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
+	 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
 	 if( len < 0) {	
 	   retval = RETVAL_ERROR;		  	
 	 }					
@@ -474,7 +486,7 @@ int do_authenticate(Pargs myargs) {
 			 /* we get the second need auth */
 			 /* just ignore it and get the next line */
 			 /* which should be the 381 we need */
-			 if((len = sgetline(myargs->sockfd, &resp)) < 0) {
+			 if((len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct)) < 0) {
 				 retval = RETVAL_ERROR;
 			 }
 			 else {
@@ -488,11 +500,11 @@ int do_authenticate(Pargs myargs) {
 			 }
 			 else {
 				 sprintf(buf, "AUTHINFO PASS %s\r\n", (myargs->auth).passwd);
-				 sputline(myargs->sockfd, buf);
+				 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
 				 if(myargs->debug == TRUE) {
 					 do_debug("sending command: %s", buf);
 				 }
-				 len = sgetline(myargs->sockfd, &resp);
+				 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
 				 if(len < 0) {	
 					 retval = RETVAL_ERROR;		  	
 				 }					
@@ -503,7 +515,8 @@ int do_authenticate(Pargs myargs) {
 					 number(resp, &nr);
 					 switch(nr) {
 					 case 281: /* bingo */
-						 retval = RETVAL_OK;  
+						 retval = RETVAL_OK;
+						 print_phrases(myargs->status_fptr, rpost_phrases[42], NULL);
 						 break;
 					 case 502: /* permission denied */
 						 retval = RETVAL_NOAUTH;
@@ -684,6 +697,9 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 			case 'n':  /* show the file name as we're uploading it */
 				myargs->show_name = TRUE;
 				break;
+			case 'i':  /* ignore read_only opening announcement */
+				myargs->ignore_readonly = TRUE;
+				break;
 #ifdef TIMEOUT
 			case 'T': /* timeout */
 				if(loop+1 == argc) {
@@ -693,6 +709,12 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 				else {
 					TimeOut = atoi(argv[++loop]);
 				}
+				break;
+#endif
+#ifdef HAVE_LIBSSL
+			case 'z': /* use SSL */
+				myargs->do_ssl = TRUE;
+				myargs->portnr = DEFAULT_SSL_PORT;
 				break;
 #endif
 			  default:

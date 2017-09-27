@@ -7,9 +7,10 @@
 #include "suck_config.h" /* for debug etc stuff */
 
 /* declarations */
-int sgetline(int fd, char **sbuf);
-int sputline(int fd, const char *outbuf);
-int connect_to_nntphost(const char *host, struct hostent **, FILE *, unsigned short int);
+int sgetline(int fd, char **sbuf, int, void *);
+int sputline(int fd, const char *outbuf, int, void *);
+int connect_to_nntphost(const char *host, struct hostent **, FILE *, unsigned short int, int, void **);
+void disconnect_from_nntphost(int, int, void **);
 char *number(char *sp, int *intPtr);
 char *get_long(char *, long *);
 struct hostent *get_hostent(const char *host);

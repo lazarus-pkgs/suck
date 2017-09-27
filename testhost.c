@@ -50,7 +50,7 @@ enum { CMD_HELP, CMD_LIST, CMD_DESC, CMD_NEWGRP, CMD_OVERVIEW };
 enum { RETVAL_OK = 0, RETVAL_ERROR = -1, RETVAL_BAD_DATES = -2, RETVAL_NOAUTH = -3};
 
 /*-functions----*/
-int do_a_command(int, int, FILE *, char *, char *, char *);
+int do_a_command(int, int, FILE *, char *, char *, char *, int, void *);
 int check_date_format(char *, char *, char *);
 void load_phrases(const char *);
 void free_phrases(void);
@@ -58,11 +58,12 @@ void free_phrases(void);
 /*------------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
 
-	int sockfd, response, loop, cmd, quiet, mode_reader, retval = RETVAL_OK;
+	int sockfd, response, loop, cmd, quiet, mode_reader, do_ssl, retval = RETVAL_OK;
 	struct hostent *hi;
 	struct stat sbuf;
 	unsigned short int portnr;
 	FILE *fptr = stdout;		/* used to print output to */
+	void *ssl_struct;
 
 	char *host, *buf, *ptr, *cmdargs, *userid, *passwd;
 	char ndate[14];	/* 6 for yymmdd 6 for hhmmss and 1 for space and 1 for null */
@@ -79,6 +80,7 @@ int main(int argc, char *argv[]) {
 	userid = NULL;
 	phrases = NULL;
 	mode_reader = FALSE;
+	do_ssl = FALSE;
 	quiet = FALSE;		/* do we show status or not */
 
 	/* have to do this next so if set on cmd line, overrides this */
@@ -203,6 +205,12 @@ int main(int argc, char *argv[]) {
 				}
 				break;
 #endif
+#ifdef HAVE_LIBSSL
+			case 'z':
+				do_ssl = TRUE;
+				portnr = DEFAULT_SSL_PORT;
+				break;
+#endif
 			  default:
 				retval = RETVAL_ERROR;
 				error_log(ERRLOG_REPORT, test_phrases[7], argv[loop], NULL);
@@ -217,12 +225,12 @@ int main(int argc, char *argv[]) {
 	if(retval == RETVAL_OK) {
 		load_phrases(phrases);	/* this is here so everything displays okay */
 
-		sockfd = connect_to_nntphost( host, &hi, (quiet == FALSE)?  fptr : NULL, portnr);
+		sockfd = connect_to_nntphost( host, &hi, (quiet == FALSE)?  fptr : NULL, portnr, do_ssl, &ssl_struct);
 		if(sockfd < 0 ) {
 			retval = RETVAL_ERROR;
 		}
 		/* get the announcement line */
-		else if(sgetline(sockfd, &buf) < 0) {
+		else if(sgetline(sockfd, &buf, do_ssl, ssl_struct) < 0) {
 			retval = RETVAL_ERROR;
 		}
 		else {
@@ -237,12 +245,16 @@ int main(int argc, char *argv[]) {
 			}
 			else {
 				if(mode_reader == TRUE) {
-					sputline(sockfd, "mode reader\r\n");
-					sgetline(sockfd, &buf);
+					sputline(sockfd, "mode reader\r\n", do_ssl, ssl_struct);
+					sgetline(sockfd, &buf, do_ssl, ssl_struct);
 				}
-				do_a_command(sockfd, cmd, fptr, cmdargs, userid, passwd);
+				do_a_command(sockfd, cmd, fptr, cmdargs, userid, passwd, do_ssl, ssl_struct);
 			}
 		}
+		if(sockfd >= 0) {
+			disconnect_from_nntphost(sockfd, do_ssl, &ssl_struct);
+		}
+		
 		if(retval == RETVAL_ERROR) {
 			error_log(ERRLOG_REPORT, test_phrases[8], host, NULL);
 		}
@@ -254,7 +266,7 @@ int main(int argc, char *argv[]) {
 	exit(retval);
 }
 /*-------------------------------------------------------------------------------*/
-int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, char *passwd) {
+int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, char *passwd, int do_ssl, void *ssl_struct ) {
 	char *ptr, *buf, cmdstr[MAXCMDLEN], buf2[MAXCMDLEN];
 	int response;
 	int len, done, retval = RETVAL_OK;
@@ -267,14 +279,14 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 	}
 	strcat(cmdstr, "\r\n");
 	
-	sputline(sockfd, cmdstr);		/* which command do I run? */
-	sgetline(sockfd, &buf);			/* get response */
+	sputline(sockfd, cmdstr, do_ssl, ssl_struct);		/* which command do I run? */
+	sgetline(sockfd, &buf, do_ssl, ssl_struct);			/* get response */
 
 	ptr = number(buf, &response);
 	if(response == 480 ) { /* we must do authorization */
 		sprintf(buf2, "AUTHINFO USER %s\r\n", userid);
-		sputline(sockfd, buf2);
-		len = sgetline(sockfd, &buf);
+		sputline(sockfd, buf2, do_ssl, ssl_struct);
+		len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
 		if( len < 0) {	
 			retval = RETVAL_ERROR;		  	
 		}					
@@ -286,8 +298,8 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 			}
 			else {
 				sprintf(buf2, "AUTHINFO PASS %s\r\n", passwd);
-				sputline(sockfd, buf2);
-				len = sgetline(sockfd, &buf);
+				sputline(sockfd, buf2, do_ssl, ssl_struct);
+				len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
 				if(len < 0) {	
 					retval = RETVAL_ERROR;		  	
 				}					
@@ -295,8 +307,8 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 					number(buf, &response);
 					switch(response) {
 					  case 281: /* bingo resend original command*/
-						sputline(sockfd, cmdstr);
-						len = sgetline(sockfd, &buf);
+						sputline(sockfd, cmdstr, do_ssl, ssl_struct);
+						len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
 						if( len < 0) {	
 							retval = RETVAL_ERROR;		  	
 						}
@@ -329,7 +341,7 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 		len = done = 0;
 		while( len >=0 && done == 0) {
 		
-			len = sgetline(sockfd, &buf);
+			len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
 
 			if(len == 2 && strcmp(buf, ".\n") == 0) {
 				done = 1;

@@ -271,7 +271,7 @@ int do_localpost(PMaster master) {
 						count++;
 					}
 				}
-				close(sockfd);
+				disconnect_from_nntphost(sockfd, master->local_ssl, &master->local_ssl_struct);
 			}
 			fclose(fp_list);
 		}
@@ -322,8 +322,8 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 			if(master->debug == TRUE) {
 				do_debug("sending command %s", linein);
 			}
-			sputline(sockfd, linein);
-			if(sgetline(sockfd, &resp) < 0) {
+			sputline(sockfd, linein, master->local_ssl, master->local_ssl_struct);
+			if(sgetline(sockfd, &resp, master->local_ssl, master->local_ssl_struct) < 0) {
 				retval = RETVAL_ERROR;
 			}
 			else {
@@ -363,19 +363,19 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 							/* replace nl with cr nl */
 							strcpy(&linein[len-1], "\r\n");
 						}
-						sputline(sockfd, linein);
+						sputline(sockfd, linein, master->local_ssl, master->local_ssl_struct);
 					}
 					if(longline == TRUE) {
 						/* end the last line */
-						sputline(sockfd, "\r\n");
+						sputline(sockfd, "\r\n", master->local_ssl, master->local_ssl_struct);
 					}
 					/* end the article */
-					sputline(sockfd, ".\r\n");
+					sputline(sockfd, ".\r\n", master->local_ssl, master->local_ssl_struct);
 					/* put in for prob */
 					if(master->debug == TRUE) {
 						do_debug("Finished sending article\n");
 					}
-					if(sgetline(sockfd, &resp) < 0 ) {
+					if(sgetline(sockfd, &resp, master->local_ssl, master->local_ssl_struct) < 0 ) {
 						retval = RETVAL_ERROR;
 					}
 					else {

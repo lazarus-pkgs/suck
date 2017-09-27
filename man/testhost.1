@@ -47,6 +47,9 @@ timeout
 [
 .BI -q
 ]
+[
+.BI -z
+]
 
 .SH OPTIONS
 -a     Get the active list from hostname
@@ -101,12 +104,17 @@ the filename parameter.  All status messages will then be sent to this file.
 This option overrides the compiled-in TIMEOUT value. This is how long testhost
 waits for data from the remote host before timing out and aborting.
 
--U userid
+\-U userid
 
--P password
+\-P password
 
 These two options let you specify a userid and password, if your NNTP server
 requires them.
+
+\-z
+
+This options tells testhost to use SSL to talk to the remote server, if testhost
+was compiled with SSL.
 
 .SH DESCRIPTION
 .I Testhost
@@ -132,6 +140,7 @@ If the
 .I -M
 option is used, the command will be preceded with the "mode reader" command,
 which might be needed by some servers.
+
 .SH EXIT VALUES
 0 on success, -1 on failure.
 .de R$

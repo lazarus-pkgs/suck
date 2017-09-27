@@ -98,7 +98,7 @@ int do_group_xover(PMaster master, char *grpname, long startnr, long endnr) {
 			  /* okay, do it */
 			  done = FALSE;
 			  while((done == FALSE) && (retval == RETVAL_OK)) {
-				  len = sgetline(master->sockfd, &resp);
+				  len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 				  /* have we got the last one? */
 				  if((len == 2) && (strcmp(resp, ".\n") == 0)) {
 					  done = TRUE;
@@ -302,7 +302,7 @@ void get_xoverview(PMaster master) {
 		done = FALSE;
 		/* now get em in, until we hit .\n which signifies end of response */
 		while(done != TRUE) {
-			sgetline(master->sockfd, &resp);
+			sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 			if(master->debug == TRUE) {
 				do_debug("Got line--%s", resp);
 			}
@@ -511,7 +511,7 @@ int get_xover(PMaster master, char *group, long startnr, long endnr) {
 			  /* got a list coming at us */
 			  done = FALSE;
 			  while((done == FALSE) && (retval == RETVAL_OK)) {
-				  len = sgetline(master->sockfd, &resp);
+				  len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 				  if(master->debug == TRUE) {
 					  do_debug("Got xover line: %s", resp);
 				  }

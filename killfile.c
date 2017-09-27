@@ -493,14 +493,14 @@ int get_one_article_kill(PMaster master, int logcount, long itemon) {
 		else {
 			fputs(inbuf, stdout);
 			fputs("\n", stdout);
-			retval = get_chunk_mem(master, &len, CHUNK_BODY, &inbuf);
-			if(retval == RETVAL_OK) {
-				fwrite(inbuf, sizeof(inbuf[0]), len, stdout);
-				/* this is needed as a separator */
-				/* in stdout version */
-				fputs(".\n", stdout);
-			}			
-			
+			if(master->header_only == FALSE) {
+				retval = get_chunk_mem(master, &len, CHUNK_BODY, &inbuf);
+				if(retval == RETVAL_OK) {
+					fwrite(inbuf, sizeof(inbuf[0]), len, stdout);
+				}
+			}
+                        /* this is needed as a separator in stdout version */
+			fputs(".\n", stdout);
 		}
 		if(retval == RETVAL_OK) {
 			master->nrgot++;
@@ -565,7 +565,7 @@ int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf)
 		}
 	}
 	while(buf != NULL && done == FALSE) {
-		len=sgetline(master->sockfd, &inbuf);
+		len=sgetline(master->sockfd, &inbuf, master->do_ssl, master->ssl_struct);
 		(void) TimerFunc(TIMER_ADDBYTES, len, NULL);
 		if(len < 0) {
 			free(buf);

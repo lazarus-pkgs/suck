@@ -1,4 +1,4 @@
-.\" $Revision: 3.10.1 $
+.\" $Revision: 3.10.2 $
 .TH RPOST 1
 .SH NAME
 rpost - post an article to an NNTP news server
@@ -66,9 +66,16 @@ timeout
 [
 .BI \-n
 ]
+
 [
 .BI -F
 perl_file
+]
+[
+.BI -i
+]
+[
+.BI -z
 ]
 [
 .BI -f
@@ -100,6 +107,13 @@ an alternate file.  The lower case version, -e, will send the error messages
 to the compiled-in default defined in suck_config.h.  The default is suck.errlog.
 The upper case version, -E, requires the filename parameter.  All error messages
 will then be sent to this file.
+
+.BI \-i
+
+This option tells rpost to ignore the 201 (no posting allowed) from the welcoming
+message and to try and post anyway.   Some news servers (inn-2.3.1) send 201 
+no posting allowed when they are using the AUTHINFO commands to verify permission
+to post.
 
 .BI \-l
 phrase_file
@@ -151,6 +165,10 @@ password
 
 These two options let you specify a userid and password, if your NNTP server
 requires them.
+
+.BI \-z
+This option tells rpost to use SSL to communicate with the remote hosts, if SSL was
+compiled into rpost.
 
 .SH STDIN MODE
 rpost

@@ -1,6 +1,32 @@
 
 CHANGES
 =======
+-- Changes from Suck-4.2.5 -> Suck-4.3.0
+
+* As of this version, my e-mail address has changed from
+from bobyetman@worldnet.att.net to bobyetman@home.com
+
+* 	changes to allow it to use SSL.
+
+* rpost.c - added -i option, to ignore the
+	readonly opening response and try
+	to post anyway, since inn-2.3, when
+	using authinfo, still sends 201 code
+	meaning readonly.
+
+	- do_authenticate() - added print
+	statements to show start of, and
+	successful completion of authentication.
+
+* suck.c - get_one_article_kill() - add test
+	for header_only mode when in stdout mode 
+	to not download the body.
+
+	- get_one_article(), get_articles() - added
+	 -bP option, to post articles during download.
+
+Sep 17, 2001 - Suck-4.3.0 released
+
 -- Changes from Suck-4.2.4 -> Suck-4.2.5
 
 * batch.c - post_one_msg() - fixed bug in

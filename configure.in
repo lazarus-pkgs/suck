@@ -19,6 +19,7 @@ AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(socks, Rconnect)
 AC_CHECK_LIB(socks5, SOCKSconnect)
 AC_CHECK_LIB(cV, fprintf)
+AC_CHECK_LIB(ssl, SSL_get_error)
 
 dnl Checks for header files.
 AC_HEADER_DIRENT

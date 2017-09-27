@@ -3,6 +3,8 @@
 
 #define DEFAULT_NNRP_PORT 119 	/* port to talk to on remote machine */
 #define LOCAL_PORT 119		/* port to talk to on local host */
+#define DEFAULT_SSL_PORT 563    /* if using SSL, this is the default port */
+#define LOCAL_SSL_PORT 563       /* if using SSL, for local host */
 
 /* Max length of a Message-ID that is possbile */
 #define MAX_MSGID_LEN 196

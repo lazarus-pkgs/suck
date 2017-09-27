@@ -41,6 +41,8 @@ const char *default_rpost_phrases[] = {
 	"No rnews file name or rnews path provided\n",
 	"Rnews file or path is invalid\n",
 	"Uploading file-> %v1%\n", /*40*/
+	"Attempting to authenticate user\n",
+	"Authentication succeeded\n",
 };
 
 int nr_rpost_phrases = sizeof(default_rpost_phrases)/sizeof(default_rpost_phrases[0]);

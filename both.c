@@ -61,6 +61,10 @@ int TimeOut = TIMEOUT;
 #include <sys/select.h>		/* for aix */
 #endif
 
+#ifdef HAVE_LIBSSL
+#include <openssl/ssl.h>
+#endif
+
 /* internal function proto */
 void vprint_phrases(FILE *, const char *, va_list);
 void do_debug_vl(const char *, va_list);
@@ -156,14 +160,29 @@ struct hostent *get_hostent(const char *host) {
 	return hi;
 }
 /*--------------------------------------------*/
-int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsigned short int portnr) {
+int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsigned short int portnr, int do_ssl, void **ssl) {
 	char *ptr;
 	struct in_addr *aptr;
 	struct in_addr saddr;
 	struct sockaddr_in address;
 	char sport[10];
 	int sockfd = -1;
+	
+#ifdef HAVE_LIBSSL
+	SSL *ssl_struct = NULL;
+	SSL_CTX *test1 = NULL;
+	
+	if(do_ssl == TRUE) {
+		(void) SSL_library_init();
 
+		test1 = SSL_CTX_new(SSLv23_client_method());
+		if(test1 == NULL) {
+			/* whoops */
+			error_log(ERRLOG_REPORT, both_phrases[18], NULL);
+			return sockfd;
+		}
+	}
+#endif
 	sprintf(sport, "%hu", portnr);	/* cause print_phrases wants all strings */
 	print_phrases(msgs, both_phrases[1], sport, NULL);
 
@@ -208,16 +227,63 @@ int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsig
 				}
 			}
 		}
+#ifdef HAVE_LIBSSL
+		if(sockfd > -1 && do_ssl == TRUE) {
+			if((ssl_struct = SSL_new(test1)) == NULL) {
+				error_log(ERRLOG_REPORT, both_phrases[18], NULL);
+				close(sockfd);
+				sockfd = -1;
+			}
+			else if(SSL_set_fd(ssl_struct, sockfd) == FALSE) {
+				error_log(ERRLOG_REPORT, both_phrases[18], NULL);
+				close(sockfd);
+				sockfd = -1;
+			}
+			else if(SSL_connect(ssl_struct) != 1) {
+				error_log(ERRLOG_REPORT, both_phrases[18], NULL);
+				close(sockfd);
+				sockfd = -1;
+			}
+			else {
+				*ssl = ssl_struct;
+			}
+			
+		}
+#endif
 	}
 	return sockfd;
 }
+/*---------------------------------------------------------------*/
+void disconnect_from_nntphost(int fd, int do_ssl, void **ssl) {
+#ifdef HAVE_LIBSSL
+	if(do_ssl == TRUE) {
+		fd = SSL_get_fd(*ssl);
+		SSL_shutdown(*ssl);
+		SSL_free(*ssl);
+		*ssl = NULL;
+	}
+#endif
+	close(fd);
+	
+}
 /*----------------------------------------------------------------*/
-int sputline(int fd, const char *outbuf) {
+int sputline(int fd, const char *outbuf, int do_ssl, void *ssl_buf) {
 	
 #ifdef DEBUG1
 	do_debug("\nSENT: %s", outbuf);
 #endif
+#ifdef HAVE_LIBSSL
+	if(do_ssl == TRUE) {
+		if(fd == SSL_get_fd((SSL *)ssl_buf)) {
+			return SSL_write((SSL *)ssl_buf, outbuf, strlen(outbuf));
+		}
+		else {
+			return -1;
+		}
+	}
+#endif
 	return send(fd, outbuf, strlen(outbuf), 0);
+
 }
 /*-------------------------------------------------------------*/
 void do_debug(const char *fmt, ...) {
@@ -296,7 +362,7 @@ char *findnl(char *startbuf, char *endbuf) {
 	return NULL;
 }
 /*-----------------------------------------------------------*/
-int sgetline(int fd, char **inbuf) {
+int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 
 	static char buf[MAXLINLEN+MAXLINLEN+6];
 	static char *start = buf;
@@ -350,12 +416,34 @@ int sgetline(int fd, char **inbuf) {
 #ifdef DEBUG1
 				do_debug("SELECT got: %d\n", i);
 #endif
+#ifdef HAVE_LIBSSL
+				if(do_ssl == TRUE) {
+					if(fd == SSL_get_fd((SSL *)ssl_buf)) {
+						i = SSL_read((SSL *)ssl_buf, eob, MAXLINLEN-len);
+					}
+					else {
+						i = -1;
+					}
+				}
+				else
+#endif
 				i = recv(fd, eob, MAXLINLEN-len, 0);	/* get line */
 			}
 			else if(i == 0) {
 				error_log(ERRLOG_REPORT, both_phrases[10], NULL);
 			}      /* other errors will be handled down below */
-#else 
+#else
+#ifdef HAVE_LIBSSL
+			if(do_ssl == TRUE) {
+				if(fd == SSL_get_fd((SSL *)ssl_buf)) {
+					i = SSL_read((SSL *)ssl_buf, eob, MAXLINLEN-len);
+				}
+				else {
+					i = -1;
+				}
+			}
+			else
+#endif		
 			i = recv(fd, eob, MAXLINLEN-len, 0);	/* get line */
 #endif
 

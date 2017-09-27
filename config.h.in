@@ -89,3 +89,6 @@
 
 /* Define if you have the socks5 library (-lsocks5).  */
 #undef HAVE_LIBSOCKS5
+
+/* Define if you have the OpenSSL Library (-lssl). */
+#undef HAVE_LIBSSL

@@ -4,7 +4,7 @@
 #include <stdio.h>	/* for FILE */
 #include "suck_config.h"
 
-/* link list structure one for each article */
+/* Link list structure one for each article */
 typedef struct LinkList {
 	struct LinkList *next;
 	char msgnr[MAX_MSGID_LEN];
@@ -97,9 +97,14 @@ typedef struct {
 	void *killp;
 	void *xoverp;
 	POverview xoverview;
+	int do_ssl;
+	void *ssl_struct;
+	int local_ssl;
+	void *local_ssl_struct;
+	int batch_post_nr;
 } Master, *PMaster;
 
-int get_a_chunk(int, FILE *);
+int get_a_chunk(PMaster, FILE *);
 void free_one_node(PList);
 int send_command(PMaster, const char *, char **, int);
 int get_message_index(PMaster);

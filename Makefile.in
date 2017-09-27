@@ -58,6 +58,11 @@ CHKHISTORY=chkhistory.o		# use flat file history routine
 # Step 6: If compiling for OS/2 uncomment the following
 #OS2_LD=-Zexe
 #OS2_DEFS=-DEMX
+
+# Step 7: If compiling with SSL uncomment the following
+#SSL_LIB=-lssl -lcrypto
+#SSL_DEFS=-I/usr/local/ssl/include -DHAVE_LIBSSL
+#SSL_LIB_LOC=-L/usr/local/ssl/lib
 ############################################################################
 # COMPILE flags for GCC
 ############################################################################
@@ -81,13 +86,16 @@ MY_DBZ_GCC_FLAGS =  -Wall -Wpointer-arith -Wcast-align -Wcast-qual \
 #DB_LIB=-linn
 #DB_INC_LOC=-I/usr/src/inn-2.3.0/include
 #DB_LIB_LOC=-L/usr/src/inn-2.3.0/lib
-#PERL_CORE=/usr/lib/perl5/5.00503/i586-linux/CORE
-#PERL_LIB=-lperl -lcrypt
+#PERL_CORE=/usr/lib/perl5/5.6.1/i686-linux/CORE
+#PERL_LIB=-lperl -lcrypt -lm
 #PERL_DEFS=-DPERL_EMBED -Dbool=char -DHAS_BOOL 
 #PERL_INC_LOC=-I$(PERL_CORE)
 #PERL_LIB_LOC=-L$(PERL_CORE)
 #GCC_FLAGS= $(MY_GCC_FLAGS)
 #DBZ_GCC_FLAGS= $(MY_DBZ_GCC_FLAGS)
+#SSL_LIB=-lssl -lcrypto
+#SSL_DEFS=-I/usr/local/ssl/include -DHAVE_LIBSSL
+#SSL_LIB_LOC=-L/usr/local/ssl/lib
 # for dmalloc lib include uncomment this
 #DMALLOC_DEFS=-DDMALLOC=1
 #DMALLOC_INC=-I/usr/local/include
@@ -103,8 +111,8 @@ srcdir = @srcdir@
 # Suck Makefile
 PKGNAME=suck
 VERSION_MAJOR=4
-VERSION_MINOR=2
-VERSION_PATCH=5
+VERSION_MINOR=3
+VERSION_PATCH=0
 VERSION=$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 
 CC = @CC@
@@ -135,7 +143,7 @@ SPECVERSION = `sed -n 's/^Version: //p' suck.spec`
 #List of .o files suck needs to compile:
 suckobjs = both.o both_phrases.o suck.o suckutils.o killfile.o timer.o killprg.o \
            dedupe.o suck_phrases.o active.o batch.o xover.o ssort.o $(CHKHISTORY) \
-	   db.o queue.o
+	   db.o
 rpostobjs = both.o both_phrases.o rpost.o rpost_phrases.o
 testhobjs = both.o both_phrases.o testhost.o test_phrases.o
 makepobjs = makephrases.o suck_phrases.o rpost_phrases.o test_phrases.o \
@@ -146,10 +154,10 @@ all: phrases.h suck rpost testhost lmove
 	@echo make done
 
 suck: phrases.h $(suckobjs)
-	$(CC) $(LDFLAGS) $(DB_LIB_LOC) $(PERL_LIB_LOC) -o suck $(suckobjs) $(LIBS) $(DB_LIB) $(PERL_LIB)
+	$(CC) $(LDFLAGS) $(DB_LIB_LOC) $(PERL_LIB_LOC) $(SSL_LIB_LOC) -o suck $(suckobjs) $(LIBS) $(DB_LIB) $(PERL_LIB) $(SSL_LIB)
 
 lmove: phrases.h $(lmoveobjs)
-	$(CC) $(LDFLAGS) -o lmove $(lmoveobjs) $(LIBS)
+	$(CC) $(LDFLAGS) $(SSL_LIB_LOC) -o lmove $(lmoveobjs) $(LIBS) $(SSL_LIB)
 
 lpost: lpost.o
 	$(CC) $(LDFLAGS) -o lpost lpost.o $(LIBS)
@@ -158,10 +166,10 @@ readdb: phrases.h read_db.o
 	$(CC) $(LDFLAGS) -o read_db read_db.o $(LIBS)
 
 rpost: phrases.h $(rpostobjs)
-	$(CC) $(LDFLAGS) $(PERL_LIB_LOC) -o rpost $(rpostobjs) $(LIBS) $(PERL_LIB)
+	$(CC) $(LDFLAGS) $(PERL_LIB_LOC) $(SSL_LIB_LOC) -o rpost $(rpostobjs) $(LIBS) $(PERL_LIB) $(SSL_LIB)
 
 testhost: phrases.h $(testhobjs)
-	$(CC) $(LDFLAGS) -o testhost $(testhobjs) $(LIBS)
+	$(CC) $(LDFLAGS) $(SSL_LIB_LOC) -o testhost $(testhobjs) $(LIBS) $(SSL_LIB)
 
 makephrases: $(makepobjs)
 	$(CC) $(LDFLAGS) -o makephrases $(makepobjs) $(LIBS)
@@ -221,7 +229,7 @@ rpost.o: rpost.c
 	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
 
 .c.o: 
-	$(CC) -c $(CFLAGS) $(GCC_FLAGS) $(CPPFLAGS) $(DEFS) $< 
+	$(CC) -c $(CFLAGS) $(SSL_DEFS) $(GCC_FLAGS) $(CPPFLAGS) $(DEFS) $< 
 
 #---------------------------------------------------------------------------
 # stuff to make sure configure is up to date (I hope)
@@ -293,4 +301,4 @@ makerpm: maketar
 	mv /usr/src/packages/SRPMS/*.rpm ~
 	rm -rf /usr/src/packages/BUILD/*
 # now generate the .sig files
-	pgps -b ~/suck*.rpm ~/suck*.tar.gz
+	#pgps -b ~/suck*.rpm ~/suck*.tar.gz

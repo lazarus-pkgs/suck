@@ -1,8 +1,8 @@
 Summary: suck - download news from remote NNTP server
 Name: suck
-Version: 4.2.5
+Version: 4.3.0
 Release: 1
-Source: http://home.att.net/~bobyetman/suck-4.2.5.tar.gz
+Source: http://home.att.net/~bobyetman/suck-4.3.0.tar.gz
 Packager: Robert Yetman <bobyetman@att.net>
 BuildRoot: /tmp/suck-%{PACKAGE_VERSION}-%{PACKAGE_RELEASE}
 Copyright: Unknown

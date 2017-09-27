@@ -178,6 +178,12 @@ number_to_read
 [
 .BI \-sg
 ]
+[
+.BI \-ssl
+]
+[
+.BI \-SSL
+]
 
 Options valid in all modes
 
@@ -427,6 +433,16 @@ This option tells suck to add the name of the current group being downloaded, if
 to the BPS display.   Typically the only time suck doesn't know the group name is if
 an article is downloaded via the suckothermsgs file.
 
+\-ssl 
+
+This option tells suck to use SSL to talk to the remote server, if suck was compiled with
+SSL support.
+
+\-SSL
+
+This option tells suck to use SSL to talk to the local server, if suck was compiled with
+SSL support.
+
 \-T timeout
 
 This option overrides the compiled-in TIMEOUT value. This is how long suck waits for data from the
@@ -575,6 +591,9 @@ support the XHDR command.
 \-sg \-\-show_group
 .RE
 .RS
+\-ssl \-\-use_ssl
+.RE
+.RS
 \-w  \-\-wait_signal
 .RE
 .RS
@@ -644,6 +663,8 @@ support the XHDR command.
 \-S  \-\-status_log
 .RE
 .RS
+\-SSL \-\-local_use_ssl
+.RS
 \-T  \-\-timeout
 .RE
 .RS
@@ -698,6 +719,9 @@ by the \-dm command line option.
 .RE
 .RS
 or %suck myhost.com \-bp -hl localhost
+.RE
+.RS
+or %suck myhost.com \-bP NR -hl localhost
 .RE
 .RS
 %suck myhost.com \-b[irlf] batchfile
@@ -775,6 +799,14 @@ worrying if you are using INND or CNEWS.
 
 .RS
 %suck news.server.com -bp -hl localhost -A -c
+.RE
+
+\-bP NR \- This option works identically to \-bp above, except instead of
+waiting until all articles are downloaded, it will post them to the local
+server after downloading NR of articles.
+
+.RS
+%suck news.server.com -bP 100 -hl localhost -A -c
 .RE
 
 .SH SUCK ARGUMENT FILE

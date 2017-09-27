@@ -160,7 +160,7 @@ const char *default_suck_phrases[] = {
         "Invalid line in Nodownload File %v1%, ignoring\n",
         "Nodownload File processed, %v1% lines read, %v2% articles deleted, %v3% articles remaining\n", /* 70 */
 	"%v1% - %v2%... High Number article is low, resetting last read to %v3%\n",
-	
+	"No batch_post count provide\n",
 };
 
 const char *default_batch_phrases[] = {
@@ -225,10 +225,6 @@ const char *default_xover_reasons[] = {
 	"Xover - Match by perl program"
 };
 
-const char *default_queue_phrases[] = {
-	"Out of memory setting up command queue", /* 0 */
-};
-
 int nr_suck_phrases= sizeof(default_suck_phrases)/sizeof(default_suck_phrases[0]);
 int nr_timer_phrases= sizeof(default_timer_phrases)/sizeof(default_timer_phrases[0]);
 int nr_chkh_phrases= sizeof(default_chkh_phrases)/sizeof(default_chkh_phrases[0]);
@@ -241,4 +237,4 @@ int nr_active_phrases=sizeof(default_active_phrases)/sizeof(default_active_phras
 int nr_batch_phrases=sizeof(default_batch_phrases)/sizeof(default_batch_phrases[0]);
 int nr_xover_phrases=sizeof(default_xover_phrases)/sizeof(default_xover_phrases[0]);
 int nr_xover_reasons=sizeof(default_xover_reasons)/sizeof(default_xover_reasons[0]);
-int nr_queue_phrases=sizeof(default_queue_phrases)/sizeof(default_queue_phrases[0]);
+

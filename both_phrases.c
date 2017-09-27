@@ -17,6 +17,7 @@ const char *default_both_phrases[] = {
 	"Out of memory reading %v1%, ignoring\n",	/* 15 */
 	"Out of memory reading argument file\n",
 	"Address: %v1%\n",
+	"Unable to initialize SSL\n",
 };
 
 int nr_both_phrases=sizeof(default_both_phrases)/sizeof(default_both_phrases[0]);

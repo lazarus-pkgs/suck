@@ -50,7 +50,6 @@
 #include "batch.h"
 #include "xover.h"
 #include "db.h"
-#include "queue.h"
 
 #ifdef MYSIGNAL 
 #include <signal.h>
@@ -101,7 +100,7 @@ char **active_phrases=default_active_phrases;
 char **batch_phrases=default_batch_phrases;
 char **xover_phrases=default_xover_phrases;
 char **xover_reasons=default_xover_reasons;
-char **queue_phrases=default_queue_phrases;
+
 
 enum { STATUS_STDOUT, STATUS_STDERR };
 enum { RESTART_YES, RESTART_NO, RESTART_ERROR };
@@ -117,7 +116,7 @@ enum {
 	ARG_NODEDUPE, ARG_NO_CHK_MSGID, ARG_READACTIVE, ARG_PREBATCH, ARG_SKIP_ON_RESTART, \
 	ARG_KLOG_NAME, ARG_USEGUI, ARG_XOVER, ARG_CONN_DEDUPE, ARG_POST_FILTER, ARG_CONN_ACTIVE, \
 	ARG_HIST_FILE, ARG_HEADER_ONLY, ARG_ACTIVE_LASTREAD, ARG_USEXOVER, ARG_RESETCOUNTER, \
-	ARG_LOW_READ, ARG_SHOW_GROUP
+	ARG_LOW_READ, ARG_SHOW_GROUP, ARG_USE_SSL, ARG_LOCAL_SSL, ARG_BATCH_POST_NR, 
 }; 
 
 typedef struct Arglist{
@@ -135,6 +134,7 @@ const Args arglist[] = {
 	{"bl", "batch_lmove",  1, ARG_BATCH_LMOVE, 40},
 	{"bf", "batch_innfeed",1, ARG_BATCH_INNFEED, 40},
 	{"bp", "batch_post",   0, ARG_BATCH_POST, -1},
+	{"bP", "batch_post_nr", 1, ARG_BATCH_POST_NR, 72},	
 	{"c",  "cleanup",      0, ARG_CLEANUP, -1},
 	{"dt", "dir_temp",    1, ARG_DIR_TEMP, 37},
 	{"dd", "dir_data",    1, ARG_DIR_DATA, 37},
@@ -155,7 +155,10 @@ const Args arglist[] = {
 	{"r",  "rnews_size", 1, ARG_RNEWSSIZE, 35},
 	{"rc", "reset_counter", 0, ARG_RESETCOUNTER, -1},	
 	{"s",  "def_status_log", 0, ARG_DEF_STATLOG, -1},
-	{"sg", "show_group", 0, ARG_SHOW_GROUP, -1},	
+	{"sg", "show_group", 0, ARG_SHOW_GROUP, -1},
+#ifdef HAVE_LIBSSL
+	{"ssl","use_ssl", 0, ARG_USE_SSL, -1},
+#endif
 	{"u",  "auto_authorization", 0, ARG_AUTOAUTH, -1},
 	{"w",  "wait_signal", 2, ARG_WAIT_SIG, 46},
 	{"x",  "no_chk_msgid", 0, ARG_NO_CHK_MSGID, -1},
@@ -182,6 +185,9 @@ const Args arglist[] = {
 	{"P",  "password", 1, ARG_PASSWD, 44},
 	{"R",  "no_rescan", 0, ARG_RESCAN, -1},
 	{"S",  "status_log", 1, ARG_STATLOG, 42},
+#ifdef HAVE_LIBSSL
+	{"SSL" "local_use_ssl", 0, ARG_LOCAL_SSL, -1},
+#endif
 #ifdef TIMEOUT
 	{"T",  "timeout", 1, ARG_TIMEOUT, 52},
 #endif	
@@ -276,6 +282,11 @@ int main(int argc, char *argv[]) {
 	master.resetcounter = FALSE;
 	master.low_read = FALSE;
 	master.show_group = FALSE;
+	master.do_ssl = FALSE;
+	master.ssl_struct = NULL;
+	master.local_ssl = FALSE;
+	master.local_ssl_struct = NULL;
+	master.batch_post_nr = 0;
 	
 	/* have to do this next so if set on cmd line, overrides this */
 
@@ -374,7 +385,9 @@ int main(int argc, char *argv[]) {
 		do_debug("master.header_only = %s\n", true_str(master.header_only));
 		do_debug("master.active_lastread = %d\n", master.active_lastread);
 		do_debug("master.use_xover = %s\n", true_str(master.use_xover));
-		
+		do_debug("master.do_ssl = %s\n", true_str(master.do_ssl));
+		do_debug("master.local_ssl = %s\n", true_str(master.local_ssl));
+		do_debug("master.batch_post_nr =  %d\n",master.batch_post_nr);
 #ifdef TIMEOUT
 		do_debug("TimeOut = %d\n", TimeOut);
 #endif
@@ -531,22 +544,18 @@ int main(int argc, char *argv[]) {
 						retval = do_connect(&master, CONNECT_AGAIN);
 					}
 					if(retval == RETVAL_OK) {
-#ifdef USE_QUEUE
-						retval = get_queue(&master);
-#else
 						retval = get_articles(&master);
-#endif
 					}
 				}
 				
 			}
 			/* send quit, and get reply */
-			sputline(master.sockfd,"quit\r\n");
+			sputline(master.sockfd,"quit\r\n", master.do_ssl, master.ssl_struct);
 			if(master.debug == TRUE) {
 				do_debug("Sending command: quit\n");
 			}
 			do {
-				resp = sgetline(master.sockfd, &inbuf);
+				resp = sgetline(master.sockfd, &inbuf, master.do_ssl, master.ssl_struct);
 				if(resp>0) {
 					if(master.debug == TRUE) {
 						do_debug("Quitting GOT: %s", inbuf);
@@ -557,7 +566,7 @@ int main(int argc, char *argv[]) {
 			}while(nr != 205 && resp > 0);	
 		}
 		if(master.sockfd >= 0) {
-			close(master.sockfd);
+			disconnect_from_nntphost(master.sockfd, master.do_ssl, &master.ssl_struct);
 			print_phrases(master.msgs,suck_phrases[4], master.host, NULL);
 		}
 		if(master.debug == TRUE) {
@@ -648,9 +657,9 @@ int do_connect(PMaster master, int which_time) {
 	
 	if(which_time != CONNECT_FIRST) {
 		/* close down previous connection */
-		sputline(master->sockfd, "quit\r\n");
+		sputline(master->sockfd, "quit\r\n", master->do_ssl, master->ssl_struct);
 		do {
-			resp = sgetline(master->sockfd, &inbuf);
+			resp = sgetline(master->sockfd, &inbuf, master->do_ssl, master->ssl_struct);
 			if(resp>0) {
 				if(master->debug == TRUE) {
 					do_debug("Reconnect GOT: %s", inbuf);
@@ -658,8 +667,8 @@ int do_connect(PMaster master, int which_time) {
 				number(inbuf, &nr);
 			}
 			
-		}while(nr != 205 && resp > 0);		
-		close(master->sockfd);
+		}while(nr != 205 && resp > 0);
+		disconnect_from_nntphost(master->sockfd, master->do_ssl, &master->ssl_struct);
 
 		/* now reset everything */
 		if(master->curr != NULL) {
@@ -672,11 +681,13 @@ int do_connect(PMaster master, int which_time) {
 		do_debug("Connecting to %s on port %d\n", master->host, master->portnr);
 	}
 	fp = (which_time == CONNECT_FIRST) ? master->msgs : NULL;
-	master->sockfd = connect_to_nntphost( master->host, &hi, fp , master->portnr);
+
+	master->sockfd = connect_to_nntphost( master->host, &hi, fp, master->portnr, master->do_ssl, &master->ssl_struct);
+	
 	if(master->sockfd < 0 ) {
 		retval = RETVAL_ERROR;
 	}
-	else if(sgetline(master->sockfd, &inbuf) < 0) {
+	else if(sgetline(master->sockfd, &inbuf, master->do_ssl, master->ssl_struct) < 0) {
 	 	/* Get the announcement line */
 		retval = RETVAL_ERROR;
 	}
@@ -888,7 +899,7 @@ int do_one_group(PMaster master, char *buf, char *group, FILE *newrc, long lastr
 					}
 					else {
 						do {
-							if(sgetline(master->sockfd, &inbuf) < 0) {
+							if(sgetline(master->sockfd, &inbuf, master->do_ssl, master->ssl_struct) < 0) {
 								retval = RETVAL_ERROR;
 							}
 							else if (*inbuf != '.' ) {
@@ -1051,8 +1062,21 @@ int get_articles(PMaster master) {
 					if(master->curr != NULL) {
 						(master->curr)->sentcmd = FALSE;	/* if we sent command force resend */
 					}
-				} 
-
+				}
+				// do a local post every x number of articles
+				if(master->batch == BATCH_LIHAVE && master->batch_post_nr > 0 && master->nrgot >=  master->batch_post_nr) {
+					fclose(master->innfeed);
+					master->innfeed = NULL;
+					do_post_filter(master);
+					retval = do_localpost(master);
+					if(retval == RETVAL_OK) {
+						master->nrgot = 0; // so if no more articles left we don't try to post in main routine
+						if((master->innfeed = fopen(full_path(FP_GET, FP_TMPDIR, master->batchfile), "a")) == NULL) {
+							MyPerror(full_path(FP_GET, FP_TMPDIR, master->batchfile));
+							retval = RETVAL_ERROR;
+						}
+					}
+				}
  
 		 	} /* end while */
 			db_close(master);
@@ -1133,7 +1157,7 @@ int do_supplemental(PMaster master) {
 				 /* now have to get message-id and the . */
 				 done = FALSE;
 				 while( done == FALSE) {
-					 if(sgetline(master->sockfd, &resp) < 0) {
+					 if(sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct) < 0) {
 						 retval = RETVAL_ERROR;
 						 done = TRUE;
 					 }
@@ -1449,11 +1473,13 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 		if(master->debug == TRUE) {
 			do_debug("Sending command: \"%s\"",cmd);
 		}
-		sputline(master->sockfd, cmd);
+		sputline(master->sockfd, cmd, master->do_ssl, master->ssl_struct);
 		(master->curr)->sentcmd = TRUE;
 	}
 	plist = (master->curr)->next;
-	if(plist != NULL) {
+	if(plist != NULL && master->batch_post_nr == 0) {
+		/* if batch_post_nr > 0 we're doing periodic batch posts */
+		/* which confuses the remote server so we can't use pipelining */
 		if(master->nrmode == FALSE || plist->groupnr == (master->curr)->groupnr) {
 		/* can't use pipelining if nrmode on, cause of GROUP command I'll have to send*/
 			if(plist->sentcmd == FALSE) {
@@ -1464,7 +1490,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 				if(master->debug == TRUE) {
 					do_debug("Sending command: \"%s\"",cmd);
 				}
-				sputline(master->sockfd, cmd);
+				sputline(master->sockfd, cmd, master->do_ssl, master->ssl_struct);
 				plist->sentcmd = TRUE;
 			}
 		}
@@ -1491,7 +1517,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 	}
 
 	/* okay hopefully by this time the remote end is ready */
-	if((len = sgetline(master->sockfd, &resp)) < 0) {
+	if((len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct)) < 0) {
 		retval = RETVAL_ERROR;
 	}
 	else {
@@ -1511,8 +1537,8 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 				if(master->debug == TRUE) {
 					do_debug("Sending command: \"%s\"",cmd);
 				}
-				sputline(master->sockfd, cmd);
-				len = sgetline(master->sockfd, &resp);
+				sputline(master->sockfd, cmd, master->do_ssl, master->ssl_struct);
+				len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 				if(master->debug == TRUE) {
 					do_debug("got answer: %s", resp);
 				}
@@ -1526,7 +1552,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 		/* 221 = header 220 = article */
 		if(nr == 220 || nr == 221 ) {
 			/* get the article */
-			if((retval = get_a_chunk(master->sockfd, fptr)) == RETVAL_OK) {
+			if((retval = get_a_chunk(master, fptr)) == RETVAL_OK) {
 				master->nrgot++;
 				if (fptr == stdout) {
 					/* gracefully end the message in stdout version */
@@ -1561,7 +1587,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 	return retval;
 }
 /*---------------------------------------------------------------------------*/
-int get_a_chunk(int sockfd, FILE *fptr) {
+int get_a_chunk(PMaster master, FILE *fptr) {
 
 	int done, partial, len, retval;
 	char *inbuf;
@@ -1576,7 +1602,7 @@ int get_a_chunk(int sockfd, FILE *fptr) {
 	/* long and the last character is a ., which would make us think */
 	/* that we are at the end of the article when we actually aren't */
 	
-	while(done == FALSE && (len = sgetline(sockfd, &inbuf)) >= 0) {
+	while(done == FALSE && (len = sgetline(master->sockfd, &inbuf, master->do_ssl, master->ssl_struct)) >= 0) {
 
 		TimerFunc(TIMER_ADDBYTES, len, NULL);
 			
@@ -1701,8 +1727,8 @@ void pause_signal(int action, PMaster master) {
 	 if(master->debug == TRUE) {
 		 do_debug("sending command: %s", cmd);
 	 }
-	 sputline(master->sockfd, cmd);
-	 len = sgetline(master->sockfd, &resp);	
+	 sputline(master->sockfd, cmd, master->do_ssl, master->ssl_struct);
+	 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);	
 	 if( len < 0) {	
 		 retval = RETVAL_ERROR;		  	
 	 }					
@@ -1719,11 +1745,11 @@ void pause_signal(int action, PMaster master) {
 			 retval = do_authenticate(master);
 			 if(retval == RETVAL_OK) {
 				 /* resend command */
-				 sputline(master->sockfd, cmd);
+				 sputline(master->sockfd, cmd, master->do_ssl, master->ssl_struct);
 				 if(master->debug == TRUE) {
 					 do_debug("sending command: %s", cmd);
 				 }
-				 len = sgetline(master->sockfd, &resp);
+				 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 				 if( len < 0) {	
 					 retval = RETVAL_ERROR;		  	
 				 }
@@ -1897,6 +1923,9 @@ int parse_args(PMaster master, int arg, char *argv[]) {
 		master->MultiFile = TRUE;
 		master->batchfile = argv[0];
 		break;
+	case ARG_BATCH_POST_NR:
+		master->batch_post_nr = atoi(argv[0]);
+		/* no break fall thru to the rest of batch_post*/
 	case ARG_BATCH_POST:
 		master->batch = BATCH_LIHAVE;
 		master->MultiFile = TRUE;
@@ -2073,6 +2102,16 @@ int parse_args(PMaster master, int arg, char *argv[]) {
 		TimeOut = atoi(argv[0]);
 		break;
 #endif
+#ifdef HAVE_LIBSSL
+	case ARG_USE_SSL:
+		master->do_ssl = TRUE;
+		master->portnr = DEFAULT_SSL_PORT;
+		break;
+	case ARG_LOCAL_SSL:
+		master->local_ssl = TRUE;
+		break;
+#endif
+			
 	}
 	
 	return retval;
@@ -2090,8 +2129,8 @@ int do_authenticate(PMaster master) {
 	 if(master->debug == TRUE) {
 		 do_debug("sending command: %s", buf);
 	 }
-	 sputline(master->sockfd, buf);
-	 len = sgetline(master->sockfd, &resp);
+	 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
+	 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 	 if( len < 0) {	
 	   retval = RETVAL_ERROR;		  	
 	 }					
@@ -2108,7 +2147,7 @@ int do_authenticate(PMaster master) {
 			 /* we get the second need auth */
 			 /* just ignore it and get the next line */
 			 /* which should be the 381 we need */
-			 len = sgetline(master->sockfd, &resp);
+			 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 			 TimerFunc(TIMER_ADDBYTES, len, NULL);
 			 
 			 number(resp, &nr);
@@ -2120,11 +2159,11 @@ int do_authenticate(PMaster master) {
 		 }
 		 else {
 			 sprintf(buf, "AUTHINFO PASS %s\r\n", master->passwd);
-			 sputline(master->sockfd, buf);
+			 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
 			 if(master->debug == TRUE) {
 				 do_debug("sending command: %s", buf);
 			 }
-			 len = sgetline(master->sockfd, &resp);
+			 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 			 if(len < 0) {	
 				 retval = RETVAL_ERROR;		  	
 			 }					
@@ -2188,8 +2227,7 @@ void load_phrases(PMaster master) {
 				   ( active_phrases=read_array(fpi, NR_ACTIVE_PHRASES,TRUE)) &&
 				   ( batch_phrases= read_array(fpi, NR_BATCH_PHRASES,TRUE)) &&
 				   ( xover_phrases= read_array(fpi, NR_XOVER_PHRASES,TRUE)) &&
-				   ( xover_reasons= read_array(fpi, NR_XOVER_REASONS,TRUE)) &&
-				   ( queue_phrases= read_array(fpi, NR_QUEUE_PHRASES,TRUE))) {
+				   ( xover_reasons= read_array(fpi, NR_XOVER_REASONS,TRUE))) {
 					error = FALSE;
 				}
 			}
@@ -2212,7 +2250,6 @@ void load_phrases(PMaster master) {
 			batch_phrases=default_batch_phrases;
 			xover_phrases=default_xover_phrases;
 			xover_reasons=default_xover_reasons;
-			queue_phrases=default_queue_phrases;
 		}
 	}		
 }
@@ -2258,9 +2295,7 @@ void free_phrases(void) {
 		if(xover_reasons != default_xover_reasons) {
 			free_array(NR_XOVER_REASONS, xover_reasons);
 		}
-		if(queue_phrases != default_queue_phrases) {
-			free_array(NR_QUEUE_PHRASES, queue_phrases);
-		}
+
 		
 		
 }

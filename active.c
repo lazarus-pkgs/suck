@@ -113,15 +113,15 @@ Pactive nntp_active(PMaster master, Pignore ignorehead) {
 		if(master->debug == TRUE) {
 			do_debug("Sending command: LIST\n");
 		}
-		sputline(localfd, "LIST\r\n");
-		if(sgetline(localfd, &resp) >= 0) {
+		sputline(localfd, "LIST\r\n", master->local_ssl, master->local_ssl_struct);
+		if(sgetline(localfd, &resp, master->local_ssl, master->local_ssl_struct) >= 0) {
 			if(master->debug == TRUE) {
 				do_debug("got answer: %s", resp);
 			}
 			number(resp, &nr);
 			if(nr == 215) { /* now we can get the list */
 				do {
-					if(sgetline(localfd, &resp) > 0) {
+					if(sgetline(localfd, &resp, master->local_ssl, master->local_ssl_struct) > 0) {
 						if(master->debug == TRUE) {
 							do_debug("Got groupline: %s", resp);
 						}
@@ -139,8 +139,8 @@ Pactive nntp_active(PMaster master, Pignore ignorehead) {
 					listhead = NULL;
 				}
 			}
-		}	
-		close(localfd);
+		}
+		disconnect_from_nntphost(localfd, master->local_ssl, &master->ssl_struct);
 	}
 	return listhead;
 }
@@ -183,14 +183,16 @@ int connect_local(PMaster master) {
 	int fd;
 	struct hostent *hi;
 	char *inbuf;
+	unsigned int port;
 
+	port = (master->local_ssl == TRUE) ? LOCAL_SSL_PORT : LOCAL_PORT;
 	if(master->debug == TRUE) {
-		do_debug("Connecting to %s on port %d\n", master->localhost, LOCAL_PORT);
+		do_debug("Connecting to %s on port %d\n", master->localhost, port);
 	}
 	
-	if((fd = connect_to_nntphost(master->localhost, &hi, NULL, LOCAL_PORT)) >= 0) {
+	if((fd = connect_to_nntphost(master->localhost, &hi, NULL, port, master->local_ssl, &master->local_ssl_struct)) >= 0) {
 		/* get the announcement line */
-		if(sgetline(fd, &inbuf) < 0) {
+		if(sgetline(fd, &inbuf, master->local_ssl, master->local_ssl_struct) < 0) {
 			close(fd);
 			fd = -1;
 		}
