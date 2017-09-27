@@ -168,6 +168,7 @@ int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsig
 	char sport[10];
 	int sockfd = -1;
 	
+	memset(&saddr, '\0', sizeof(saddr));
 #ifdef HAVE_LIBSSL
 	SSL *ssl_struct = NULL;
 	SSL_CTX *test1 = NULL;
