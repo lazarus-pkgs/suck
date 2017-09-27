@@ -161,6 +161,7 @@ const char *default_suck_phrases[] = {
         "Nodownload File processed, %v1% lines read, %v2% articles deleted, %v3% articles remaining\n", /* 70 */
 	"%v1% - %v2%... High Number article is low, resetting last read to %v3%\n",
 	"No batch_post count provide\n",
+	"Userid or Password not provided, unable to authenticate\n",
 };
 
 const char *default_batch_phrases[] = {

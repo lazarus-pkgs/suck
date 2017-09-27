@@ -116,7 +116,8 @@ enum {
 	ARG_NODEDUPE, ARG_NO_CHK_MSGID, ARG_READACTIVE, ARG_PREBATCH, ARG_SKIP_ON_RESTART, \
 	ARG_KLOG_NAME, ARG_USEGUI, ARG_XOVER, ARG_CONN_DEDUPE, ARG_POST_FILTER, ARG_CONN_ACTIVE, \
 	ARG_HIST_FILE, ARG_HEADER_ONLY, ARG_ACTIVE_LASTREAD, ARG_USEXOVER, ARG_RESETCOUNTER, \
-	ARG_LOW_READ, ARG_SHOW_GROUP, ARG_USE_SSL, ARG_LOCAL_SSL, ARG_BATCH_POST_NR, 
+	ARG_LOW_READ, ARG_SHOW_GROUP, ARG_USE_SSL, ARG_LOCAL_SSL, ARG_BATCH_POST_NR, \
+	ARG_PASSWD_ENV,
 }; 
 
 typedef struct Arglist{
@@ -183,6 +184,7 @@ const Args arglist[] = {
 	{"N",  "portnr", 1, ARG_PORTNR, 45},
 	{"O",  "skip_on_restart", 0, ARG_SKIP_ON_RESTART, -1},	
 	{"P",  "password", 1, ARG_PASSWD, 44},
+        {"Q",  "password_env", 0, ARG_PASSWD_ENV, -1},
 	{"R",  "no_rescan", 0, ARG_RESCAN, -1},
 	{"S",  "status_log", 1, ARG_STATLOG, 42},
 #ifdef HAVE_LIBSSL
@@ -287,6 +289,7 @@ int main(int argc, char *argv[]) {
 	master.local_ssl = FALSE;
 	master.local_ssl_struct = NULL;
 	master.batch_post_nr = 0;
+	master.passwd_env = FALSE;
 	
 	/* have to do this next so if set on cmd line, overrides this */
 
@@ -388,6 +391,7 @@ int main(int argc, char *argv[]) {
 		do_debug("master.do_ssl = %s\n", true_str(master.do_ssl));
 		do_debug("master.local_ssl = %s\n", true_str(master.local_ssl));
 		do_debug("master.batch_post_nr =  %d\n",master.batch_post_nr);
+		do_debug("master.passwd_env = %s\n", true_str(master.passwd_env));
 #ifdef TIMEOUT
 		do_debug("TimeOut = %d\n", TimeOut);
 #endif
@@ -549,21 +553,23 @@ int main(int argc, char *argv[]) {
 				}
 				
 			}
-			/* send quit, and get reply */
-			sputline(master.sockfd,"quit\r\n", master.do_ssl, master.ssl_struct);
-			if(master.debug == TRUE) {
-				do_debug("Sending command: quit\n");
-			}
-			do {
-				resp = sgetline(master.sockfd, &inbuf, master.do_ssl, master.ssl_struct);
-				if(resp>0) {
-					if(master.debug == TRUE) {
-						do_debug("Quitting GOT: %s", inbuf);
-					}
-					number(inbuf, &nr);					
+			if(retval == RETVAL_OK) { /* if we got disconnected above, don't do this */
+				/* send quit, and get reply */
+				sputline(master.sockfd,"quit\r\n", master.do_ssl, master.ssl_struct);
+				if(master.debug == TRUE) {
+					do_debug("Sending command: quit\n");
 				}
+				do {
+					resp = sgetline(master.sockfd, &inbuf, master.do_ssl, master.ssl_struct);
+					if(resp>0) {
+						if(master.debug == TRUE) {
+							do_debug("Quitting GOT: %s", inbuf);
+						}
+						number(inbuf, &nr);					
+					}
 			
-			}while(nr != 205 && resp > 0);	
+				}while(nr != 205 && resp > 0);
+			}
 		}
 		if(master.sockfd >= 0) {
 			disconnect_from_nntphost(master.sockfd, master.do_ssl, &master.ssl_struct);
@@ -1424,7 +1430,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 			 }
 			 if(grps != NULL) {
 				 /* okay send group command */
-				 sprintf(grpcmd, "GROUP %s\r\n", grps->group);
+				 snprintf(grpcmd, MAXLINLEN, "GROUP %s\r\n", grps->group);
 				 if(send_command(master, grpcmd, &resp, 211) != RETVAL_OK) {
 					 master->nrmode = FALSE; /* can't chg groups turn it off */
 				 }
@@ -1436,7 +1442,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 		 }
 		 if(master->nrmode == TRUE) {
 			 /* everything hunky dory, we've switched groups, and got a good nr */
-			 sprintf(cmd, "%s %ld\r\n", cmdstart, article->nr);
+			 snprintf(cmd, MAXLINLEN, "%s %ld\r\n", cmdstart, article->nr);
 		 }
 		 else if(warned == FALSE) {
 			 /* tell of the switch to nonnr mode */
@@ -1530,7 +1536,10 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 		number(resp, &nr);
 		if(nr == 480) {
 			/* got to authorize, negate send-ahead for next msg */
-			plist->sentcmd = FALSE;	/* cause its gonna error out in do_auth() */
+			if(plist != NULL) {
+				plist->sentcmd = FALSE;	/* cause its gonna error out in do_auth() */
+			}
+			
 			if(do_authenticate(master) == RETVAL_OK) {
 				/* resend command for current article */
 				cmd = build_command(master, "article", master->curr);
@@ -2023,6 +2032,11 @@ int parse_args(PMaster master, int arg, char *argv[]) {
 	case ARG_USERID:	/* userid */
 		master->userid = argv[0];
 		break;
+	case ARG_PASSWD_ENV:	/* get userid/password from ENV */
+		master->userid = getenv("NNTP_USER");
+		master->passwd = getenv("NNTP_PASS");
+		master->passwd_env = TRUE;
+		break;
 	case ARG_VERSION: 	/* show version number */
 		error_log(ERRLOG_REPORT,"Suck version %v1%\n",SUCK_VERSION, NULL);
 		retval = RETVAL_VERNR;	/* so we don't do anything else */
@@ -2124,69 +2138,76 @@ int do_authenticate(PMaster master) {
 	 int len, nr, retval = RETVAL_OK;
 	 char *resp, buf[MAXLINLEN];
 
-	 /* we must do authorization */
-	 sprintf(buf, "AUTHINFO USER %s\r\n", master->userid);
-	 if(master->debug == TRUE) {
-		 do_debug("sending command: %s", buf);
+
+	 if(master->userid == NULL || master->passwd == NULL) {
+		 error_log(ERRLOG_REPORT, suck_phrases[73], NULL);
+		 retval = RETVAL_NOAUTH;
 	 }
-	 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
-	 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
-	 if( len < 0) {	
-	   retval = RETVAL_ERROR;		  	
-	 }					
 	 else {
+		 /* we must do authorization */
+		 sprintf(buf, "AUTHINFO USER %s\r\n", master->userid);
 		 if(master->debug == TRUE) {
-			 do_debug("got answer: %s", resp);
+			 do_debug("sending command: %s", buf);
 		 }
-
-		 TimerFunc(TIMER_ADDBYTES, len, NULL);
-
-		 number(resp, &nr);
-		 if(nr == 480) {
-			 /* this is because of the pipelining code */
-			 /* we get the second need auth */
-			 /* just ignore it and get the next line */
-			 /* which should be the 381 we need */
-			 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
+		 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
+		 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
+		 if( len < 0) {	
+			 retval = RETVAL_ERROR;		  	
+		 }					
+		 else {
+			 if(master->debug == TRUE) {
+				 do_debug("got answer: %s", resp);
+			 }
+			 
 			 TimerFunc(TIMER_ADDBYTES, len, NULL);
 			 
 			 number(resp, &nr);
-		 }
-		 
-		 if(nr != 381) {
-			 error_log(ERRLOG_REPORT, suck_phrases[27], resp, NULL);
-			 retval = RETVAL_NOAUTH;
-		 }
-		 else {
-			 sprintf(buf, "AUTHINFO PASS %s\r\n", master->passwd);
-			 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
-			 if(master->debug == TRUE) {
-				 do_debug("sending command: %s", buf);
-			 }
-			 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
-			 if(len < 0) {	
-				 retval = RETVAL_ERROR;		  	
-			 }					
-			 else {
-				 if(master->debug == TRUE) {
-					 do_debug("got answer: %s", resp);
-				 }
-
+			 if(nr == 480) {
+				 /* this is because of the pipelining code */
+				 /* we get the second need auth */
+				 /* just ignore it and get the next line */
+				 /* which should be the 381 we need */
+				 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 				 TimerFunc(TIMER_ADDBYTES, len, NULL);
-
+				 
 				 number(resp, &nr);
-				 switch(nr) {
-	  			   case 281: /* bingo */
-					 retval = RETVAL_OK;  
-					 break;
-				   case 502: /* permission denied */
-					 retval = RETVAL_NOAUTH;
-					 error_log(ERRLOG_REPORT, suck_phrases[28], NULL);
-					 break;
-				   default: /* wacko error */
-					 error_log(ERRLOG_REPORT, suck_phrases[27], resp, NULL);
-					 retval = RETVAL_NOAUTH;
-					 break;
+			 }
+			 
+			 if(nr != 381) {
+				 error_log(ERRLOG_REPORT, suck_phrases[27], resp, NULL);
+				 retval = RETVAL_NOAUTH;
+			 }
+			 else {
+				 sprintf(buf, "AUTHINFO PASS %s\r\n", master->passwd);
+				 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
+				 if(master->debug == TRUE) {
+					 do_debug("sending command: %s", buf);
+				 }
+				 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
+				 if(len < 0) {	
+					 retval = RETVAL_ERROR;		  	
+				 }					
+				 else {
+					 if(master->debug == TRUE) {
+						 do_debug("got answer: %s", resp);
+					 }
+					 
+					 TimerFunc(TIMER_ADDBYTES, len, NULL);
+
+					 number(resp, &nr);
+					 switch(nr) {
+					 case 281: /* bingo */
+						 retval = RETVAL_OK;  
+						 break;
+					 case 502: /* permission denied */
+						 retval = RETVAL_NOAUTH;
+						 error_log(ERRLOG_REPORT, suck_phrases[28], NULL);
+						 break;
+					 default: /* wacko error */
+						 error_log(ERRLOG_REPORT, suck_phrases[27], resp, NULL);
+						 retval = RETVAL_NOAUTH;
+						 break;
+					 }
 				 }
 			 }
 		 }

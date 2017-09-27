@@ -377,7 +377,10 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 	ret = 0;
 	ptr = NULL;
 
-	if(eob == start || (ptr = findnl(start, eob)) == NULL) {
+	if(fd < 0) {
+		ret = -1;
+	}
+	else if(eob == start || (ptr = findnl(start, eob)) == NULL) {
 		
 		/* TEST for not a full line in buffer */	
 		/* the eob == start test is needed in case the buffer is */

@@ -32,6 +32,9 @@ rnews_file rnews_path
 prefix
 ]
 [
+.BI -Q
+]
+[
 .BI -d
 ]
 [
@@ -165,6 +168,12 @@ password
 
 These two options let you specify a userid and password, if your NNTP server
 requires them.
+
+.BI \-Q
+
+This option allows you to specify the userid and password via the environment variables
+"NNTP_USER" and "NNTP_PASS" instead of on the command line.  This prevents a potential
+security issue where someone doing a ps command can see your login and password.
 
 .BI \-z
 This option tells rpost to use SSL to communicate with the remote hosts, if SSL was

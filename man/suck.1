@@ -70,6 +70,9 @@ userid
 password
 ]
 [
+.BI \-Q
+]
+[
 .BI \-c
 ]
 [
@@ -461,6 +464,13 @@ remote server, rather than wait for a request for authorization.  You must suppl
 These two options let you specify a userid and password, if your NNTP server
 requires them.
 
+\-Q
+
+This option tells suck to get the userid and password for NNTP authentication from
+the environment variables "NNTP_USER" and "NNTP_PASS" vice the -U or -P password.
+This prevents a potential security problem where someone doing a ps command can
+see your userid and password.
+
 \-V
 
 This option will cause suck to print out the version number and then exit.
@@ -655,6 +665,9 @@ support the XHDR command.
 .RE
 .RS
 \-P  \-\-password
+.RE
+.RS
+\-Q  \-\-password_env
 .RE
 .RS
 \-R  \-\-no_rescan

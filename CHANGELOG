@@ -1,6 +1,40 @@
 
 CHANGES
 =======
+-- Changes from Suck-4.3.0 -> Suck-4.3.1
+
+* as of this version, my e-mail address has changed
+to bobyetman@sucknews.org
+
+* 	- added stuff to autoconf to handle the Db,
+	history, Perl & SSL stuff in the Makefile.
+
+* both.h - added tests for socks.h
+
+* rpost.c - added -Q option, to allow user
+	to specify NNTP authentication via
+	environment variables
+         - do_batch() - add test to not append
+	prefix if article name is an Inn token.
+
+* suck.c - added -Q option, to allow user
+	to specify NNTP authentication via
+	environment variables
+
+	- build_command() - changed sprintfs
+	to snprintf() to fix potential overflow
+	problems.
+
+	-- get_one_article() - fix bug where
+	plist would be null when doing authentication
+	and there was only one article to download.
+
+        - main() - fix bug where if reconnect after
+	dedupe, and it failed, you would try to send
+	the quit command to an invalid file descriptor.
+
+Sep 24, 2002, Suck-4.3.1 released
+
 -- Changes from Suck-4.2.5 -> Suck-4.3.0
 
 * As of this version, my e-mail address has changed from

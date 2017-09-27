@@ -9,6 +9,10 @@
 # and perl only closes files upon program exit, or
 # reuse of file handle.
 
+# WARNING USING /tmp/tmp.rpost is insecure,
+# you should change this to somewhere normal
+# users can't read or write.
+#
 package Embed::Persistant;
 
 sub perl_rpost {

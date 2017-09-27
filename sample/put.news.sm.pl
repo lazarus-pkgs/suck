@@ -8,6 +8,10 @@
 # running as a subroutine, not a full blown program
 # and perl only closes files upon program exit, or
 # reuse of file handle.
+# 
+# Warning use of /tmp/tmp.rpost is insecure
+# you should change this to somewhere normal
+# users can't read or write.
 
 package Embed::Persistant;
 

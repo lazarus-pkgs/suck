@@ -5,6 +5,9 @@
 # doesn't like.
 # It is set up for INND using CNFS, so it uses the sm command
 # to get the actual article
+#
+# Warning using /tmp/tmp$$ is insecure, you should change
+# this to somewhere normal users can read or write.
 
 TMPFILE=/tmp/tmp$$
 SEDCMD="/^NNTP-Posting-Host/d"

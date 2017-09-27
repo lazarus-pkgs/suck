@@ -6,7 +6,8 @@ SHELL=/bin/sh
 ############################################################################
 
 # Step 1: Define ONE of the CHKHISTORY 
-CHKHISTORY=chkhistory.o		# use flat file history routine
+CHKHISTORY=@HISTORY@
+#CHKHISTORY=chkhistory.o	# use flat file history routine
 #CHKHISTORY=chkhistory_db.o	# use DB history routine, if you use 
                                 # DBM, GDBM, NDBM, or DBZ
                                 # in order to use DBZ with INN you will need
@@ -16,17 +17,19 @@ CHKHISTORY=chkhistory.o		# use flat file history routine
 # If you are using flat file, you can skip the rest, they don't matter
 
 # Step 2: Define ONE of the Database Types
+DB_TYPE=@DB_TYPE@
 #DB_TYPE=-DUSE_DBM
 #DB_TYPE=-DUSE_GDBM	
 #DB_TYPE=-DUSE_NDBM
 #DB_TYPE=-DUSE_DBZ	# for inn-1.X.X users
-#DB_TYPE=-DUSE_INN2	# for inn-2.1-2.X users
+#DB_TYPE=-DUSE_INN2	# for inn-2.1-2.2 users
 #DB_TYPE=-DUSE_INN23	# for inn-2.3.X users
 
 # Step 3: Define ONE Library that contains the functions
 # If you are using INN-2.X, and the compiler complains 
 # about Undefined Symbols QIOclose QIOopen QIOread
 # Use the DB_LIB that includes -lstorage
+DB_LIB=@DB_LIB@
 #DB_LIB=-ldbm
 #DB_LIB=-lgdbm
 #DB_LIB=-lndbm
@@ -49,6 +52,10 @@ CHKHISTORY=chkhistory.o		# use flat file history routine
 # add -lm to the PERL_LIB line.
 # The rest of these should be left alone (except to remove the #).
 # If you're using perl5.004 or older, add "-DOLD_PERL to PERL_DEFS
+PERL_LIB=@PERL_LIB@
+PERL_DEFS=@PERL_DEFS@
+PERL_INC_LOC=@PERL_INC_LOC@
+PERL_LIB_LOC=@PERL_LIB_LOC@
 #PERL_CORE=/usr/lib/perl5/5.00503/i686-linux/CORE
 #PERL_LIB=-lperl -lcrypt
 #PERL_DEFS=-DPERL_EMBED -Dbool=char -DHAS_BOOL
@@ -60,6 +67,8 @@ CHKHISTORY=chkhistory.o		# use flat file history routine
 #OS2_DEFS=-DEMX
 
 # Step 7: If compiling with SSL uncomment the following
+SSL_LIB=@SSL_LIB@
+SSL_DEFS=@SSL_DEFS@
 #SSL_LIB=-lssl -lcrypto
 #SSL_DEFS=-I/usr/local/ssl/include -DHAVE_LIBSSL
 #SSL_LIB_LOC=-L/usr/local/ssl/lib
@@ -81,26 +90,8 @@ MY_DBZ_GCC_FLAGS =  -Wall -Wpointer-arith -Wcast-align -Wcast-qual \
   -Waggregate-return -Wmissing-prototypes -Wnested-externs -Wwrite-strings \
   -Wmissing-declarations
 ############################################################################
-#CHKHISTORY=chkhistory_db.o 
-#DB_TYPE=-DUSE_INN23
-#DB_LIB=-linn
-#DB_INC_LOC=-I/usr/src/inn-2.3.0/include
-#DB_LIB_LOC=-L/usr/src/inn-2.3.0/lib
-#PERL_CORE=/usr/lib/perl5/5.6.1/i686-linux/CORE
-#PERL_LIB=-lperl -lcrypt -lm
-#PERL_DEFS=-DPERL_EMBED -Dbool=char -DHAS_BOOL 
-#PERL_INC_LOC=-I$(PERL_CORE)
-#PERL_LIB_LOC=-L$(PERL_CORE)
 #GCC_FLAGS= $(MY_GCC_FLAGS)
 #DBZ_GCC_FLAGS= $(MY_DBZ_GCC_FLAGS)
-#SSL_LIB=-lssl -lcrypto
-#SSL_DEFS=-I/usr/local/ssl/include -DHAVE_LIBSSL
-#SSL_LIB_LOC=-L/usr/local/ssl/lib
-# for dmalloc lib include uncomment this
-#DMALLOC_DEFS=-DDMALLOC=1
-#DMALLOC_INC=-I/usr/local/include
-#DMALLOC_LIB=-ldmalloc
-#DMALLOC_LD=-L/usr/local/lib
 ##############################################################################
 
 # Ultrix 2.2 make doesn't expand the value of VPATH.
@@ -112,7 +103,7 @@ srcdir = @srcdir@
 PKGNAME=suck
 VERSION_MAJOR=4
 VERSION_MINOR=3
-VERSION_PATCH=0
+VERSION_PATCH=1
 VERSION=$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 
 CC = @CC@
@@ -138,7 +129,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
-SPECVERSION = `sed -n 's/^Version: //p' suck.spec`
+SPECVERSION = `sed -n 's/^%define version //p' suck.spec`
 
 #List of .o files suck needs to compile:
 suckobjs = both.o both_phrases.o suck.o suckutils.o killfile.o timer.o killprg.o \
@@ -295,10 +286,12 @@ makerpm: maketar
 		echo Mismatch: Makefile version ${VERSION} and .spec file version ${SPECVERSION} ; \
 		exit 1 ; \
 	fi
-	rpm -ta ../${PKGNAME}-${VERSION}.tar.gz	
+	#pwd
+	rpm -ta /home/bobyetman/${PKGNAME}-${VERSION}.tar.gz	
 # move em to my home dir and clean up
-	mv /usr/src/packages/RPMS/i386/*.rpm ~
-	mv /usr/src/packages/SRPMS/*.rpm ~
-	rm -rf /usr/src/packages/BUILD/*
+	mv /usr/src/redhat/RPMS/i386/*.rpm ~
+	mv /usr/src/redhat/SRPMS/*.rpm ~
+	rm -rf /usr/src/redhat/BUILD/*
+	rm -rf /tmp/suck*
 # now generate the .sig files
 	#pgps -b ~/suck*.rpm ~/suck*.tar.gz

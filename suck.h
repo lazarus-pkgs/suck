@@ -102,6 +102,7 @@ typedef struct {
 	int local_ssl;
 	void *local_ssl_struct;
 	int batch_post_nr;
+	int passwd_env;
 } Master, *PMaster;
 
 int get_a_chunk(PMaster, FILE *);
@@ -113,9 +114,6 @@ const char *build_command(PMaster, const char *, PList);
 
 int allocnode(PMaster, char *, int, char *, long);
 int do_connect(PMaster, int);
-
-#ifdef MYSIGNAL
-#endif
 
 enum { RETVAL_ERROR = -1, RETVAL_OK = 0, RETVAL_NOARTICLES, RETVAL_UNEXPECTEDANS, RETVAL_VERNR, \
        RETVAL_NOAUTH, RETVAL_EMPTYKILL, RETVAL_NOXOVER };

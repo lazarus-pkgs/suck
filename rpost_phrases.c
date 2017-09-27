@@ -43,6 +43,7 @@ const char *default_rpost_phrases[] = {
 	"Uploading file-> %v1%\n", /*40*/
 	"Attempting to authenticate user\n",
 	"Authentication succeeded\n",
+	"No userid or password provided, unable to authenticate\n",
 };
 
 int nr_rpost_phrases = sizeof(default_rpost_phrases)/sizeof(default_rpost_phrases[0]);

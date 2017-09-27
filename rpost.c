@@ -50,6 +50,7 @@ struct nntp_auth {
 	char *userid;
 	char *passwd;
 	int autoauth;
+	int use_env;
 };
 
 typedef struct {
@@ -130,6 +131,7 @@ int main(int argc, char *argv[], char *env[]) {
 	myargs.auth.userid = NULL;
 	myargs.auth.passwd = NULL;
 	myargs.auth.autoauth = FALSE;
+	myargs.auth.use_env = FALSE;
 	myargs.do_modereader = FALSE;
 	myargs.portnr = DEFAULT_NNRP_PORT;
 	myargs.host = getenv("NNTPSERVER");		/* the default */
@@ -219,6 +221,7 @@ int main(int argc, char *argv[], char *env[]) {
 			do_debug("myargs.host = %s\n", null_str(myargs.host));
 			do_debug("myargs.phrases = %s\n", null_str(myargs.phrases));
 			do_debug("myargs.auth.autoauth = %s\n", true_str(myargs.auth.autoauth));
+			do_debug("myargs.auth.use_env = %s\n", true_str(myargs.auth.use_env));
 			do_debug("myargs.rnews_file = %s\n", null_str(myargs.rnews_file));
 			do_debug("myargs.rnews_path = %s\n", null_str(myargs.rnews_path));
 			do_debug("myargs.show_name = %s\n", true_str(myargs.show_name));
@@ -463,69 +466,75 @@ int do_authenticate(Pargs myargs) {
 	 char *resp, buf[MAXLINLEN];
 
 	 /* we must do authorization */
-
-	 print_phrases(myargs->status_fptr, rpost_phrases[41], NULL);
-	 
-	 sprintf(buf, "AUTHINFO USER %s\r\n", (myargs->auth).userid);
-	 if(myargs->debug == TRUE) {
-		 do_debug("sending command: %s", buf);
+	 if((myargs->auth).userid == NULL || (myargs->auth).passwd == NULL) {
+		 error_log(ERRLOG_REPORT, rpost_phrases[43], NULL);
+		 retval = RETVAL_NOAUTH;
+		 
 	 }
-	 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
-	 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
-	 if( len < 0) {	
-	   retval = RETVAL_ERROR;		  	
-	 }					
 	 else {
+		 print_phrases(myargs->status_fptr, rpost_phrases[41], NULL);
+	 
+		 sprintf(buf, "AUTHINFO USER %s\r\n", (myargs->auth).userid);
 		 if(myargs->debug == TRUE) {
-			 do_debug("got answer: %s", resp);
+			 do_debug("sending command: %s", buf);
 		 }
+		 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
+		 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
+		 if( len < 0) {	
+			 retval = RETVAL_ERROR;		  	
+		 }					
+		 else {
+			 if(myargs->debug == TRUE) {
+				 do_debug("got answer: %s", resp);
+			 }
 
-		 number(resp, &nr);
-		 if(nr == 480) {
-			 /* this is because of the pipelining code */
-			 /* we get the second need auth */
-			 /* just ignore it and get the next line */
-			 /* which should be the 381 we need */
-			 if((len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct)) < 0) {
-				 retval = RETVAL_ERROR;
-			 }
-			 else {
-				 number(resp, &nr);
-			 } 
-		 }
-		 if(retval == RETVAL_OK) {
-			 if(nr != 381) {
-				 error_log(ERRLOG_REPORT, rpost_phrases[16], resp, NULL);
-				 retval = RETVAL_NOAUTH;
-			 }
-			 else {
-				 sprintf(buf, "AUTHINFO PASS %s\r\n", (myargs->auth).passwd);
-				 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
-				 if(myargs->debug == TRUE) {
-					 do_debug("sending command: %s", buf);
+			 number(resp, &nr);
+			 if(nr == 480) {
+				 /* this is because of the pipelining code */
+				 /* we get the second need auth */
+				 /* just ignore it and get the next line */
+				 /* which should be the 381 we need */
+				 if((len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct)) < 0) {
+					 retval = RETVAL_ERROR;
 				 }
-				 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
-				 if(len < 0) {	
-					 retval = RETVAL_ERROR;		  	
-				 }					
 				 else {
-					 if(myargs->debug == TRUE) {
-						 do_debug("got answer: %s", resp);
-					 }
 					 number(resp, &nr);
-					 switch(nr) {
-					 case 281: /* bingo */
-						 retval = RETVAL_OK;
-						 print_phrases(myargs->status_fptr, rpost_phrases[42], NULL);
-						 break;
-					 case 502: /* permission denied */
-						 retval = RETVAL_NOAUTH;
-						 error_log(ERRLOG_REPORT, rpost_phrases[17], NULL);
-						 break;
-					 default: /* wacko error */
-						 error_log(ERRLOG_REPORT, rpost_phrases[16], resp, NULL);
-						 retval = RETVAL_NOAUTH;
-						 break;
+				 } 
+			 }
+			 if(retval == RETVAL_OK) {
+				 if(nr != 381) {
+					 error_log(ERRLOG_REPORT, rpost_phrases[16], resp, NULL);
+					 retval = RETVAL_NOAUTH;
+				 }
+				 else {
+					 sprintf(buf, "AUTHINFO PASS %s\r\n", (myargs->auth).passwd);
+					 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
+					 if(myargs->debug == TRUE) {
+						 do_debug("sending command: %s", buf);
+					 }
+					 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
+					 if(len < 0) {	
+						 retval = RETVAL_ERROR;		  	
+					 }					
+					 else {
+						 if(myargs->debug == TRUE) {
+							 do_debug("got answer: %s", resp);
+						 }
+						 number(resp, &nr);
+						 switch(nr) {
+						 case 281: /* bingo */
+							 retval = RETVAL_OK;
+							 print_phrases(myargs->status_fptr, rpost_phrases[42], NULL);
+							 break;
+						 case 502: /* permission denied */
+							 retval = RETVAL_NOAUTH;
+							 error_log(ERRLOG_REPORT, rpost_phrases[17], NULL);
+							 break;
+						 default: /* wacko error */
+							 error_log(ERRLOG_REPORT, rpost_phrases[16], resp, NULL);
+							 retval = RETVAL_NOAUTH;
+							 break;
+						 }
 					 }
 				 }
 			 }
@@ -657,6 +666,11 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 				else { 
 					myargs->auth.passwd = argv[++loop];
 				}
+				break;
+			case 'Q':     /* get userid/passwd from env */
+				myargs->auth.use_env = TRUE;
+				myargs->auth.passwd = getenv("NNTP_PASS");
+				myargs->auth.userid = getenv("NNTP_USER");
 				break;
 			  case 'M':	/* do mode reader command */
 				myargs->do_modereader = TRUE;
@@ -966,7 +980,8 @@ int do_batch(Pargs myargs) {
 	else {		
 		while((retval != RETVAL_ERROR) && (fgets(buf, MAXLINLEN, fpi_batch) != NULL)) {
 			/* build file name */
-			if(myargs->prefix == NULL) {
+			/* if no prefix, or if this is a inn token (not a real file), just copy it */
+			if(myargs->prefix == NULL || (file[0] == '@' && file[strlen(file)-1] == '@')) {
 				strcpy(file, buf);
 			}
 			else {
