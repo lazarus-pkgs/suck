@@ -1,0 +1,296 @@
+SHELL=/bin/sh
+.SUFFIXES: .c .0
+
+############################################################################
+# History File Configuration Stuff
+############################################################################
+
+# Step 1: Define ONE of the CHKHISTORY 
+CHKHISTORY=chkhistory.o		# use flat file history routine
+#CHKHISTORY=chkhistory_db.o	# use DB history routine, if you use 
+                                # DBM, GDBM, NDBM, or DBZ
+                                # in order to use DBZ with INN you will need
+                                # the full compiled source code, especially
+                                # inn/lib/libinn.so & inn/include/dbz.h
+
+# If you are using flat file, you can skip the rest, they don't matter
+
+# Step 2: Define ONE of the Database Types
+#DB_TYPE=-DUSE_DBM
+#DB_TYPE=-DUSE_GDBM	
+#DB_TYPE=-DUSE_NDBM
+#DB_TYPE=-DUSE_DBZ	# for inn-1.X.X users
+#DB_TYPE=-DUSE_INN2	# for inn-2.1-2.X users
+#DB_TYPE=-DUSE_INN23	# for inn-2.3.X users
+
+# Step 3: Define ONE Library that contains the functions
+# If you are using INN-2.X, and the compiler complains 
+# about Undefined Symbols QIOclose QIOopen QIOread
+# Use the DB_LIB that includes -lstorage
+#DB_LIB=-ldbm
+#DB_LIB=-lgdbm
+#DB_LIB=-lndbm
+#DB_LIB=-ldbz
+#DB_LIB=-linn -lstorage	# see note above
+#DB_LIB=-linn		# INN puts DBZ code in here
+
+# Step 4: IF your DB Library/Includes are in a non-standard place, 
+# define These
+#DB_INC_LOC=-I/usr/src/inn-2.3/include
+#DB_LIB_LOC=-L/usr/src/inn-2.3/lib
+
+# Step 5: If you want to use embedded PERL functions as kill routines
+# define these. 
+# PERL_CORE needs to point to where perl.h and libperl.a lives.
+# PERL_DEFS might need to be changed, depending on how you compiled
+# your perl.  These defaults should be good for most people.
+# If you get errors about missing libs, add em to the PERL_LIB define.
+# If your compile fails with refs to missing symbols like pow() and floor(),
+# add -lm to the PERL_LIB line.
+# The rest of these should be left alone (except to remove the #).
+# If you're using perl5.004 or older, add "-DOLD_PERL to PERL_DEFS
+#PERL_CORE=/usr/lib/perl5/5.00503/i686-linux/CORE
+#PERL_LIB=-lperl -lcrypt
+#PERL_DEFS=-DPERL_EMBED -Dbool=char -DHAS_BOOL
+#PERL_INC_LOC=-I$(PERL_CORE)
+#PERL_LIB_LOC=-L$(PERL_CORE)
+
+# Step 6: If compiling for OS/2 uncomment the following
+#OS2_LD=-Zexe
+#OS2_DEFS=-DEMX
+############################################################################
+# COMPILE flags for GCC
+############################################################################
+GCC_FLAGS= 
+DBZ_GCC_FLAGS=
+############################################################################
+# YOU SHOULD NOT NEED TO TOUCH BELOW HERE
+############################################################################
+# my compile stuff
+############################################################################
+MY_GCC_FLAGS =  -Wall -Wpointer-arith -Wcast-align -Wcast-qual \
+  -Wshadow  -Waggregate-return -Wmissing-prototypes -Wnested-externs \
+  -Wstrict-prototypes -Wwrite-strings -Wmissing-declarations
+
+MY_DBZ_GCC_FLAGS =  -Wall -Wpointer-arith -Wcast-align -Wcast-qual \
+  -Waggregate-return -Wmissing-prototypes -Wnested-externs -Wwrite-strings \
+  -Wmissing-declarations
+############################################################################
+#CHKHISTORY=chkhistory_db.o 
+#DB_TYPE=-DUSE_INN23
+#DB_LIB=-linn
+#DB_INC_LOC=-I/usr/src/inn-2.3.0/include
+#DB_LIB_LOC=-L/usr/src/inn-2.3.0/lib
+#PERL_CORE=/usr/lib/perl5/5.00503/i586-linux/CORE
+#PERL_LIB=-lperl -lcrypt
+#PERL_DEFS=-DPERL_EMBED -Dbool=char -DHAS_BOOL 
+#PERL_INC_LOC=-I$(PERL_CORE)
+#PERL_LIB_LOC=-L$(PERL_CORE)
+#GCC_FLAGS= $(MY_GCC_FLAGS)
+#DBZ_GCC_FLAGS= $(MY_DBZ_GCC_FLAGS)
+# for dmalloc lib include uncomment this
+#DMALLOC_DEFS=-DDMALLOC=1
+#DMALLOC_INC=-I/usr/local/include
+#DMALLOC_LIB=-ldmalloc
+#DMALLOC_LD=-L/usr/local/lib
+##############################################################################
+
+# Ultrix 2.2 make doesn't expand the value of VPATH.
+VPATH = @srcdir@
+# This must repeat the value, because configure will remove `VPATH = .'.
+srcdir = @srcdir@
+
+# Suck Makefile
+PKGNAME=suck
+VERSION_MAJOR=4
+VERSION_MINOR=2
+VERSION_PATCH=5
+VERSION=$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
+
+CC = @CC@
+@SET_MAKE@
+
+CFLAGS = @CFLAGS@
+CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
+LDFLAGS = @LDFLAGS@ $(DMALLOC_LD) $(OS2_LD)
+DEFS = @DEFS@ -DSUCK_VERSION=\"$(VERSION)\" $(DMALLOC_DEFS) $(OS2_DEFS) $(DMALLOC_INC)
+LIBS = @LIBS@ $(DMALLOC_LIB)
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+manext = 1
+mandir = @mandir@/man$(manext)
+srcdir = @srcdir@
+MAN = $(srcdir)/man
+SMAN= $(srcdir)/Spanish.docs
+
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+AUTOCONF = @AUTOCONF@
+AUTOHEADER = @AUTOHEADER@
+SPECVERSION = `sed -n 's/^Version: //p' suck.spec`
+
+#List of .o files suck needs to compile:
+suckobjs = both.o both_phrases.o suck.o suckutils.o killfile.o timer.o killprg.o \
+           dedupe.o suck_phrases.o active.o batch.o xover.o ssort.o $(CHKHISTORY) \
+	   db.o queue.o
+rpostobjs = both.o both_phrases.o rpost.o rpost_phrases.o
+testhobjs = both.o both_phrases.o testhost.o test_phrases.o
+makepobjs = makephrases.o suck_phrases.o rpost_phrases.o test_phrases.o \
+            both_phrases.o lmove_phrases.o
+lmoveobjs = both.o both_phrases.o lmove.o lmove_phrases.o
+ 
+all: phrases.h suck rpost testhost lmove
+	@echo make done
+
+suck: phrases.h $(suckobjs)
+	$(CC) $(LDFLAGS) $(DB_LIB_LOC) $(PERL_LIB_LOC) -o suck $(suckobjs) $(LIBS) $(DB_LIB) $(PERL_LIB)
+
+lmove: phrases.h $(lmoveobjs)
+	$(CC) $(LDFLAGS) -o lmove $(lmoveobjs) $(LIBS)
+
+lpost: lpost.o
+	$(CC) $(LDFLAGS) -o lpost lpost.o $(LIBS)
+
+readdb: phrases.h read_db.o
+	$(CC) $(LDFLAGS) -o read_db read_db.o $(LIBS)
+
+rpost: phrases.h $(rpostobjs)
+	$(CC) $(LDFLAGS) $(PERL_LIB_LOC) -o rpost $(rpostobjs) $(LIBS) $(PERL_LIB)
+
+testhost: phrases.h $(testhobjs)
+	$(CC) $(LDFLAGS) -o testhost $(testhobjs) $(LIBS)
+
+makephrases: $(makepobjs)
+	$(CC) $(LDFLAGS) -o makephrases $(makepobjs) $(LIBS)
+
+phrases: makephrases
+	./makephrases phrases.engl
+
+phrases.h: makephrases 
+	./makephrases phrases.h
+
+install: install_bin install_man
+
+#install_Spanish: install_bin install_sman
+
+install_bin: suck rpost testhost lmove
+	- mkdir -p $(bindir)
+	- strip -s suck rpost testhost lmove
+	$(INSTALL_PROGRAM) suck $(bindir)/suck
+	$(INSTALL_PROGRAM) rpost $(bindir)/rpost
+	$(INSTALL_PROGRAM) testhost $(bindir)/testhost
+	$(INSTALL_PROGRAM) lmove $(bindir)/lmove
+
+install_man: $(MAN)/suck.1 $(MAN)/rpost.1 $(MAN)/testhost.1 $(MAN)/lmove.1
+	- mkdir -p $(mandir)
+	- rm -f $(mandir)/lpost.$(manext)
+	$(INSTALL_DATA) $(MAN)/suck.1 $(mandir)/suck.$(manext)
+	$(INSTALL_DATA) $(MAN)/rpost.1 $(mandir)/rpost.$(manext)
+	$(INSTALL_DATA) $(MAN)/testhost.1 $(mandir)/testhost.$(manext)
+	$(INSTALL_DATA) $(MAN)/lmove.1 $(mandir)/lmove.$(manext)
+
+#install_sman: $(SMAN)/suck.1 $(SMAN)/rpost.1 $(SMAN)/testhost.1 $(SMAN)/lpost.1
+#	$(MAKE) -C $(SMAN)
+
+install_lpost: lpost $(MAN)/lpost.1
+	- strip -s lpost
+	$(INSTALL_PROGRAM) lpost $(bindir)/lpost
+	$(INSTALL_DATA) $(MAN)/lpost.1 $(mandir)/lpost.$(manext)
+
+installall: install install_lpost
+
+clean:
+	rm -f `find . \( -name "*.o" -o -name "*[~%]" \) -print`
+
+chkhistory_db.o: chkhistory_db.c
+	$(CC) -c $(DB_INC_LOC) $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(DB_TYPE) $<
+
+killfile.o: killfile.c
+	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
+
+killprg.o: killprg.c
+	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
+
+xover.o: xover.c
+	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
+
+rpost.o: rpost.c
+	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
+
+.c.o: 
+	$(CC) -c $(CFLAGS) $(GCC_FLAGS) $(CPPFLAGS) $(DEFS) $< 
+
+#---------------------------------------------------------------------------
+# stuff to make sure configure is up to date (I hope)
+#---------------------------------------------------------------------------
+${srcdir}/configure: configure.in
+	cd ${srcdir} && autoconf
+
+# autoheader might not change config.h.in, so touch a stamp file
+${srcdir}/config.h.in: stamp-h.in
+${srcdir}/stamp-h.in: configure.in
+	cd ${srcdir} && autoheader
+	echo timestamp  > ${srcdir}/stamp-h.in
+
+config.h: stamp-h
+stamp-h: config.h.in config.status
+	./config.status
+
+Makefile: Makefile.in config.status
+	./config.status
+
+config.status: configure
+	./config.status --recheck
+#---------------------------------------------------------------------------
+# stuff for me compiling/debugging this sucker
+#---------------------------------------------------------------------------
+debug: moreclean
+	make CFLAGS="-g" LDFLAGS="-g"
+	make readdb CFLAGS=-g LDFLAGS="-g"
+
+debug_both: moreclean
+	make CFLAGS="-g -DDEBUG1=1" LDFLAGS="-g"
+
+profile: moreclean
+	make CFLAGS="-pg" LDFLAGS="-pg"
+
+cleanrun: 
+	rm -rf Msgs
+	rm -f suck.errlog suck.status suck.newrc suck.index suck.sorted suck.post \
+        suck.restart suck.lock suck.killlog debug.* gmon.out batch *.tmp core suck.db \
+	dmalloc_logfile
+
+moreclean: clean cleanrun 
+	rm -f suck rpost testhost lpost makephrases lmove read_db
+
+distclean: clean cleanrun cleanconfig moreclean
+	rm -rf test
+	rm -f sucknewsrc sucknewsrc.old suckkillfile suckothermsgs batch \
+        phrases.h phrases.engl active active.old active-ignore suckxover suck.db.out
+
+cleanconfig:
+	rm -f Makefile Spanish.docs/Makefile config.h config.cache config.status config.log
+
+makedist: makerpm
+	echo "Done"
+
+maketar: distclean
+# make tar
+	tar -czv -f ../$(PKGNAME)-$(VERSION).tar.gz -C .. suck-$(VERSION)
+
+makerpm: maketar
+# now make RPMS
+	if [ "${SPECVERSION}" != "${VERSION}" ] ; then \
+		echo Mismatch: Makefile version ${VERSION} and .spec file version ${SPECVERSION} ; \
+		exit 1 ; \
+	fi
+	rpm -ta ../${PKGNAME}-${VERSION}.tar.gz	
+# move em to my home dir and clean up
+	mv /usr/src/packages/RPMS/i386/*.rpm ~
+	mv /usr/src/packages/SRPMS/*.rpm ~
+	rm -rf /usr/src/packages/BUILD/*
+# now generate the .sig files
+	pgps -b ~/suck*.rpm ~/suck*.tar.gz

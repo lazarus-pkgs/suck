@@ -1,0 +1,165 @@
+.\" $Revision: 3.10.4 $
+.TH LMOVE 1
+.SH NAME
+lmove - move articles into /news/group/number directories
+.SH SYNOPSIS
+.I lmove
+.BI 
+-d directory
+[
+.BI 
+-c filename
+]
+[
+.BI
+-a filename
+]
+[
+.BI
+-e | -E filename
+]
+[
+.BI
+-l phrase_file
+]
+[
+.BI
+-D
+]
+[
+.BI
+-A
+]
+[
+.BI
+-h | -s
+]
+
+.SH OPTIONS
+
+\-a filename
+
+This is the location of the active file.  See description of file below.
+If this option is not provided, the default of "active" is used.
+
+\-A
+
+Lmove uses the active file to determine what number to start at when
+creating the file name for the articles in each group.  If an external
+program or person either puts articles into the directories, or changes
+the numbers in the active file, the possibility exists to accidently
+overwrite already existing articles.  In order to avoid this, lmove 
+checks to see if an article already exists before moving a new article
+into the directory tree.  If it already exists, then lmove aborts with
+a warning message at that point.
+
+This option overrides the default action.  If this option is given when
+lmove runs, then lmove will keep increasing the article number until
+it finds one not being used.  
+
+\-c filename
+
+This is the location of the configuration file.  See description of file below.
+If this option is not provided, the default of "lmove-config" is used.
+
+\-d directory
+
+This option is required. This is the directory that contains the articles
+for lmove to put into the directory structure.  It should be on the same
+filesystem as the BASE directory (see ACTIVE FILE below), since some ..IX's
+move command can not move files across file systems.
+
+\-D 
+
+This option tells lmove to log various debugging messages to debug.suck.  This is
+primarily used by the developer to trace various problems.
+
+\-e | \-E filename
+
+These options will send all error messages (normally displayed on stderr), to 
+an alternate file.  The lower case version, -e, will send the error messages
+to the compiled-in default defined in suck_config.h.
+The upper case version, -E, requires the filename parameter.  All error messages
+will then be sent to this file.
+
+\-l phrase_file
+
+This option tells lmove to load in an alternate phrase file, instead of using
+the built-in messages.  This allows you to have lmove print phrases in another
+language, or to allow you to customize the messages without re-building lmove.
+See the "FOREIGN LANGUAGE PHRASES" in suck.1 for more details.
+
+\-s
+
+This option tells suck to create symbolic links for articles that are cross
+posted to multiple groups.  The first group on the newsgroups line that
+is in the active file gets the actual text of the article, any other groups
+that are on the newsgroups line that also exist in the active file will get
+symbolic links to the actual text.   This is so that news readers can see
+cross posted articles in all the groups that they were cross posted to.
+NOTE: If an article is cross posted to a group that does not exist in the
+active file, then a link will not be created. 
+
+\-h 
+
+This option is identical to the -s option, but instead of symbolic links,
+hard links are created.  See man 2 link and man 2 symlink to explain the
+differences between hard and symbolic links.
+
+.SH DESCRIPTION
+
+Lmove will take articles in a single directory (such as those retrieved with
+"suck" ), and put them into a directory tree based on newsgroups.  Lmove uses
+an "active" file to determine where to put the various articles, and to keep
+track of the highest numbered articles in these directories.  Lmove will scan
+each article to find a matching group in the active file, then store the
+article in that group's directory, increasing the highest number for that
+group.  Normally, once the first group of an article is matched in the active file,
+lmove goes on to the next article, unless you use the -h or -s option above.
+
+.SH CONFIGURATION FILE
+
+The configuration file should contain two lines:
+
+.RS
+BASE=/usr/spool/news
+.RE
+.RS
+ACTIVE=/usr/spool/news/active
+.RE
+
+The BASE= tells lmove the base directory for all articles.  This is where 
+the articles are actually stored.
+
+The ACTIVE= tells lmove where to find the active file, described below.
+
+.SH ACTIVE FILE
+
+The active file consists of newsgroup names, the current highest article number,
+the current lowest article number, and the current status of the group.  Lmove
+only uses the newsgroup name and highest article number.  The other fields are
+just rewritten, and not modified in any way.  These are here for use by other
+programs.
+
+Example:
+
+.RS
+comp.os.linux.announce 1000 1 y
+.RE
+
+The lines are a listing of the valid groups that lmove will
+store articles in.  The highest article number for a new group should be
+either 0 or 1.
+
+Upon completion, lmove will move the current active file to "active.old",
+and write out a new active file with the new highest article numbers.
+Any articles not moved into the directory structure are left in the original
+article directory.
+
+.SH EXIT VALUES
+0 on success, -1 on failure.
+.de R$
+Revision \\$$3, \\$$4
+..
+.SH "SEE ALSO"
+suck(1), rpost(1), testhost(1).

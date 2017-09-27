@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# this is just a simple script to use sed to strip off the 
+# NNTP_Posting_Host and Xref headers that my ISP's newsfeed 
+# doesn't like.
+# It is set up for INND using CNFS, so it uses the sm command
+# to get the actual article
+
+TMPFILE=/tmp/tmp$$
+SEDCMD="/^NNTP-Posting-Host/d"
+SEDCMD2="/^Xref/d"
+OUTFILE=$2
+
+/usr/news/bin/sm $1 > $TMPFILE
+
+if [ -f ${TMPFILE} ]; then
+
+	sed -e ${SEDCMD} ${TMPFILE} | sed -e ${SEDCMD2} > ${OUTFILE}
+		
+	if [ $? -ne 0 ]; then
+		echo "Error"
+		exit -1
+	fi
+
+	rm ${TMPFILE}
+fi

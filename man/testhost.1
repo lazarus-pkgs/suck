@@ -1,0 +1,141 @@
+.\" $Revision: 3.10.0 $
+.TH TESTHOST 1
+.SH NAME
+testhost - test the status of an NNTP news server
+.SH SYNOPSIS
+.I testhost
+.BI hostname
+[
+.BI -a | -n
+date time
+.BI | -o
+]
+[
+.BI -M
+]
+[
+.BI -s | -S
+filename
+]
+[
+.BI -e | -E
+filename
+]
+[
+.BI -N
+port_number
+]
+[
+.BI -U
+userid
+]
+[
+.BI -P
+password
+]
+[
+.BI -l
+phrase_file
+]
+[
+.BI -T
+timeout
+]
+[
+.BI -d
+]
+[
+.BI -q
+]
+
+.SH OPTIONS
+-a     Get the active list from hostname
+
+\-d
+
+This option tells testhost get the descriptions of the newsgroups on the
+remote server by sending the 'list newsgroups' command.  The remote server
+may or may not support this command.
+
+-e | -E filename
+
+These options will send all error messages (normally displayed on stderr), to 
+an alternate file.  The lower case version, -e, will send the error messages
+to the compiled-in default defined in suck_config.h.  The default is suck.errlog.
+The upper case version, -E, requires the filename parameter.  All error messages
+will then be sent to this file.
+
+\-l phrase_file
+
+This option tells testhost to load in an alternate phrase file, instead of using
+the built-in messages.  This allows you to have testhost print phrases in another
+language, or to allow you to customize the messages without re-building.
+See the "FOREIGN LANGUAGE PHRASES" in suck.1 for more details.
+
+-n date time     
+
+Get the newgroups created on the host since the date and
+time specified. The date must be in YYMMDD format and the time must be in
+HHMMSS format.
+
+-N port_number
+
+This option will tell testhost to use an alternate NNRP port number when connecting
+to the host, instead of the default, 119.
+
+\-q 
+
+This option tells testhost to not display the connection and announcement messages,
+rather only display the results of the actual command run.
+
+-s | -S filename
+
+These options will send all status messages (normally displayed on stdout), to
+an alternate file.  The lower case version, -s, will send the status messages
+to the compiled-in default defined in suck_config.h.  The default is /dev/null,
+so no status messages will be displayed.  The upper case version, -S, requires
+the filename parameter.  All status messages will then be sent to this file.
+
+\-T
+
+This option overrides the compiled-in TIMEOUT value. This is how long testhost
+waits for data from the remote host before timing out and aborting.
+
+-U userid
+
+-P password
+
+These two options let you specify a userid and password, if your NNTP server
+requires them.
+
+.SH DESCRIPTION
+.I Testhost
+will query a NNTP news server, specified by
+.I hostname.
+The default action is to issue the 
+.I help
+command to the server, to see what software it is running
+and what commands it accepts.
+.PP
+If the
+.I -a
+option is used, testhost will display the server's
+active history list.  If the 
+.I -n date time
+option is used, testhost will display all new groups created on the server
+since the date and time specified.  If the
+.I -o
+option is used, then testhost will display the overview format, which is
+what the XOVER command returns.
+.PP
+If the
+.I -M
+option is used, the command will be preceded with the "mode reader" command,
+which might be needed by some servers.
+.SH EXIT VALUES
+0 on success, -1 on failure.
+.de R$
+This is revision \\$3, \\$4.
+..
+.SH "SEE ALSO"
+suck(1), rpost(1), lpost(1).

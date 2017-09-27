@@ -1,0 +1,48 @@
+Recently, I decided to learn a bit about JAVA programming.  So, to do this,
+I threw together a GUI for suck, primarily as a learning experience.
+
+This GUI basically takes the status and error messages from a suck run,
+and puts them in scrollable areas.   The only tough part to this was
+how to handle the BPS and count parts of the display, since they
+would very quickly overflow any display buffer I had.  Due to the way
+suck prints them out, there wasn't an easy way to separate these
+from the rest of the status messages.  So, I added the -G option.
+
+The -G option changes the BPS and Count output to a format easier
+to pick out in a program.  It outputs "---BPS+++NR".  This is used
+by my Java program so that it can display the BPS and count in a
+separate window.
+
+If you want to use the GUI - I have provided both the Java source
+code, and the .class files, in case you don't have a java compiler.
+You'll still to get the Java runtime kit.  For linux, go to
+<http://www.blackdown.org/java-linux/Mirrors.html>.  For other
+OSes, try <http://www.javasoft.com/>, the official Sun Site.
+
+Because Suck.java calls a child program, it can't run as an applet.
+This is a built-in security measure in java.
+
+The following is the script I use to run it. 
+------------------------------------------------------------------
+#!/bin/sh
+CLASSPATH="/home/boby/doNews/"
+export CLASSPATH;
+
+/usr/local/jdk1.1.6/bin/java Suck ${CLASSPATH}/get.news.wn.sh
+------------------------------------------------------------------
+
+You'll need to change 3 things:
+
+1. CLASSPATH=      
+this needs to point where the Suck*.class files live.
+
+2. /usr/local/jdk1.1.6/bin/java
+this needs to point to where the java runtime executable lives.
+
+3. ${CLASSPATH}/get.news.wn
+this needs to point to the shell/program you normally would
+use to run suck.  In my case, I keep the class files in the
+same directory as the rest of my suck stuff.
+
+If any one wants to expand this, feel free to, and I'll
+include it in future version.

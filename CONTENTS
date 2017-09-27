@@ -1,0 +1,84 @@
+# VARIOUS DOCS
+CHANGELOG			# commentary on what changes I've made to the source
+CONTENTS			# this file
+README				# Descriptions and News you need to read.
+README.Gui			# about my java gui
+README.Xover			# about the new xover killfiles
+
+# SCRIPTS TO TIE ALL THIS STUFF TOGETHER
+sample/get.news.innxmit		# sample for INN (innxmit)
+sample/get.news.rnews		# sample for CNEWS (rnews)
+sample/put.news			# used by the get.news scripts
+
+# SAMPLE DATAFILES
+sample/suckkillfile.sample
+sample/sucknewsrc.sample
+sample/suckothermsgs.sample
+sample/killprg_child.c		# sample of killprg routine
+sample/kill_perl.pl		# sample of perl embed for killfiles
+sample/put.news.pl		# sample of perl embed for rpost
+sample/post_filter.pl		# sample of pre-post filter
+
+# MAN PAGES
+man/suck.1
+man/lpost.1
+man/rpost.1
+man/testhost.1
+
+# JAVA RELATED FILES
+java/Suck.java			# a Java gui for downloading news
+java/Suck.class
+java/SuckMenu.class
+java/SuckUpdate.class
+
+# PERL RELATED FILES
+perl/header.pl			# a Perl/Tk gui to display articles/header
+
+# SOURCE FILES	
+active.c
+active.h
+batch.c
+batch.h
+both.c
+both.h
+both_phrases.c
+chkhistory.c
+chkhistory.h
+chkhistory_db.c
+db.c
+db.h
+dedupe.c
+dedupe.h
+killfile.c
+killfile.h
+killprg.c
+lmove.c
+lmove_phrases.c
+lpost.c
+phrases.h
+read_db.c
+rpost.c
+rpost_phrases.c
+ssort.c
+ssort.h
+suck.c
+suck.h
+suck_config.h
+suck_phrases.c
+suckutils.c
+suckutils.h
+testhost.c
+test_phrases.c
+timer.c
+timer.h
+xover.c
+xover.h
+
+# STUFF FOR AUTO-CONFIGURING
+Makefile.in
+config.h.in
+configure
+configure.in
+install-sh
+stamp-h
+suck.spec

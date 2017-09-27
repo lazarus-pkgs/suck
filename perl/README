@@ -1,0 +1,11 @@
+This program will display a directory of article headers, one at a time,
+and allow you to add the Message-ID to suckothermsgs for forced downloading.
+
+This program, is written in Perl, and requires the Perl:Tk module available from
+http://www.perl.com/CPAN/modules/by-module/Tk/tk8XX.XXX.tar.gz
+800.013 is the latest version as of 21 Mar 99.
+
+Sample Usage:
+
+suck remotehost -m -g 
+header.pl Msgs

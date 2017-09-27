@@ -1,0 +1,1673 @@
+
+CHANGES
+=======
+-- Changes from Suck-4.2.4 -> Suck-4.2.5
+
+* batch.c - post_one_msg() - fixed bug in
+	testing for a long input line that
+	caused us to reject any line that is
+	exactly 13 char long.
+
+* chhistory_db.c - various changes to allow it
+	to compile with Inn-2.3 headers.
+
+* rpost.c - do_article() - added test for second
+	duplicate article string to handle DNews.
+
+	- filter_batch_article() - added option for
+	showing the file name as we upload it.
+
+Dec 02, 2000 - Suck-4.2.5 released
+
+-- Changes from Suck-4.2.3 -> Suck-4.2.4
+
+*	various changes to allow compile under OS/2
+	(look for ifdef EMX).  You'll need to edit the
+	Makefile to get it to compile.
+
+*both.c - true_str(), null_str() - moved from suck.c so
+	rpost can use.
+
+* killprg.c - Changes to include so will compile using 
+	Perl5.6.  If you're using perl5.004 or older,
+	you'll need to define OLD_PERL in the Makefile.
+
+* rpost.c - Changes so will compile with perl5.6.0.
+  
+	do_article() - Added actual error message from
+	remote server to Malfunction error message, to
+	make it easier to figure out problem. 
+
+* suck.c - do_one_group() - added code for resetcounter 
+	option.  If remote end resets its article numbers
+	the normal suck response is to ignore the group
+	and reset the lastread counter to match the current
+	high counter.  This option tells suck to reset
+	its lastread counter to the low counter, effectively
+	causing suck to get all articles for the group, and
+	use the historydb to check for dupes.
+	Added low_read option. This option is used in concert
+	with the maxread option of the sucknewsrc.  Normally
+	when there is a maxread in the sucknewsrc, suck will
+	download the newest articles.  This option tells suck
+	to download instead the oldest articles.
+	
+	do_articles() - added code for show_group option. 
+	This option will add the name of the current group
+	to the BPS display as you download the articles.
+        
+May 21, 2000 - Suck-4.2.4 released
+
+-- Changes from Suck-4.2.2 -> Suck-4.2.3
+
+* both.c - signal_block() - Changes to get rid of invalid 
+	#ifdef POSIX_SIGNAL causing this routine never to
+	get called.
+
+* killfile.c. parse_killfile() - fixed bug in getting perl
+        filter filename.  If you didn't specify debug, the
+        nl was getting left on the name, causing errors.
+
+* rpost.c - * - Major internal re-write to handle future
+	expansion of filters/batch mode.  Changed many
+	function's arg passing, so they only pass around
+	myargs.  Re-wrote batch mode to make adding new
+	filters easier.  Added rnews mode, for reading
+	rnews files.  See man page for more details.
+
+* suck.c - main(), sighandler() - changes from signal() to
+	sigaction() so I use all POSIX signal handling stuff.
+
+        - do_nodownload() - added, this routine allows you
+        to specifiy Message-IDs to never download.  See the
+        SUCKNODOWNLOAD section in the man page.
+
+23 Jan 2000 - Suck-4.2.3 released
+
+-- Changes from Suck-4.2.1 -> Suck-4.2.2
+
+* lmove.c match_group(), move_msgs(), scan_args() - Re-wrote
+	for new options -h and -s to create hard or symbolic
+	links to files crossposted to multiple groups.  Re-wrote
+ 	code to handle malformed header with spaces either before
+	or after the newsgroup names.
+
+	load_active() - added test for duplicate group line.
+
+* suck.c - do_one_group() - changed command from "xhdr 111-"
+	to "xhdr 111-2222" for brain-dead servers that don't
+	follow the proposed standard and treat 111- correctly.
+
+* xover.c - do_xover(), do_group_xover() - changed command from
+	"xover 111-" to "xover 111-222".
+
+25 July 1999 - Suck-4.2.2 released
+
+-- Changes from Suck-4.2.0 -> Suck-4.2.1
+
+* rpost.c - do_perl() - fixed bug where infile was being lost
+	due to FREETMPS, causing failed posting.
+
+* suck.c - restart_yn() - fixed bug where if prior to restart,
+	we had sent command for an article, but not received it,
+	then on restart, we would skip article.   So I have
+	to set sentcmd to false if we haven't downloaded it.
+
+* xover.c - chk_a_group() - rewrote into one loop, to get rid
+	of segfaults on NULL field, and to speed things up for
+	complicated xover files.
+
+23 May 1999 - Suck-4.2.1 released
+
+-- Changes from Suck-4.1.2 -> Suck-4.2.0
+
+* active.c - get_msgids() - added new option, -i, to set the default
+	number of articles to download when using the -A or -AL option
+	and a new group is added.  See man page for usage.
+
+        do_one_group() - changed handling of return from 
+	do_group_xover() so handle new error code.
+
+	parse_args(), main() - added code to handle -i option.
+
+	get_articles() - fixed bug in handling of pause and
+	reconnect after X nr of articles.  Wasn't taken into
+	account 0 articles correctly.
+
+* killfile.c - moved xoverview pointer out of master killfile and
+	into master struct, so can use independently of killfiles
+	(for -Z option).
+
+	parse_killfile() - changed to passed which argument to 
+	various setup routines, so can distinguish between XOVER
+	and regular killfiles.
+
+* killprg.c - killprg_forkit(), killperl_setup() - added test for
+	which, so if XOVER killfiles we don't point the killfile
+	functions to killprg stuff.
+
+	- killprg_sendoverview(), killprg_sendxover, 
+	killperl_sendxover() - created.  These routines handle 
+	the sending of the overview.fmt and each overview line
+	to a child program or perl subroutine for matching.
+
+* suck.c - main() - added code to handle retreival and freeing up
+	of memory used by overview.fmt.  Added call to free up
+	xoverp killfile.u
+
+	- do_one_group() - added code to handle new option, -Z,
+	to use XOVER vice XHDR to get message-ids, in case the 
+	remote server doesn't support the XHDR command.
+
+* xover.c - do_group_xover() - changed the error code returned
+	if server can't do xover command, so can recover 
+	gracefully from other errors (such as too long msgid)
+
+	get_xover(), find_msgid() - created.  These routines
+	use the XOVER command to get the Message-ID and alloc
+	it for the -Z option.
+
+	Moved xoverview pointer out of master killfile and into
+	master struct, so can use for -Z option.
+
+	- do_one_line() - added code so if we have a program
+	or perl subroutine to do the checking, it gets called
+
+11 May 1999 - suck-4.2.0 released
+
+-- Changes from Suck-4.1.1 -> Suck-4.1.2
+
+* suck.c -- do_supplemental() - added call to do_sup_bynr().
+
+	do_sup_bynr() - created.  Handles lines in suckothermsgs
+	that specify a group name and article number for retreival.
+
+14 Apr 1999 - suck-4.1.2 released
+
+-- Changes from Suck-4.1.0 -> Suck-4.1.1
+
+* suck.c - get_one_article() - fixed bug in sending command
+	for the second article, was resending first article
+	command.
+
+27 Mar 1999 - suck-4.1.1 released
+
+-- Changes from Suck-4.0.0 -> Suck-4.1.0
+
+* killfile.c - get_one_article_kill() - added code to handle
+	new option, -g, to get only the headers of articles.
+	See man pages for details.
+
+* suck.c - get_one_article() - added code to handle new option
+	-g, to get only the headers of articles.
+
+* xover.c - chk_a_group() - fix bug in counting of Xref line,
+	causing inaccurate count.
+
+        do_one_line(), get_xoverview() - fixed handling of :full
+	flag in overview.fmt.
+
+22 Mar 99 - suck-4.1.0 released
+
+-- Changes from Suck-3.10.4 -> Suck-4.0.0
+
+* reworked restart code.  Got rid of suck.restart and suck.sorted,
+   replaced with suck.db, which contains the records of all messages.
+   All of this code is now contained in db.c.  Cleaned up the use of
+   the Mandatory field by creating separate delete and sentcmd fields.
+
+* chkhistory.c chkhistory() - fixed bug which caused no articles to be
+	checked, I wasn't passing the current article to my_bsearch().
+
+        chkhistory() - changed HISTORY_FILE to a run time option vice
+	the constant defined in the Makefile.
+
+* chkhistory_db.c 
+	chkhistory(), open_history() - changed HISTORY_FILE to a
+	run_time option.
+
+* killfile.c - added code to handle new killfile option NRXREF.
+	This works the same as NRGRPS, but on the Xref line
+	instead of the Newsgroups line.
+
+  killfile_done() - fixed bug in freeing perl_int.
+
+  check_a_group() - fixed bug in counting nr of groups.
+
+  pass_two() - fix bug if groupline didn't have group name, we could
+	core dump when trying to nuke nl.
+
+* ssort.c - changed params that my_bsearch is called with, to make
+	chkhistory faster.  Changed second param to string vice struct.
+
+* suck.c - do_cleanup() - fixed a bug with moving suck.newrc to sucknewsrc.
+	If we're restarted with -R, no suck.newrc would exist, and
+	we'd move sucknewsrc to sucknewsrc.old, and fail on the
+	move of suck.newrc to sucknewsrc.  Now if suck.newrc doesn't
+	exist, we don't move sucknewsrc either.
+
+	parse_args() - added code to handle history file option (HF).
+
+* xover.c - added code to handle to option NRXREF, like above.
+	Also added code to handle new option XOVER_LOG_LONG,
+	which causes suck to format xover kills so that they
+	look like message headers, instead of printing just
+	the Xover line.
+
+13 Mar 99 - Suck-4.0.0 released
+
+-- Changes from Suck-3.10.3 -> Suck-3.10.4
+
+* active.c - get_message_index_active() - added code to handle -F
+	option, reconnect after reading the active file.  This is
+	in case of a large active file, and the remote end times
+	out while reading it.
+
+* killprg.c - tweaked the #ifdef for the Perl 5.004 stuff
+
+* lmove.c - move_msg(), scan_args() - Added test to see if article
+	exists in new location before I move it.  This is to avoid
+	overwriting articles if another process adds articles to
+	directory without changing the active file.   If an article
+	already exists, I abort UNLESS you use the -A option.  See
+	man page for more details. 
+	
+   main() - rewrote tests for msgdir and basedir, to avoid segfaults
+	if not defined.
+
+* suck.c - main(), scan_args() - added code to handle -F option.
+
+* xover.c - get_xoverview() - fixed bug in parsing of xoverview, not
+	stripping the blanks and nls correctly.  Also fixed bug in
+	allocing of memory (had POverview vice Overview).
+
+25 Jan 1999 - Suck-3.10.4 released
+
+-- Changes from Suck-3.10.2 -> Suck-3.10.3
+
+* batch.c - do_post_filter() - created, allows you to edit all articles
+	downloaded.
+
+*batch.c - do_lmove_patch()
+*killprg.c - killprg_forkit()
+*rpost.c - do_filter - added exit(-1) so that if child doesn't execl,
+	we don't have both parent and child running.
+
+* chkhistory.c - chkhistory() - changed error_log() call to MyPerror()
+	for open of history file, so get more descriptive error msg.
+
+*  suck.c - main(), parse_args() - added arg handling for do_post_filter().
+
+   get_articles(), restart_yn() - re-worked the handling of restarts, to 
+	avoid downloading same article twice, or not downloading an article,
+	due to the de-duping process when I did a rescan for new articles,
+	so I had the same MsgId twice, then deleted the first one already
+	downloaded, and then downloaded it again.
+
+* dedupe.c - dedupe_list() - added code so that if one of a set of dupes
+	is marked as downloaded, or a dupe, I delete the other one 
+	instead, to help avoid the scenario above.	
+
+10 Dec 98  - Suck-3.10.3 released
+
+-- Changes from Suck-3.10.1 -> Suck-3.10.2
+
+* chkhistory.c - chkhistory() - changed to new, hopefully faster routine,
+	using ssort() and my_bsearch().
+
+* dedupe.c - dedupe_list() - changed to use  new routine to handle deduping
+	based on the ssort() routine.
+
+* ssort.c - created, contains ssort() and my_search().
+
+* suckutils.c - qcmp_msgid() - created for use by my_bsearch().
+
+* xover.c - do_group_xover(), do_one_line() - rewrote to fix bug in 
+	not handling multiple group keep/delete files.  
+
+8 Nov 98 - Suck-3.10.2 released
+
+-- Changes from Suck-3.10.0 -> Suck-3.10.1
+
+* chkhistory_db.c - open_history() - fixed typo in GDBM code had == where
+	it should have been = .
+
+* killprg.c - added #define ERRSV and PL_na, since Perl 5.004 and earlier
+	don't have these.
+
+* rpost.c - main(), scan_args() - modified to handle perl embedded filter.
+
+* rpost.c - parse_perl(), perl_done(), do_perl() - created, handles embedded
+	perl subroutine for filtering files uploaded.
+
+* xover.c - get_xoverview() - fix bug in not initializing elements of the
+	linked list (next = NULL).
+
+13 Oct 98 - Suck-3.10.1 released
+
+-- Changes from Suck-3.9.4 -> Suck-3.10.0
+
+* both.c  - added tests for <net/socket.h> and <arpa/inet.h> for BEos,
+	it needs net/socket.h, everyone else needs the other one.
+	
+	error_log(), do_debug_vl()  - added code to handle printing of error
+        messages to do_debug().
+
+* chkhistory.c - chkhistory() - added code to check for valid lines, since
+	INN now has lines that begin with [, used by the DBZ code, and
+	we need to ignore them, and use only the lines that start with <.
+
+* chkhistory_db.c - open_history(), close_history() - added code for using
+      GDBM database.
+
+* killfile.c - parse_killfile(), do_debug() - changed to pointer and malloc
+	for master killfile, so can re-use routine to load in XOVER killfiles.
+	Added filename parameter, so can tell it what file to parse.  Changed
+	TRUE_STR() macro to use true_str function from suck.c
+
+	parse_a_file() - added initialization of bodybig and bodysmall.
+
+	parse_killfile(), parse_one_file() - changed so that if a killfile
+	evaluates to empty, we throw it away, so we don't spend time
+	finding groups for empty killfiles.
+
+	parse_killfile(), free_killfile() - changed to set up for embeded
+	perl killfile call.
+
+* killprg.c - killperl_setup(), killperl_done(), chk_msg_kill_perl() -
+        created, handles calling embedded perl subroutine for killfiles.
+
+* lpost.c - added include <string.h> to fix compile bug on SunOS.
+
+* rpost.c - do_article() - added code to test for a string to confirm
+	a duplicate post error message, since some servers don't use
+	a separate error code to dilineate these from other failures.
+
+	scan_args() - added call to error_log() so that error_log and 
+	MyPerror messages also go to debug.suck, if debug is true.
+
+* suck.c - main(), get_articles(), parse_args() - added code to change the
+        format of the BPS and count output to make it easier for a gui to
+        pick these out and display separately.  For use in my java gui, 
+	or anything else for that matter.  Added arg -G to toggle this on.
+
+	main() - changed calls to true_str() and null_str() from macros
+	to true functions, since they are used so much in debug code, so
+	as not not have 300 copies of "true" "false" and "null" in the
+	program.  Added -f option, to reconnect after deduping the
+	messages, in case of long dedupes, and the remote disconnects
+	due to time outs.
+
+	main(), parse_args() allocnode(), do_one_group()  - added code to
+	handle the new XOVER arg, to parse the xover killfiles, to allow
+	passing of article number, and to do the xover() call.
+
+	parse_args() - added call so if debug is set, error_log and MyPerror
+        reports to debug.suck.
+
+* testhost.c - main() - added -o option, to list the overview format, which
+	is what the XOVER command returns.  Added -M option, in case you
+	need the mode reader command for the -o option to work.
+
+* xover.c - created, holds code to process XOVER killfiles.
+
+5 Oct 98 - Suck-3.10.0 released
+
+-- Changes from Suck-3.9.3 -> Suck-3.9.4
+
+* active.c - add_to_list() - added code to do regular expression testing,
+       if your system supports regex().
+	   - read_ignore() - added code to compile regular expressions if
+       your system supports regex().
+
+*chkhistory_db.c - added code to handle INN-2.0's new database routines.
+
+* makephrases.c - count_vars() - rewrote so can't go past end of string
+       when checking for a variable.  Added <string.h>.
+
+* suck.c - do_one_group() - changed so abort on non 411,500 error codes
+	when sending the group command.
+
+23 Jul 98 - Suck-3.9.4 released
+
+-- Changes from Suck-3.9.2 -> Suck-3.9.3
+
+* suck.c - main() - added code to get reply from "quit" command, that
+	way if remote end is in process of sending us something, we
+	don't close down the buffer prematurely.
+
+23 Apr 98 - Suck-3.9.3 released
+
+-- Changes from Suck-3.9.1 -> Suck-3.9.2
+
+* As of this version, my e-mail address has changed from boby@pixi.com
+to bobyetman@worldnet.att.net.
+
+killprg.c - chk_msg_kill_fork() - added code to handle new -LF option,
+	to override built-in default for suck.killlog.
+
+killfile.c - get_chunk_mem() - changed so that if send_command() aborts
+	due to TimeOut, we return the actual error (RETVAL_ERROR) vice
+	UNEXPECTEDANS which would cause us to keep going.
+
+	regex_scan() - fixed bug if you had were using QUOTECHAR and had
+	regex() compiled in.  The regex code would strip the QUOTECHAR
+	off the string, so we'd always do case insensitive compare.
+
+	parse_a_file(), regex_scan(), regex_check(), regex_block(), do_debug() - 
+	modified to handle new non-regex searching mechanism.  Switched to
+	Boyer-Moore algorithm vice straight brute force of strstr() or nstrstr().
+	Should make searching of body of messages lots quicker.  Added ability
+	to designate string in a killfile as a non-regex.  This is done by adding
+	a % to the front of a string, before the QUOTE char.  Added NON_REGEX=
+	param to killfiles.  Allows you to specify a character instead of % to
+	represent non-regex strings.  Revamped the handling of the QUOTE character,
+	it's all done now in regex_scan().  Fixed bug in printing if we were
+	using extended regex or not.  Added debugging statements.  
+
+	chk_msg_kill() - added code to handle new -LF option, to override built-in
+	default for suck.killlog.
+
+suck.c - do_one_group() - added error message print if timed out getting
+	MsgIds.
+
+	do_connect(), send_command() - fixed to handle flushing of inbuf
+	and resetting which group number we are on, if reconnect option is 
+	given.
+
+	restart_yn() - added -O, skip_on_restart.   Useful when suck is
+	having trouble with a particular article, and it keeps timing out
+	when you restart.  This option tells suck to skip the first article
+	on restart.
+
+29 Mar 98 - Suck-3.9.2 released
+
+-- Changes from Suck-3.9.0 -> Suck-3.9.1
+
+both.c - get_long() - created, copy of number() except it gets
+	longs instead of ints.
+	str_long() - created copy of str_int() except it gets
+	longs instead of ints.  
+
+suck.h - changed so MsgNr is long vice int.  This necessitated a
+	bunch of changes in other routines, changing int vars
+	to long, and a couple of subroutine calls had to be changed.
+
+12 Feb 98 - Suck-3.9.1 released
+
+-- Changes from Suck-3.8.0 -> Suck-3.9.0
+
+Makefile.in - remove -ansi -pedantic, which caused Linux Glibc and
+	other systems problems.
+
+active.c - nntp_active(), read_active() - created, read activelist
+	from NNTP host or local file, respectively.
+
+	get_message_index_active() - changed to call nntp_active()
+	or read_active().
+
+	get_msgids() - add nl to print of original line, so sucknewsrc
+	looks okay.
+
+batch.c - do_rnewsbatch() - added code to test for existence of batch
+	file and fail if it already exists.  Added code to test for
+	write error.  Redo fclose()s so they are in right place.
+	
+	do_innbatch() - added code to test for write error.
+
+both.c - do_debug_binary() - created, do a dump without filtering
+	thru a print.  Needed in case got NULL in string.
+
+	findnl() - created, replaces strstr() call in sgetline()
+	so can handle NULLS in messages.
+
+	sgetline() - added call to do_debug_binary() - so can see
+	if I get NULL in recv().
+
+killfile.c - get_one_article_kill() - added code to test if failed to
+	write header to disk.  Modified to handle new calling sequence
+	for chk_msg_kill*().  Added code to get the body of the article,
+	if it wasn't already downloaded in check_a_group().  Added code
+	to handle UNEXPECTEDANS from get_chunk_mem.
+
+	chk_msg_kill() - modified to handle new calling sequence, so can
+	pass master to check_a_group(), 
+
+	get_chunk_mem() - renamed from get_a_chunk_mem().  Added size param
+	to track size of buffer. Changed strcpy() to memmove() in case of nulls
+	in string.  Added code to get both the header and body of articles into
+	separate buffers.  Added NULL to end of buf so that logging is correct.
+	Added code to handle retval and to pass back UNEXPECTANS if the article
+	is not available on server.
+
+	check_a_group() - added code to test body and bodysize.  Moved some code
+	down to regex_block().  recoded to handle multiple body and header checks.
+
+	parse_a_file, do_debug() - added code to handle body and bodysize> and
+	bodysize< parameters.  added code to handle multiple header and body checks.
+	added code to handle extended regex parameter.
+
+	regex_block() - created.  This code will check an entire block
+	(header/body) for the string/regex desired.
+	
+	debug_one_kill() - created, print OneKill structrure, moved some
+	code from print_debug() here to make printouts more uniform and
+	code read a bit easier.
+
+	regex_scan() - fixed bug in error message for bad regular expression.
+	Added code to free up structure if error in routine.  Added code to
+	handle use extended regex parameter.
+
+	pass_one() - added code to handle use extended regex parameter.
+	
+killprg.c - chk_msg_kill_fork() - modified to handle new calling sequence,
+	needed cause chg_msg_kill needed master.
+
+lmove.c - read_active(), rewrite_active() - swap lownr and highnr
+	params around to match real format of active.
+
+	load_phrases() - added code to test for correct version nr,
+	fixed bug in not skipping ahead to lmove phrases.
+
+	find_groups() - fix bug by changing linein[] to static.
+
+makephrases.c - added code to write out version number to phrase file.
+
+rpost.c - added tests to various sgetlines() in case it aborts due to timeout.
+
+	load_phrases() - added code to test for version number.
+
+	do_batch() - added code to write rest of articles to failed file
+	if we abort due to loss of connection.
+
+suck_config.h - Move DEBUG1 from suck_config.h to Makefile debug_both
+
+suck.c - main() - added TRUE_STR() and NULL_STR() macros to 
+	clean up the debugging printout a bit.  Fix bug in errormsg
+	if localhost isn't defined.  Moved printout of debug stuff
+	so it prints even if there's an error in the parsing of
+	the args.  Added code to handle chk_msgid option.  Added code
+	to handle -AL option, read activelist from file.  Added code
+	to handle -B option, check for any lingering messages and
+	batch em up before we start the main run.
+
+	do_supplemental() - added -z option don't do dedupe.  This
+	is primarily for real slow machines where the dedupe process
+	is longer than the time to download the messages.  I don't
+	recommend this option.
+
+	allocnode() - added code to handle -x option, chk_msgid.  If
+	this option is set suck doesn't check the end of the MsgId 
+	to verify that there is the > that is supposed to be there.
+	This is for some brain-dead NNTP servers that truncate
+	XHDR info at 72 characters.  Fixed bug introduced when added
+	code to get message number that cause the supplemental file
+	to not be processed.
+
+	get_a_chunk() - change fputs to fwrite(), to handle NULLs.  Added
+	code to test retval of fwrite() in case disk is full.
+
+	load_phrases() - added code to test for correct version nr,
+	fixed bug in not skipping lmove phrases.
+
+	get_articles() - move test for mandatory down to killfile code,
+	due to pipelining in non-killfile code.  
+
+testhost.c - main() - added -q option, suppress connect and announcement
+	displays, only show result of command
+
+	load_phrases() - added code to test for correct version number.
+
+5 Feb 98 - suck-3.9.0 released
+
+-- Changes from Suck-3.7.0 -> Suck-3.8.0
+
+active.c - read_ignore() - move fclose() to prevent attempt to 
+	close file that's NULL.
+
+batch.c - batch_lmove() - changed batchfile option to pass the
+	configuration file name vice the activefile name.  lmove
+	now uses the configuration file to get the activefile name.
+
+killfile.c - parse_a_file() - added code to handle comment character.
+
+lmove.c - main(), rewrite_active(), load_active(), scan_args() -
+	added -c option which allows you to specify configuration file
+	name.  Rewrote so that active file looks like standard news
+	active file, which group name, low, high, and status fields.
+	This means I had to move BASE= to another file, the config
+	file.  This also loads ACTIVE= to specify the location of
+	the active file.
+	load_config() - created, loads configuration file.
+
+rpost.c - main(), send_command() - added code to handle the new -u
+	option, auto_authenticate.  This option automatically sends
+	the authinfo user command upon connect to the remote host.
+
+	do_authenticate() - added, used by -u option.  send_command() and
+	do_authenticate() are carbon copies of what is in  suck.c, 
+	except for variable name changes.
+
+suck.c - get_one_article() - move output of final '.' so that it
+	only happens if the article is successfully downloaded.
+
+	main(), allocnode(), do_free(), do_one_group(), do_supplemental(),
+	get_one_article(), get_one_article_kill(), restart_yn(), parse_args() 
+	- (wow) Added code to handle -n option.  This option retrieves
+	articles by the Number, not by the MessageID.  This means I had to
+	track which group each article was in, and send the command to 
+	switch groups when needed.  This gets tricky because of the 
+	pipelining code, so I can't send ahead if I have to switch groups.
+	If your remote NNTP server doesn't send the article number with
+	the xhdr command, then this option is disabled in the code.	
+
+	get_group_number() - created, adds group to list and assigns nr
+		for later retrieval in -n option.
+
+	build_command() - created, builds head, article, or body command
+	with either msgid or msgnr, depending on -n option.
+
+	do_connect, scan_args() - added code to handle the -u, auto_authenticate
+	option.  This option will automatically send the authinfo user command
+	upon connection.
+
+
+testhost.c - main() - added code to handle -d option, get group descriptions
+	(send command 'list newsgroups').
+
+24 Nov 97 - suck-3.8.0 released
+
+-- Changes from Suck-3.6.0 -> Suck-3.7.0
+
+Makefile.in - add configure section, change install so install_lpost
+	does both program and man page, fix bug in in installall
+
+sample\* - various tweaks to use new -A and -bp options
+
+active.c - created, handles the -A option, reading in the local
+	active file, and merging it with the existing sucknewsrc
+	to get the msgids.
+
+both.c - sgetline() - added global variable TimeOut, to allow set
+	of timeout value from all the programs.
+
+batch.c - created, moved all batch subroutines here.  
+	- do_localpost(), post_one_msg() - created, post articles
+	to local server using IHAVE (-bp option)
+
+killfile.c - chk_msg_kill() - put NL between articles in killfile log
+	when in long log mode.
+	- get_one_article_kill() - added code for BATCH_LIHAVE
+	- added <limits.h> to fix compile bug on glibc systems.
+
+rpost.c - scan_args() - added code to handle -T (timeout) option.
+
+suck.c - get_message_index() - rewritten, much of this code moved to
+	do_one_group(), so that it can be called from active.c.
+	Correctly handle a maxread of 0 and not download any msgs.
+	- do_one_group() - created.
+	- get_articles() - redid code that prints BPS to use new
+	GET_BPS function from the timercode, so that I can correctly
+	format the output and don't get BPSS type stuff.  Added code
+	to handle BATCH_LIHAVE file open.
+	- get_one_article(), main(), added code for BATCH_LIHAVE
+	- do_rnewsbatch(), do_innbatch, do_lmovebatch() - moved to batch.c
+	- scan_args() - rewritten to handle long and short args
+        - parse_args() - created, contains much of old scan_args().
+	Added code to handle -A, -bp, -hl, and -T (Timeout) options. 
+	- main() - added some arg checking code.
+	- get_one_article(), do_authenticate() - fixed bug in not
+	handling authentication due to send-ahead code.
+
+testhost.c - main() - added code to handle -T (timeout) option.
+
+timer.c - TimerFunc() - added GET_BPS option to return the BPS vice
+	display it on the screen.
+
+19 Oct 97 - suck-3.7.0 released
+
+-- Changes to Suck-3.5.2
+*.c - removed all ifdef TIMER this option is no longer needed,
+	now that the -q is present.
+
+both.c - added test for NULL fpo to print_phrases().
+
+killfile.c - changed all routines, got rid of non-regex stuff,
+	and rewrote to handle new killfile format and parameters.
+	Changed get_one_article_kill() to put tmp message into
+	TMPDIR not MSGDIR.  Added -k option to ignore postfix
+	for master killfile so can have one set of killfiles for multiple
+	feeds.  Changed so the killfile names in the GROUP lines
+	are absolute, and don't get prefix added on.
+	Changed so killfile log only opened once, and changed log 
+	format, added long and short version, and it also prints
+	out which string we matched on.  Added wildcard matching
+	to the group matching routine (so can match comp.os.linux*).
+	Handle space instead of comma for separator on newsgroup line.
+	Added code to handle batch infeed option.  Added test for
+	regex or non-regex, so can use faster strstr() if not regex.
+	Fixed bug so that if killfile don't exist, we just ignore it.
+
+killprg.c - chk_msg_fork_kill() - added logging to killfile log.
+	Added various debugging statements, to help determine
+	problems with child programs.
+	- move #include <unistd.h> before the <dirent.h>, needs to
+	be this order for FreeBSD.
+	- chk_msg_kill_fork() - added new logging code in.
+
+suck.c - get_announcements() - added code to handle authentication.
+	renamed to do_connect(), moved connect code down here, to allow
+	for disconnect and reconnect every X msgs (to combat the inn
+	LIKE_PULLERS=DONT option)
+         send_command() - moved code for authentication to separate
+	function.
+         do_authenticate() - created to handle all authentication
+	requests.
+	 scan_args() - re-organized so options in alphabetic order,
+	so easier to figure out which letters are used.
+	 get_msg_index() - added # of msgs to the print out of the
+	which articles are being downloaded.
+	main() 
+	get_articles() - moved parsing of killfiles to main(), made
+	 killp part of master structure.  Added code to handle -C option
+	(reconnect every x msgs).  Added code to handle batch innfeed 
+	option.
+
+	get_one_article() _ changed to create tmp msg file in
+	TMPDIR not MSGDIR, so rnews can feed directly off of MSGDIR.
+        do_rnewsbatch(), do_innbatch() - changed so gathers all articles
+	with the proper postfix.  This is needed in case a restart gets
+	more articles and the numbering changes.  This means if you are
+	NOT using a postfix, you'll need to make sure there is nothing
+	else in the MSGDIR but the msgs, since we'll match on all files.
+	Fixed bug in not printing ".\n" at end of message in stdout 
+	mode.  Added code to handle batch innfeed option.
+
+	main() - moved code to set up master.msgs to stdout or stderr
+	to before lock_file() call, so that if in stdout mode, we 
+	print messages correctly.
+
+suckutils.c - move_file() - change typo in write from fpi to fpo.
+	- tmp_path() - removed as was causing a bug in renaming the
+	tmp articles back to the real names.
+
+timer.c - added ifdefs for HAVE_GETTIMEOFDAY in case the system
+	doesn't have it.
+
+7 Sep 97 - suck-3.6.0 released
+
+-- Changes to Suck-3.5.1
+
+both.c - MyPerror() - added code to handle NULL ptr possibility
+
+killfile.c - regex_scan() - fixed bug in error_log report (forgot NULL)
+
+rpost.c - do_article() - added code to handle M$ 446 (615) response for
+	duplicate article
+ 
+suck.c - main() - added code to handle -q option.
+
+	do_rnewsbatch(), do_innbatch() - fixed possible overflow condition
+	by changing size of tmp variable to MAX_PATH vice 20.
+
+	 get_articles() - added code to handle -q (quiet) option to not
+	display BPS and article count.
+
+	 scan_args() - added code for -q option.
+
+	 get_message_index() - added test in case low and high article 
+	numbers from GROUP command don't jive (low > high)
+
+	 get_one_article() - changed nesting on the last if() so that
+	if Multifile is FALSE we don't try to move files, since there
+	aren't any to move.
+
+	 do_supplemental() - removed an unneeded call to TimerFunc().
+         Added test for no messages, so don't do deduping and history
+	 check.
+
+
+suck_config.h - added code for Solaris in case PATH_MAX wasn't defined to
+	define it to MAXNAMLEN
+
+suck_utils.c - move_file() - added test in case either file is NULL ptr
+
+1 Aug 97 - suck-3.5.2 released
+
+-- Changes to Suck-3.5.0
+
+README - revamped a bit, to make col.announce posting a bit easier.
+
+killfile.c - get_one_article_kill() - change rename() to move_file().
+
+lmove.c - added limits.h to fix problem on SCO machines with no PATH_MAX.
+
+rpost.c - main() -added code to set up default phrase file. 
+
+suck.c - main() - added code to set up default phrase file "/usr/local/lib/suck.phrases"
+	This also involved changing the *.doc/Makefiles to copy the phrase file to this
+	location.  Added call to setvbuf() to set buffering to line vice block.
+	Added code to handle rescan arg, which says to skip rescan on a restart.
+
+       - do_cleanup()  - change rename() to move_file().
+
+       - do_innbatch(),
+       - do_rnews(), - added postfix to file name checked for addition to batch file.
+
+       - alloc_node(), - added code to initialize struct item sentcmd, to be used
+	for pipelining to determine if we've sent command for this article
+	or not.
+
+       - get_one_article() - added code to do pipelining, that is send the command
+	to get one article ahead, so that while we are reading one article,
+	the next one is being fetched by the server.  Changed rename() to 
+	move_file().
+
+       - scan_args() - added code to handle rescan argument -R
+
+       - restart_yn() - fixed bug in error msg when suck.restart exists, but suck.sorted don't,
+	changed it so this isn't a fatal error.
+
+suckutils.c - move_file() - created, move a file to another location, either via
+	rename() or a manual copy.  We do this so that if the move spans file systems,
+	we can handle it gracefully.
+
+      - full_path() - added FP_GET_POSTFIX option to get postfix
+
+testhost.c - main() - added code to set up default phrase file.
+
+17 Jun 97 - suck-3.5.1 releaseed
+
+--Changes to Suck-3.4.1
+
+*.c *.h - Changed DEBUG2 and DEBUG3 (debug suck and rpost) a 
+	run time option from compile time option.  Now suck, lmove,
+	and rpost support -D for debug.  This necessitated
+	changing all ifdefs DEBUG[23] to if(debug==TRUE)....
+	and a few subroutines so debug info got passed.
+
+lmove.c
+lmove_phrases.c - created.  This is the long-promised utility
+	to move articles into the news/group/nr format.  See
+	man pages for more details.
+	
+Makefile.in - changed VERSION from numbers to strings, rewrote
+	so most lines < 80 characters for those folks using
+	dumb terminals, added code so other language man pages
+	can be installed directly from main Makefile.
+
+both.c - sgetline() - changed call to select() from FD_SETSIZE
+	to fd+1 so that we only scan our own FD not all 1024.
+	A few tweaks to debug statements to clean up a bit.
+
+chkhistory.c - removed CHECK_HISTORY_OLD, no longer needed.
+
+killfile.c - get_one_article_kill() - added call to tmp_path()
+	so that current article being downloaded has a .tmp
+	extension on it.
+
+suck.c - removed all code that handled -k (MSnews kludge option).
+
+	 main() - changed algorithm a bit so on restart, in
+	addition to getting all old articles, check for any
+	new articles and download them as well.  Added code to
+	handle call to do_lmovebatch.
+
+       - get_one_article() - rewrite to not use send_command().
+        This is the start of adding the ability to pipeline 
+        commands and receipt of articles.  Added call to tmp_path()
+	so that current article being downloaded has a .tmp 
+	extension on it.
+
+       - do_supplemental() - fix bug in call to TimerFunc().
+
+       - scan_args() - added code to handle call to do_lmovebatch().
+
+       - do_lmovebatch() - created. does a fork and execl to lmove,
+	to put files in news/group/number format.
+
+suckutils.c - do_lockfile() - changed fprintf() to print_phrases()
+	    - add #include <sys/param.h> for BSDI systems and tweaked
+	      suck_config.h part where it handles PATH_MAX
+	    - tmp_path() - created, create a tmp file name with fullpath.
+ 
+20 May 97 - suck-3.5.0 released
+
+--Changes to Suck-3.4.0
+both.c - vprint_phrases() - rewrote to handle a couple of bugs,
+	1, if len = PHRASES_BLOCK_SIZE then no null termination,
+	2, if string arg > PHRASES_BLOCK_SIZE, infinite looped.
+
+suck.c - free_phrases() - fix typos of free_array() call for
+	dedupe_phrases which caused a SIGBUS error.
+       - get_message_index() - fix bugs in error_log() call for
+	 error messages for group command
+       - main() - handle suck -V  to correctly display version
+	 number without putting a hostname in.
+
+30 Mar 97 - suck-3.4.1 released
+
+--Changes to Suck-3.3.2
+
+*.* - Tweaks to various configs to make more portable.
+
+*.c - got rid of all lingering \r\n in log and status messages.
+      Added #define <sys/types.h> before sys/stat.h in various .c
+      files, for more portability (Ultrix needs this).
+
+ phrases.h
+*phrases.c - created.  This is the code that loads in the language
+	phrases, so you can rewrite the screen messages into
+	another language, or just rewrite them.  This necessitated
+	changing every print to a screen to call print_phrases().
+
+both.c  - read_array(), do_a_phrases(), free_array(),
+	convert_nl() - added.
+	These are used by the load_phrases() routines to
+	read in one array and alloc the memory for each phrases.
+	- print_phrases() vprint_phrases(), str_int() - added.
+	These routines print the phrases out with vars included.
+	- signal_block() - added code to block PAUSESIGNAL.
+	- error_log() - modified to call vprint_phrases() so that
+	phrases print correctly.
+
+killfile.c - parse_killfile(), chk_msg_kill() - changed killfile
+	logging from a command time to run time argument, added
+	logyn to Master killfile structure.
+	regex_scan() - fixed bug in handling quote character
+	check_a_group() -  changed \r to \n in checking nr of groups
+	check_a_group(), parse_a_file() - added code to handle
+	pathhost, subject, from, and nntp separators in group killfile.
+
+rpost.c - main(), scan_args() - added stuff to process language 
+	file.
+	- free_phrases() - added, frees up memory from language file
+	load.
+	- load_phrases() - added, loads in the language file.
+
+suck.c - main(), scan_args() - added code to pass killog_yn to
+	killfile routines.  Added coded to process language file.
+	Added coded to set up PAUSESIGNAL.
+
+	- get_message_index() - fixed bugs in writing suck.newrc,
+	one where if invalid line, and one where maxread was
+	never getting written back out.  Also fixed bug in notting
+	writing out line if error from server.  Fixed bug in 
+	writing file where the cmd was written instead of line from
+	file.  Fixed bug where could write to a NULL fp at end of
+	routine.
+
+	- get_articles() - rewrote way I calculate width of nritems
+	for screen display, got rid of the log10() call, making
+	the math lib (-lm) unnecessary.
+	
+	- load_phrases() - added, loads in the language file.
+	- free_phrases() - added, frees up memory from language file
+	load.
+
+	- restart_yn() - fix bug in print of error message which
+	  caused it not to show the path of the suck.restart file,
+	  but rather show suck.sorted twice.
+
+	- sighandler() - added code to handle PAUSESIGNAL
+
+	- pause_signal() - created, swap pause_* with sig_* if we
+	  are called by signal handler.  This allows the user to
+	  slow down suck while we are running.
+ 
+testhost.c - main() - added coded to process language file.
+
+	- load_phrases() - added, loads in the language file.
+	- free_phrases() - added, frees up memory from language file
+	load.
+
+timer.c - TimerFunc() - changed to write to file vice string, so can
+	call print_phrases()
+
+16 Mar 97 - suck-3.4.0 released
+
+--Changes to Suck-3.3.1
+
+killfile.c - regex_scan() - fixed bug which caused it to scan
+	the first pattern on line multiple times, instead of
+	scanning each pattern (added startline = tptr at end).
+
+rpost.c - main() - added version nr printout to DEBUG3 stuff.
+
+suck.c  - main() - added version nr printout to DEBUG2 stuff.
+
+	- restart_yn() - added code to print error message if
+		suck.restart exists, but suck.sorted doesn.t	
+
+16 Nov 96 - Suck-3.3.2 released
+
+--Changes to Suck-3.3.0
+
+rpost.c - log_fail() - fix bug in sprintf(), remove /.
+
+suck.c - get_message_index() - added code so that using
+	a neg nr in sucknewsrc will allow you to download
+	the last X nr of messages, handy for starting a 
+	new group.
+
+       - main() - check for NULLs on debug printout and
+	handle gracefully
+
+       - scan_args(), get_message_index() - added code
+	to handle msnews.microsoft.com using 224 vice
+	221 for the return value on the XHDR command,
+	hence the -k (kludge) option.
+
+testhost.c - main(), do_a_command() - added code to handle
+	NNTP authorization.
+
+sample/get.news* - added simple lock mechanism so two instances
+	of script can't run at same time.
+
+5 Nov 96 - suck-3.3.1 released
+
+--Changes to Suck-3.2.2
+
+suck.c - main() - changed call to do_cleanup so that
+	it would be called even if no articles, since
+	this is not an error.
+       - get_articles(), scan_args() - added code to
+	handle the -W wait/pause argument to pause x nr
+	of seconds between y nr of messages.
+       - do_cleanup() - don't generate error if the sorted
+	file doesn't exist.
+
+suck_config.h - added ifdef REGEX_H for killfile regex use.
+
+killfile.h
+killfile.c  - check_line()
+	    - parse_a_file()
+	    - free_node()
+	    - check_a_group() - added code to do the regex checks
+	 	on subject, from, path and nntphost.
+	    - regex_scan()
+	    - regex_check() - created for regex stuff.
+
+rpost.c - do_batch() - added code to log failed uploads
+	- log_fail() - created, create a file of failed uploads
+	- do_article() - fixed a bug where if the last line
+	of an article didn't end with a cr nl, then the . to
+	signal eom wasn't recognized by remote server.
+
+7 Oct 96 - Suck-3.3.0 released
+
+--Changes to Suck-3.2.1
+
+both.c - changed connect_to_nntphost, so can pass a portnr
+	down, instead of always using the default 119.
+
+suck.c
+rpost.c
+testhost.c - main(), scan_args() - changed to handle the
+	new option -N, for selecting nnrp port number.
+
+killfile.c - free_killfile() - removed lines that were
+	explicitly freeing master.path, that is already
+	handled in free_node().
+
+21 Sep 96 - Suck-3.2.1 released
+
+--Changes to Suck-3.2.0
+
+both.c - build_args() - created, parses a file for args,
+	and builds an argv type array from it.
+       - free_args() - created, frees memory allocated
+	in build_args()
+
+chkhistory.c - cmp_msgid() - moved to suckutils.c, since
+	it is also used in chkhistory_db.c.
+
+dedupe.c - created, dedupes the linked list of msg-ids.
+
+killfile.c - parse_a_file(), check_a_group() - added
+	code to check for NNTP_Posting_Host in headers.
+
+killprg.c - chk_msg_kill_fork() - fix bug in check of
+	retval from read of result from child process
+	  - killprg_closeit() - add nl to the sprintf
+	so kill command is formatted correctly.
+
+rpost.c - made all retvals use ENUM values
+	main() - removed ifdef RPOST_NNRP stuff added
+	  -M option processing (mode reader).  Rewrote
+	argument handling stuff so can add arg file
+	processing
+	do_article(), do_batch() - fix so if problem with
+	  article, it doesn't abort, just goes on to the
+	  next article.
+	do_batch() - changed to use new Pargs struct to 
+	pass all the options down to it.
+	scan_args() - created, moved argument handling
+	to here.
+
+suck.h - Removed #ifdef NNRP made this a run-time option
+       - added more fields to Master (for arg stuff)
+
+suck.c - main() - added -M option (mode reader) option.
+	Moved all options to scan_args() so can do the
+	read args from file stuff.  This meant adding some
+	fields to master, so could pass back and forth,
+	and re-writing the arg handling stuff.
+       - scan_args() - created, handle args here.
+       - get_announcements() - removed ifdef NNRP stuff
+	 	added stuff to check do_modereader
+       - do_cleanup() - change FP_DATADIR to FP_TMPDIR on
+		N_NEWRC and N_SORTED so it looks in the
+		right location.
+       - build_list() - deleted, see below.
+       - get_message_index(), allocnode(), do_supplemental()
+		rewritten, now all they do is build a list
+		of message-ids, then the linked list is passed
+		to dedupe_list().  This gets rid of the old
+		way of deduping as building the list, and
+		hopefully will speed up large message downloads.
+       - get_message_index() - Added code to handle maxread
+		parameter in sucknewsrc.  Added check for count
+       		on group line, so if no messages available we
+		don't even try.
+
+suckutils.c - do_lockfile() - change so PMaster is passed so 
+	can print to status log.  Change print of removing
+	stale lock file from errlog to status log, since this
+	is not technically an error.
+
+13 Sep 96 - Suck-3.2.0 released
+
+--Changes to Suck-3.1.0
+
+Makefile.in
+config.h.in
+configure.in - various changes so work on more systems
+
+*.h - changed #define WORD to #define WORD 1
+    - various changes so they work with configure
+
+both.c killprg.c suck.c suckutils.c
+	- added tests for limits.h
+	- changed pid stuff to assume long vice int pids.  This
+	  involved changing a couple of switches to if/else, and
+	  re-doing printf/scanfs with casts to long.
+	- get_message_index() - added loop at end to write
+	  out rest of suck.newrc if the process was aborted
+ 	  (due to loss of pipe or other reasons).
+
+both.h  - added test for pre-defined TRUE and FALSE
+        - added test for PATH_MAX
+
+rpost.c - added -U - P options for NNTP authorization
+
+12 Jul 96 - suck-3.1.0 released.
+ 
+--Changes to Suck-3.0.0
+
+ALL - added const to lots of function calls, and other places.  Lots of
+    - touch ups to make code compile without warning messages.
+**  - changed default to use memmove() vice bcopy() and set up config.h
+      so you would uncomment to use bcopy vice memmove (reverse of old method)
+**  - changed _POSIX_PATH_MAX to PATH_MAX
+
+*.h - all modified so not to get included multiple times, and to stand
+      alone (#ifndef, #define, #endif stuff)
+
+*.c - added #include <config.h> at top for autoconf stuff
+
+config.h - moved to suck_config.h so don't conflict with autoconf stuff.
+	 - changed CHECK_HISTORY_EXP to CHECK_HISTORY_OLD to make
+	 - new version the default.
+
+both.c - sgetline() - changed to use memmove vice bcopy
+		    - rewrote a bit to not use ENODATA and ETIMEDOUT
+       - signal_block() - added handling for SIGPIPE for killprg 
+
+suck.c - send_command() - created to handle requests for authorization
+	 when commands are sent. Replaces send_a_command().
+       - main() - added -U, -P option processing, and rewrote to use
+	 send_command().
+       - get_announcements() 
+	 get_message_index() 
+	 get_one_article() - rewritten to use send_command()
+       - send_a_command() - removed, replaced by send_command()
+       - main() - added do_cleanup stuff
+       - do_cleanup() - created, cleans up after myself
+       - get_articles() - removed ifp variable and close() not needed.
+
+killfile.c - get_one_article_kill() - rewritten to use send_command()
+	   - parse_killfile()
+	   - get_one_article_kill() - modified to handle call to 
+	   either chk_msg_kill() or chk_msg_kill_fork()
+	   - chk_msg_kill() - fixed bug in counting of commas on group line.
+	   - changed functions for change from nrgrps to maxgrps or totgrps,
+	   see below.
+killfile.h - added defines for killprg.c stuff
+	   - changed confusing defs of nrgrps in two different structs,
+	     now one is maxgrps, one is totgrps.
+
+killprg.c - created, this handles forking and calling of separate program
+	  - to check messages for killing or keeping
+
+rpost.c - do_article() - changed to use memmove vice bcopy
+		       - fixed bug in duping beginning of lines dots.
+	               - added long line support.
+	- main()
+	  dobatch() - add -d option.  This option will delete the batch
+	              file on successful upload of all messages.
+
+chkhistory.c - changed to make the new check_history() routine, made the
+	     - old routine optional
+	 - chkhistory() (new version) - removed extra fclose(fhist)
+
+Makefile - Moved to Makefile.in, rewritten to work with autoconf
+	 - added more warnings to defines and to tighten up code, added
+	   -ansi and -pedantic, this necessitated bunch of little changes
+	   in all files.
+	 - added SOCKS support
+
+Never released to public, beta testers only.
+
+--Changes to Suck-2.6.3
+
+killfile.c - pass_two() - fixed bug in malloc grpname (add +1 to
+		strlen()).
+	   - malloc_line() - added +1 to malloc
+
+Makefile - fixed problem with older gcc's and linking (move $(LIBS)
+		to end of compile lines). 
+
+8 May 1996 - suck 2.6.3 released
+
+--Changes to Suck-2.6.2
+
+All files - changed wording so that everything refers to articles
+	    vice messages, hopefully to avoid confusion.
+
+Makefile - added support for Profiling so can find time wasters.
+	   Added support for non standard locations of includes
+	   and libs for INN DB stuff.  Added support for the
+	   separate compiling of chkhistory or chkhistory_db.
+
+chkhistory.c - Moved history database stuff to separate file, for
+	       easier maintenance.
+
+	     - chkhistory() - there is now an experimental version 
+	       of the flat file history checker.  If you define
+	       CHECK_HISTORY_EXP in config.h, you'll get the new version.
+	       If not, you'll get the old.
+
+chkhistory_db.c - created.
+		- check_history() - fixed bad ifdefs, all should have
+		had USE_ in front of them.
+	        - chkhistory() - added missing master->nritems--
+
+killfile.h 
+killfile.c - add NRGRPS param to allow you to prevent SPAM articles
+
+suck.h	   
+suck.c     - added -K option to bypass killfiles, and added -H option
+	     to bypass history file check.
+	   - build_list() - added prelim 1st test to the dedupe portion
+	     so that we don't always call strcmp() in hopes to speed things
+	     up.
+
+31 Mar 96 - suck-2.6.2 released
+
+--Changes to Suck-2.6.1
+
+killfile.c - corrected len params for hilines and lolines in Params structure.
+
+	- cleaned up the docs and man pages in suck.1 had HIGHLINES which
+	  should have read HILINES
+
+	- added JDOC/* Japanese docs (Thanks Motoharu )
+
+Makefile - fixed type in DBLIB
+
+suck.c   - Makefile
+         - main() - fixed version print to handle patch versions (2.6.1)
+
+10 Mar 1996 - suck-2.6.1 released
+
+--Changes to Suck-2.6
+
+	- moved man pages and sample files to their own directories
+	  so that the base dir only contains source code
+
+ALL prgs - changed all stderr stuff to go through newly created error_log()
+	 - function.  This is all part of the process to make these programs
+	 - have no messages go to screen, for use in crons, background etc.
+	 - Also added -e, -E, -s, and -S options to suck, rpost, and testhost.
+	 - This necessitated a change in the command line processing of testhost.
+	 - Now testhost requires hostname first.   
+
+both.c   - number() - re wrote to handle leading spaces gracefully
+	 - error_log() - created
+
+chkhistory.c - Added the stuff to handle DBM, NDBM, DBZ history database schemes.
+	     - I hope this stuff works as I have no way to test it.  I can't even
+	     - compile the NDBM and DBZ stuff, as I don't even have the libs/include
+	     - files stuff.
+	     - cmp_msgid() - created, used to compare two articles ids IAW rfc 822.
+
+config.h - added minor comments re the history stuff and the Makefile.  Added stuff 
+	 - for group kill file processing.
+
+killfile.c - parse_killfile(), free_killfile(), chk_msg_kill() - modified
+	   - pass_two(), free_node(), check_a_group(), parse_a_file(), strnstr() - created
+	   - Major re-write to handle group kill and delete files.
+	   - also added quote param, to allow you to specify case-sensitive or 
+           - case insensitive matches.
+	   - Changed LINES param to HILINES and LOWLINES to match nr of lines above or
+	   - below the nr of lines in a article.
+	   - main() - commented out perror on no killfile, since this really isn't an error.
+
+rpost.c  - get_article()
+	 - get_batch() 
+	 - main() - added command line options, see above.
+		  - added fptr stuff and passed to subroutines to handle status messages.
+		  - added #define RNEWS_NNRP to handle INN servers that need
+		  - mode reader to post.
+
+suck.c   - redid includes, moved various functions to suckutils.c
+	 - main() - added -V option to print version number, also added
+	 - command line options, see above, and added opening of status
+	 - log for silent mode.  This changes the handling of the -s option.
+	 - get_articles() - removed reduntant killfile tests since that code
+			  - is now in killfile.c
+	 - main()
+	 - rnews_batch() - added -r option, and the ability to build multiple batch
+			 - files, with the max size specified on the command line.
+	 - get_message_index() - added check for group not found, if got re-write
+			       - line to newrc
+			       - added sanity check for a low high article nr,
+			       - in case remote hosts resets its article nrs.
+	 - main(), do_innbatch(), do_rnewsbatch() - added stuff for multiple feeds
+		(postfix)
+				
+suckutils.c  - created, moved various functions not directly related
+	       to the getting of the articles from suck.c to here
+	     - full_path() - added postfix option so can have multiple feeds.
+
+suckutils.h  - created
+
+testhost.c   - added RETVAL enum used thru out program 
+	     - main() - rewrote command line processing, see above.
+	              - added fptr stuff for status messages
+		      - added newgroups option.  
+	     - do_a_command () - added fptr stuff for status messags
+	                       - added option for args to command to be sent
+	     - check_date_format() - created, used to ensure date/time for
+	     			   - newgroups is in the right format.
+
+Makefile - tweaks to handle new directory structure and to handle 
+	   passing version number to compile.  Added code to handle
+	   DB lib linking and passing args to compile.  Added user
+	   defines for owner, group, and mode for the executables
+	   and the man pages.
+
+19 Feb 1996 - suck-2.6 released
+
+--Changes to Suck-2.5.1
+
+get.news.innxmit - added ${SITE} variable, fixed bug on ctlinnd call
+
+chkhistory.c -  chkhistory() -  moved search list stuff inside the else{} routine so
+ 			     - it doesn't get done on a bogus line.
+
+suck.c       - main()	     - fixed a couple of printfs still going to stdout vice
+			     - where master.msgs points.
+
+	     - get_articles() - added test for master being NULL to free_killfile() call
+
+both.c       - sgetline() - added eob==start test in case buffer empty,
+			    no data for the strstr() test with a dirty buffer
+			  - THIS IS THE BUG THAT CAUSED MOST OF THE "No article found"
+			    error messages
+
+killfile.c   - free_killfile() - added test for master being NULL
+
+29 Dec 95    - suck-2.5.1 released
+
+--Changes to Suck-2.5
+suck.c
+killfile.c  - ALL ROUTINES - Added Master structure, changed basic operation mode. 
+		Previously, we read suck.sorted to get each article.  This was causing
+		a lot of disk activity.  Changed to keep the article list in memory.
+		This included changing the handling of the restart, since we have to
+		read the list into memory on a restart.  Also fixed handling of 
+		stdout/stderr for status & error messages if in multifile mode or not.
+
+suck.c	   - do_innbatch()
+	   - do_rnewsbatch() - changed to use readdir() to build article files
+			     - rather than just assuming all articles were downloading
+			     - and going one up.  This way if one article didn't download
+			     - the rest can still be batched up.
+	   - full_path() - fixed a bug in the resolving of relative paths.
+	   - get_articles() - add check for end of string when parsing for article id.
+	                    - modified get_message loop to end on signal
+	   - send_a_command() - rewrote if to switch to handle UNEXPECTEDANS better
+	   - get_a_chunk() - rewrote a bit to speed it up (hopefully)
+			   - modified to handle double dots IAW RFC 977 2.4.1
+	   - sighandler()   - created
+	   - main() - added call to signal() and to signal_block()
+		    - added -a options, always_batch; if we download at least one
+	 	    - article batch em up, even if we end on an error
+		    - added lockfile stuff
+	   - do_lockfile()  - created, Hope this is portable 	
+	   - get_message_index() - any nr < 0 will cause us to just update sucknewsrc
+			 	 - with the new high article nr (to start a newgroup)
+	   			 - any line beginning with a # will be skipped
+	   - get_messages() - added call to free_killfile()
+	   - do_supplemental() - redid status messages a bit, added call to chkhistory()
+	
+killfile.h - added free_killfile() definition, added to KillStruct 
+
+killfile.c - get_a_chunk_mem()  - modified to handle double dots IAW RFC 977 2.4.1
+	   - parse_killfile()
+	   - malloc_line() - created
+	   - check_line() - created
+	   - chk_msg_kill()  - added stuff to search Path, Subject, and From line
+			     - and kill em if match
+	   - free_killfile() - created
+
+Makefile   - added mkdir -p to install option, cleaned up a bit
+
+both.h	   - added enum for signal_block routine
+	
+both.c     - sgetline() - #ifdef TIMEOUT around timeval struct in variable declaration area
+	                - added calls to signal_block()
+	   - signal_block() - created, this is so the recv don't get interrupted by my abort signal	
+	   - connect_to_nntphost() - added msgs parameter.  This way suck can 
+	                           - point msgs to stderr if not in multifile mode
+	
+config.h   - added #define RNEWS for lpost
+           - added #define bcopy() for portability sakes
+	   - added #define MYSIGNAL stuff
+	   - added #define CHECK_HISTORY stuff
+	
+lpost.c	   - moved #define RNEWS to config.h to conform with other prgs
+
+get.news   - eliminated
+get.news.innxmit -  created, for use by INND
+                 - changed to use flush vice reload for ctlinnd
+get.news.rnews - created, for use by CNEWS
+testhost.c - added #include "config.h"
+
+timer.c    - changed message printout to include mins and seconds
+	   - added TIMER_TIMEONLY option to just disply time, not bytes
+
+timer.h    - added to enum
+	
+chkhistory.h -
+chkhistory.c - created, allows to check /usr/lib/news/history for any articles this
+	     - system already has, and not download them
+
+suck.1
+rpost.1
+lpost.1
+testhost.1   - created
+
+README
+README.NEWS  - merged, since much of the docs are now in the man pages.
+
+1 Dec 95 - suck-2.5 released
+
+--Changes to Suck-2.4.1
+
+config.h  - got rid of ##ifdef KILLFILE around #define N_KILLLOG to avoid
+		make errors if KILLFILE is not defined
+
+rpost.c	  - do_batch() - changed do_article() to retval=do_article()
+		so errors in upload got passed back.
+
+suck.c    - main() 
+	    get_articles() - added -s option, to force display of the status
+	   	message for each message to stderr vice stdout.  That way
+		if someone is not using batch mode, they can still see those
+		messages.
+	  - get_articles() - fixed bug where restart file was always deleted.
+Oct 8, 1995 - released
+
+--Changes to 2.4
+Makefile  - various tweaks
+	  - moved DEBUG stuff to config.h
+
+get.news  - added comments about where to change for rnews
+          - changed the way I test to see if I am online to using a ping
+	  - vice just checking to see if PPP is up and running
+
+suck.c	  - get_announcement() - added #ifndef NNRP if NNTP server is called.
+		NNTP servers don't need 'mode reader' command, so don't
+		send it.
+	  - full_path() - modified to allow for command line setting of directory paths;
+		changed variables passed to it.
+	  - main() - modified arg checking routine to allow for command line setting of
+		directory paths
+	  - get_messages() - changed checkdir() to use full_path()
+	  - get_articles() - added #ifdef TIMER stuff
+	  - get_articles() - changed memcpy() to bcopy() for portability's sake
+	  - full_path()    - changed PATH_MAX to POSIX_PATH_MAX for portability's sake
+	  - do_innbatch()
+	  - do_rnewsbatch()
+	  - get_articles() - added logcount, changed printf to make article file names
+			     00XX-1666, where leading zeros are applied
+	  - changed B_FALSE, B_INNXMIT, B_RNEWS to BATCH_ to avoid error on Sun compiler
+	  - changed informational msgs to print to stdout vice stderr
+	  - get_one_article() - created
+	  - get_a_chunk()  - created
+	  - send_a_message() - created
+	  - get_articles() - moved all the stuff for one article to get_one_article()
+			   - send_a_message() and get_a_chunk() and added killfile 
+			   - processing stuff and ifdef KILLFILE stuff
+	  - get_message_index() 
+	    main()	   - moved handling of restart from get_articles() to main()
+
+	  - do_dedupe()    - modified
+	  - build_list()   - created
+	  - get_articles() - added supplemental list processing, so user can specify
+			   - additional article numbers to download, in addition
+			   - to those from sucknewsrc.  This is so a user can specify
+			   - articles that will NOT be checked against killfile stuff
+			   - Now suck.sorted has two fields per line, msgnr and a
+			   - one char field that states whether or not I must download
+			   - this article. If I must, I will bypass killfile routines.
+	
+killfile.c  -
+killfile.h  - created, contains stuff related to killfile processing
+
+suck.h    - created, contains functions in suck.c needed by killfile.c stuff
+
+config.h  - created, moved user changeable #defines to here.  Renamed some
+		so that they make more sense.  Renamed suck.tmp to suck.newrc
+		to be more descriptive.
+	  - added TIMEOUT option
+	  - moved DEBUG stuff from Makefile to here
+
+both.c	  - full_path() - moved to suck.c
+	  - sgetline()  - #ifdef TIMEOUT stuff, to allow us to timeout if
+	                  no data received from socket in some defined time.
+			- plus some tweaks to speed up the routine
+	  - changed informational msgs to print to stdout vice stderr
+	  
+rpost.c   - do_batch() - changed behavior if infile doesn't exist.  Use to
+		totally bomb the program, Now just displays error msg and
+		goes on to next article
+	  - changed informational msgs to print to stdout vice stderr
+	  - do_batch() - some INNs put article number in outgoing file
+		       - in addition to the file name, so added check for this
+
+lpost.c   - changed informational msgs to print to stdout vice stderr
+
+timer.c   - created
+timer.h   - created, contains the timer display and update routines
+
+testhost.c- created, allows you to see if host is active and what commands it accepts
+	  - added LIST option to get active list
+
+1 Oct 95 - posted
+
+--Changes to 2.3B
+Rewrote code to my code styles, this basically means: no global variables,
+	single exit(), #define anything liable to change, change indentation.
+
+both.c  - added full_path() so can put files anywhere, just change #defines in both.h.
+	  added do_debug(), MyPerror() for easier debugging.
+	  sgetline(), total rewrite so less character moving around
+	  and handles partial lines, returns with the nl in buffer.
+both.h  - clarifed debugging options.
+	  centralized all #defines here for global changes
+lpost.c  - just cosmetic changes, as I hope to phase this out.
+Makefile - added a couple of comments
+rpost.c  - rewrote to handle batch option
+	   added do_article(), process one article
+	   added do_batch(), loop thru batch file, process args
+	   run filter as needed
+	   added do_filter(), basically just fork() and execl()
+suck.c   - main() rewrite to handle args
+	   get_articles() rewritten to handle multifile output
+	   added get_announcements() to move this out of main()
+	   added do_dedupe() so no more system() calls.
+	   added allocnode() for use by do_dedupe()
+	   added checkdir() to check for and make directory
+	   added do_innbatch() to build batch file of article file
+	   names needed by innxmit
+	   added do_rnewsbatch() to build file formatted for rnews
+8 August 95 Suck2.3B released
+
+--NEW MAINTAINER 3 July 1995 boby@pixi.com
+Minor changes so no warning msgs from gcc2.7.0.
+suck.c - if low=high, never got article, fixed 
+suck.c - changed if lastread in sucknewsrc ==0 no get to == -1
+3 July 1995 suck-2.2 released
+
+--Changes to 2.2: 
+Sgetline now cares for maxlen which means lines > 1024 bytes will
+be folded. Lpost got the option -v to print some debugging output.
+The other changes are only cosmetical :).
+
+--Changes to 2.1.1:
+Despite of the above proclamation i forgot to increase the buffer ;).
+This is now fixed (hopefully). You see there is definately a need
+for a new maintainer.
+
+--Changes to 2.1: 
+Radically increased buffer (+1 byte) thanks to operator@melchior.frmug.fr.net
+rpost now more RFC0977 conform.
+Renamed rpost.sh to blow.
+Added another local posting script by huber@iamexwi.unibe.ch for inn.
+
+--Changes to 2.0: 
+added inews-alike rpost thanks to inspiration from ecarp@netcom.com.
+
+--Changes to 1.4: 
+added restart ability thanks to inspiration from David.H.West@um.cc.umich.edu.
+
+--Changes to 1.3: 
+fixed numeric ip handling.
+
+--Changes to 1.2: 
+added a missing htons() thanks to laurent@brasil.frmug.fr.net
+added numeric ip address handling.

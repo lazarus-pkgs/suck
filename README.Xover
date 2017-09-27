@@ -1,0 +1,43 @@
+Starting wich Suck-3.10.0, suck now supports a second type of killfiles.
+The original killfiles have not changed, and are still fully supported.
+
+In addition to the original killfiles, suck now supports killfiles
+that are processed by on data received from the XOVER command, not
+from the articles themselves.   The master killfile for this
+set is called "suckxover".
+
+Using the normal killfiles, suck would use the command XHDR to
+get the MessageID numbers for each group, then download each
+MessageID one at a time and check it against the killfiles, then
+go onto the next message.  To check against the killfiles, I'd
+first download the HEADER, check it, then if I needed to, download
+the BODY.   Because of this, I can't buffer commands and 
+articles, so suck isn't very efficient.
+
+This changes under the new killfiles.  With these, suck now uses
+the XOVER command to get not only MessageIDs, but also the
+From:, Subject:, References:, Lines:, and ByteCount at the same
+time.  I can use this information to check against killfiles
+without downloading the header or the body of the article.
+To see which header fields your remote server supports via
+XOVER, run testhost remosthost -o.  If you need the -M command
+with suck, you'll probably need to run it as testhost remotehost
+-o -M.
+
+There are a few advantages to this approach.  The first is
+I can get the XOVER information for an entire group at a time, 
+rather than one message at a time.  This should be more efficient
+on the server.   Plus, if you are using the BODYSIZE commands in
+killfiles, I don't have to download any of the message to kill it,
+saving time and bandwidth.  In addition, I don't have to download
+headers and bodies separate, and piece them back together.
+
+Also, when downloading messages, if there are no killfiles, there
+is pipelining code to make more efficient use of bandwidth.  Basically,
+I'm sending article commands 1 ahead of the one I'm receiving, so
+there should always be one waiting for me.
+
+If you don't use NRGROUPS, HEADER, BODY, and stick with the
+headers produced by the XOVER command, you should get quite 
+a performance boost, just by renaming suckkillfile to 
+suckxover.
