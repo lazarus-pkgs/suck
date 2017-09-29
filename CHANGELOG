@@ -3,6 +3,10 @@ CHANGES
 =======
 -- Changes from suck-4.3.1 -> Suck-4.3.2
 
+Wherever a hostname is specified on the command line, the form Host:Port
+may be used to specify a port number.  If this form is used, the -N port
+option will be ignored.
+
 configure.in - add -with-perl-exe option to specify an
 	alternate path to the perl exe.
 

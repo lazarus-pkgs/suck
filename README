@@ -2,20 +2,15 @@ PREFACE
 =======
 Original Author - Tim Smith (address unknown)
 Maintainers - 
-March 1995 - Sven Goldt (address unknown)
-July 1995  - Robert A. Yetman (bobyetman@sucknews.org)
+March 1995     - Sven Goldt (goldt@math.tu-berlin.de)
+July 1995      - Robert A. Yetman (bobyetman@sucknews.org)
+September 2017 - Michael Vetter (jubalh@iodoru.org)
 
-Current Maintainer - bobyetman@sucknews.org
+Current Maintainer - jubalh@iodoru.org
 
 LOCATION
 ========
-visit http://www.sucknews.org/index.html
-to download the latest version or view the README file.
-
-FTP Sites:
-Site1	     = sunsite.unc.edu
-Path1        = /pub/Linux/system/news/transport
-File1        = suck-4.3.2.tar.gz
+https://github.com/lazarus-pkgs/suck
 
 INTRODUCTION
 ============
@@ -40,41 +35,16 @@ lpost			Gives one article fetched by suck to the local server.
 
 rpost			Posts article(s) to a remote NNTP server
 
-testhost        	Check to see what commands your host recognizes or
-			get the active or new list.
+testhost		Check to see what commands your host recognizes or
+				get the active or new list.
 
 lmove 			put articles in news/group/number format.
 
-MAJOR CHANGES FROM 4.3.1 -> 4.3.2
-
-* - Wherever a hostname is specified on the command line, the form Host:Port
-may be used to specify a port number.  If this form is used, the -N port
-option will be ignored.  
-
-* - various bug/buffer overflow conditions fixed, thanks to the Debian folks.
-
-suck - Handle SIGINT in addition to SIGTERM
-
-configure - added -with-perl-exe to allow specification of the path to the
-	perl exe, for use on systems with multiple perl installs.
-
-testhost  - added -Q option to allow specification of userid/passwd for
-	authentication via environment variables.
 
 LICENSING INFO
 ==============
 Suck is Public Domain, feel free to make any changes you want, just don't
 blame me when they break.
-
-MAILING LIST!
-=============
-There are two mailing lists for suck:
-
-suck-news@lists.sucknews.org & suck-announce@lists.sucknews.org
-
-To subscribe, send a blank e-mail to:
-suck-news-subscribe@lists.sucknews.org
-suck-announce-subscribe@lists.sucknews.org 
 
 NOTES:
 ======
