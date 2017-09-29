@@ -168,7 +168,6 @@ int connect_to_nntphost(const char *host, char * name, size_t namelen, FILE *msg
 
 	if(do_ssl == TRUE) {
 		(void) SSL_library_init();
-		struct addrinfo * ai;
 		test1 = SSL_CTX_new(SSLv23_client_method());
 		if(test1 == NULL) {
 			/* whoops */
