@@ -59,7 +59,6 @@ void free_phrases(void);
 int main(int argc, char *argv[]) {
 
 	int sockfd, response, loop, cmd, quiet, mode_reader, do_ssl, retval = RETVAL_OK;
-	struct hostent *hi;
 	struct stat sbuf;
 	unsigned short int portnr;
 	FILE *fptr = stdout;		/* used to print output to */
@@ -229,7 +228,7 @@ int main(int argc, char *argv[]) {
 	if(retval == RETVAL_OK) {
 		load_phrases(phrases);	/* this is here so everything displays okay */
 
-		sockfd = connect_to_nntphost( host, &hi, (quiet == FALSE)?  fptr : NULL, portnr, do_ssl, &ssl_struct);
+		sockfd = connect_to_nntphost( host, NULL, 0, (quiet == FALSE)?  fptr : NULL, portnr, do_ssl, &ssl_struct);
 		if(sockfd < 0 ) {
 			retval = RETVAL_ERROR;
 		}

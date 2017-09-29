@@ -181,7 +181,6 @@ int connect_local(PMaster master) {
 	
 	/* connect to localhost NNTP server */
 	int fd;
-	struct hostent *hi;
 	char *inbuf;
 	unsigned int port;
 
@@ -190,7 +189,7 @@ int connect_local(PMaster master) {
 		do_debug("Connecting to %s on port %d\n", master->localhost, port);
 	}
 	
-	if((fd = connect_to_nntphost(master->localhost, &hi, NULL, port, master->local_ssl, &master->local_ssl_struct)) >= 0) {
+	if((fd = connect_to_nntphost(master->localhost, NULL, 0, NULL, port, master->local_ssl, &master->local_ssl_struct)) >= 0) {
 		/* get the announcement line */
 		if(sgetline(fd, &inbuf, master->local_ssl, master->local_ssl_struct) < 0) {
 			close(fd);

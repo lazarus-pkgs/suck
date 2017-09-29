@@ -27,7 +27,7 @@
 #ifndef PL_na
 # define PL_na (na)
 #endif
-#endif /* OLD_PERL */u
+#endif /* OLD_PERL */
 #endif
 
 #ifdef HAVE_DIRENT_H
@@ -114,7 +114,6 @@ enum { RETVAL_ERROR = -1, RETVAL_OK, RETVAL_ARTICLE_PROB, RETVAL_NOAUTH, RETVAL_
 int main(int argc, char *argv[], char *env[]) {
 	char *inbuf;
 	int response, retval, loop, fargc, i;
-	struct hostent *hi;
 	struct stat sbuf;
 	char **args, **fargs;
 	Args myargs;
@@ -233,7 +232,7 @@ int main(int argc, char *argv[], char *env[]) {
 			do_debug("myargs.debug = TRUE\n");
 		}
 
-		
+		char hostname[NI_MAXHOST];
 
 		/* we processed args okay */
 		if(myargs.host == NULL) {
@@ -241,7 +240,7 @@ int main(int argc, char *argv[], char *env[]) {
 			retval = RETVAL_ERROR;
 		}
 		else {
-			myargs.sockfd = connect_to_nntphost( myargs.host, &hi, myargs.status_fptr, myargs.portnr, myargs.do_ssl, &myargs.ssl_struct);
+			myargs.sockfd = connect_to_nntphost( myargs.host, hostname, sizeof hostname, myargs.status_fptr, myargs.portnr, myargs.do_ssl, &myargs.ssl_struct);
 			if(myargs.sockfd < 0) {
 				retval = RETVAL_ERROR;
 			}
@@ -295,8 +294,8 @@ int main(int argc, char *argv[], char *env[]) {
 				/* do one article from stdin */
 				retval = do_article(&myargs, stdin);
 			}
-	
-			print_phrases(myargs.status_fptr, rpost_phrases[4], hi->h_name, NULL);
+
+			print_phrases(myargs.status_fptr, rpost_phrases[4], *hostname ? hostname : "the server", NULL);
 			if(myargs.debug == TRUE) {
 				do_debug("Sending quit");
 			}

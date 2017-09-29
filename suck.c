@@ -665,7 +665,6 @@ int do_connect(PMaster master, int which_time) {
 
 	char *inbuf;
 	int nr, resp, retval = RETVAL_OK;
-	struct hostent *hi;
 	FILE *fp;
 	
 	
@@ -696,7 +695,7 @@ int do_connect(PMaster master, int which_time) {
 	}
 	fp = (which_time == CONNECT_FIRST) ? master->msgs : NULL;
 
-	master->sockfd = connect_to_nntphost( master->host, &hi, fp, master->portnr, master->do_ssl, &master->ssl_struct);
+	master->sockfd = connect_to_nntphost( master->host, NULL, 0, fp, master->portnr, master->do_ssl, &master->ssl_struct);
 	
 	if(master->sockfd < 0 ) {
 		retval = RETVAL_ERROR;

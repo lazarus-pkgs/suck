@@ -112,7 +112,7 @@ char *get_long(char *sp, long *intPtr) {
 	char *retval;
 
 	if(sp==NULL) {
-		*intPtr=0; 
+		*intPtr=0;
 		retval = sp;
 	}
 	else {
@@ -139,43 +139,36 @@ char *get_long(char *sp, long *intPtr) {
 }
 
 /*---------------------------------------------*/
-struct hostent *get_hostent(const char *host) {
-	struct in_addr saddr;
-	int c;
-	struct hostent *hi = NULL;
+struct addrinfo *get_addrinfo(const char *host, const char *sport) {
+	struct addrinfo hints = { .ai_socktype=SOCK_STREAM, .ai_flags = AI_CANONNAME };
+	struct addrinfo * res = NULL;
 
-	if(host==NULL) { 
-		error_log(ERRLOG_REPORT,both_phrases[0], NULL); 
+	if(host==NULL) {
+		error_log(ERRLOG_REPORT,both_phrases[0], NULL);
 	}
 	else {
-		c=*host;
-		if(isdigit(c)) {
- 			saddr.s_addr = inet_addr(host); 
- 			hi = gethostbyaddr((char *)&saddr,sizeof(struct in_addr),AF_INET);
-		}
-		else {
-			hi = gethostbyname(host);
+		int st = getaddrinfo(host, sport, &hints, &res);
+		if (st < 0) {
+			error_log(ERRLOG_REPORT, "%v1%: %v2%: %v3%\n", host, both_phrases[2], gai_strerror(st), NULL);
 		}
 	}
-	return hi;
+	return res;
 }
 /*--------------------------------------------*/
-int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsigned short int portnr, int do_ssl, void **ssl) {
-	char *ptr, *realhost;
-	struct in_addr *aptr;
-	struct in_addr saddr;
-	struct sockaddr_in address;
+int connect_to_nntphost(const char *host, char * name, size_t namelen, FILE *msgs, unsigned short int portnr, int do_ssl, void **ssl) {
+	char *realhost;
 	char sport[10];
 	int sockfd = -1;
+	struct addrinfo * ai;
+	char buffer[60]; // if not given by caller. NI_MAXHOST would be better, but that's ok as well.
 	
-	memset(&saddr, '\0', sizeof(saddr));
 #ifdef HAVE_LIBSSL
 	SSL *ssl_struct = NULL;
 	SSL_CTX *test1 = NULL;
-	
+
 	if(do_ssl == TRUE) {
 		(void) SSL_library_init();
-
+		struct addrinfo * ai;
 		test1 = SSL_CTX_new(SSLv23_client_method());
 		if(test1 == NULL) {
 			/* whoops */
@@ -184,13 +177,17 @@ int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsig
 		}
 	}
 #endif
+	if (!name) {
+		name = buffer;
+		namelen = sizeof buffer;
+	}
 	/* handle host:port type syntax */
 	realhost = strdup(host);
 	if(realhost == NULL) {
 		MyPerror("out of memory copying host name");
 		return sockfd;
 	}
-	ptr = strchr(realhost, ':');
+	char * ptr = strchr(realhost, ':');
 	if(ptr != NULL) {
 		*ptr = '\0';  /* null terminate host name */
 		portnr = atoi(++ptr); /* get port number */
@@ -201,48 +198,43 @@ int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsig
 	sprintf(sport, "%hu", portnr);	/* cause print_phrases wants all strings */
 	print_phrases(msgs, both_phrases[1], sport, NULL);
 
-	/* Find the internet address of the NNTP server */
- 	*hi = get_hostent(realhost);
- 	if(*hi == NULL) {
-		error_log(ERRLOG_REPORT,"%v1%: ",realhost, NULL);
-  		MyPerror(both_phrases[2]);
+	/* Find the internet addresses of the NNTP server */
+	ai = get_addrinfo(realhost, sport);
+	if(ai == NULL) {
 		free(realhost);
- 	}
+	}
 	else {
 		free(realhost);
-		print_phrases(msgs, both_phrases[3], (*hi)->h_name, NULL);
- 		while((ptr = *((*hi)->h_aliases)) != NULL) {
-			print_phrases(msgs, both_phrases[4], ptr, NULL );
-			(*hi)->h_aliases++;
-		}
- 		if((*hi)->h_addrtype != AF_INET) {
-  			error_log(ERRLOG_REPORT, both_phrases[5], NULL);
-		}
-		else {
-			while((aptr = (struct in_addr *)*((*hi)->h_addr_list)++) != NULL) {
-				saddr = *aptr;
-				print_phrases(msgs, both_phrases[17], inet_ntoa(*aptr), NULL);
+		struct addrinfo * aii;
+		print_phrases(msgs, both_phrases[3], ai->ai_canonname, NULL);
+		for (aii=ai; aii; aii=aii->ai_next) {
+			if (getnameinfo(aii->ai_addr, aii->ai_addrlen, name, namelen, NULL, 0, NI_NUMERICHOST) < 0) {
+				name[0] = '\0';
 			}
-
 			/* Create a socket */
- 			if((sockfd = socket( AF_INET, SOCK_STREAM, SOCKET_PROTOCOL)) == -1) {
-				MyPerror(both_phrases[6]);
+			if((sockfd = socket(aii->ai_family, aii->ai_socktype, aii->ai_protocol)) == -1) {
+				continue; // MyPerror(both_phrases[6]);
 			}
-			else { 
-				address.sin_family = AF_INET;
-				address.sin_port = htons(portnr);  /* NNTP port */
-				address.sin_addr= saddr;
-
+			else {
 				/* Establish a connection */
-				if(connect(sockfd, (struct sockaddr *)&address, sizeof address ) == -1) {
-					MyPerror(both_phrases[7]);
+				if(connect(sockfd, aii->ai_addr, aii->ai_addrlen ) == -1) {
+					//MyPerror(both_phrases[7]);
 					close(sockfd);
 					sockfd = -1;
+					continue;
 				}
 				else {
-					print_phrases(msgs,both_phrases[8], (*hi)->h_name, NULL);
+					int st = getnameinfo(aii->ai_addr, aii->ai_addrlen, name, namelen,
+						NULL, 0, NI_NUMERICHOST);
+					print_phrases(msgs, both_phrases[8],st == 0 ? name : host, NULL);
+					if (st != 0) name[0] = '\0';
+					break;
 				}
 			}
+		}
+		freeaddrinfo(ai);
+		if (sockfd < 0) {
+			MyPerror(both_phrases[6]); // or 7?
 		}
 #ifdef HAVE_LIBSSL
 		if(sockfd > -1 && do_ssl == TRUE) {
@@ -264,7 +256,7 @@ int connect_to_nntphost(const char *host, struct hostent **hi, FILE *msgs, unsig
 			else {
 				*ssl = ssl_struct;
 			}
-			
+
 		}
 #endif
 	}
@@ -911,7 +903,6 @@ void vprint_phrases(FILE *fpout, const char *argstr, va_list vargs) {
 							fputs(in[vnr-1], fpout);
 							ptr = pnumber+1;	/* advance past var */
 						}
-							
 					}
 				}
 				if(varyn == FALSE) {
