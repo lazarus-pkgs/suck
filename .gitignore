@@ -1,0 +1,14 @@
+*.o
+*.rej
+*.orig
+configure
+config.*
+Makefile
+autom4te.cache/
+phrases.h
+
+makephrases
+lmove
+rpost
+suck
+testhost
