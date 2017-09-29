@@ -42,7 +42,7 @@ dnl Checks for library functions.
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gettimeofday select strerror memmove setvbuf sigaction)
 if test "$with_inn_lib" ; then
-    LDFLAGS="$DB_LIB -L${with_inn_lib}"
+    LDFLAGS+="$DB_LIB -L${with_inn_lib}"
 fi
 if test "$with_inn_include" ; then
    testpath=$with_inn_include
