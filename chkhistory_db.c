@@ -84,8 +84,8 @@ static DBM *db = NULL;	/* I know this isn't too pretty, but its the easiest way 
 #ifndef NO_CONFIGDATA
 #include <configdata.h>
 #endif
-#include <libinn.h>
-#include <dbz.h>
+#include <inn/libinn.h>
+#include <inn/dbz.h>
 #define close_history() dbzclose()
 #define USE_INN2    /* we need the rest of the inn2 code, only the includes are different */
 #endif

@@ -62,7 +62,7 @@ AC_CHECK_LIB(inn, main, [
   LIBS=$savedLIBS
   AC_MSG_CHECKING([for libinn.h])
   for path in $testpath ; do
-    if test -f $path/libinn.h; then
+    if [ test -f $path/libinn.h ] || [ test -f $path/inn/libinn.h ] ; then
       AC_MSG_RESULT($path)
       found="yes"
       CPPFLAGS="$CPPFLAGS -I$path"
