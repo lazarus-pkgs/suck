@@ -217,7 +217,7 @@ xover.o: xover.c
 	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
 
 rpost.o: rpost.c
-	$(CC) -c $(CFLAGS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
+	$(CC) -c $(CFLAGS) $(SSL_DEFS) $(DBZ_GCC_FLAGS) $(CPPFLAGS) $(DEFS) $(PERL_DEFS) $(PERL_INC_LOC) $<
 
 .c.o: 
 	$(CC) -c $(CFLAGS) $(SSL_DEFS) $(GCC_FLAGS) $(CPPFLAGS) $(DEFS) $< 
