@@ -95,8 +95,8 @@
 #define N_LMOVE_CONFIG  "lmove-config"          /* config file for lmove */
 #define N_XOVER         "suckxover"             /* parameter file for which articles NOT to download via xover */
 #define N_NODOWNLOAD    "sucknodownload"        /* file name for message-ids that I never download */
-#define N_PHRASES "/usr/local/lib/suck.phrases"	/* default location for phrase file */
-#define HISTORY_FILE "/usr/news/db/history"     /* default location for history file */
+#define N_PHRASES "/etc/suck/phrases"            /* default location for phrase file */
+#define HISTORY_FILE "/var/lib/news/history"     /* default location for history file */
 
 /* TEMP FILES created */
 #define N_NEWRC "suck.newrc"
@@ -112,7 +112,7 @@
 
 /* Various DIRECTORY PATHS, these can be overriden from command line */
 #define N_TMPDIR "."		/* location of Temp Files */
-#define N_DATADIR "."		/* location of Data Files */
+#define N_DATADIR "/etc/suck"		/* location of Data Files */
 #define N_MSGDIR "./Msgs"	/*location of articles produced by suck, if multifile option selected */
 
 /* Argument substition strings for rpost */
@@ -128,7 +128,7 @@
 #define RPOST_FAIL_EXT ".fail"
 
 /* RNEWS program called by lpost */
-#define RNEWS "/usr/lib/news/rnews"
+#define RNEWS "/usr/bin/rnews"
 
 /* character used as a comment in sucknewsrc */
 #define SUCKNEWSRC_COMMENT_CHAR '#'

@@ -109,7 +109,7 @@ HOW-TO-USE
     If it can't find your Inn libraries/includes, make sure you use the 
 	--with-inn-lib=path & --with-inn-include=path options
 2. Check over the Makefile, make sure it found everything, if not fix it.
-    If your flatfile history file is not at /usr/news/db/history, 
+    If your flatfile history file is not at /var/lib/news/history, 
 	you'll need to use the -HF option, to tell suck where it is.
     If you're using Inn 2.3 or newer, make sure the Makefile knows
 	where your libinn.a and includes are, otherwise, the dedupe
