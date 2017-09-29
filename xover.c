@@ -572,7 +572,7 @@ char *find_msgid(PMaster master, char *xover) {
 			while(*ptr != '\0' && *ptr != '<') {
 				ptr++;
 			}
-			if(ptr != '\0') {
+			if(ptr != NULL) {
 				ptr2 = ptr;
 				/* NULL terminate the msgid */
 				while(*ptr2 != '\0' && *ptr2 != '>') {
