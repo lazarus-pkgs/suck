@@ -176,28 +176,28 @@ install: install_bin install_man
 #install_Spanish: install_bin install_sman
 
 install_bin: suck rpost testhost lmove
-	- mkdir -p $(bindir)
+	- mkdir -p $(DESTDIR)$(bindir)
 	- strip -s suck rpost testhost lmove
-	$(INSTALL_PROGRAM) suck $(bindir)/suck
-	$(INSTALL_PROGRAM) rpost $(bindir)/rpost
-	$(INSTALL_PROGRAM) testhost $(bindir)/testhost
-	$(INSTALL_PROGRAM) lmove $(bindir)/lmove
+	$(INSTALL_PROGRAM) suck $(DESTDIR)$(bindir)/suck
+	$(INSTALL_PROGRAM) rpost $(DESTDIR)$(bindir)/rpost
+	$(INSTALL_PROGRAM) testhost $(DESTDIR)$(bindir)/testhost
+	$(INSTALL_PROGRAM) lmove $(DESTDIR)$(bindir)/lmove
 
 install_man: $(MAN)/suck.1 $(MAN)/rpost.1 $(MAN)/testhost.1 $(MAN)/lmove.1
-	- mkdir -p $(mandir)
+	- mkdir -p $(DESTDIR)$(mandir)
 	- rm -f $(mandir)/lpost.$(manext)
-	$(INSTALL_DATA) $(MAN)/suck.1 $(mandir)/suck.$(manext)
-	$(INSTALL_DATA) $(MAN)/rpost.1 $(mandir)/rpost.$(manext)
-	$(INSTALL_DATA) $(MAN)/testhost.1 $(mandir)/testhost.$(manext)
-	$(INSTALL_DATA) $(MAN)/lmove.1 $(mandir)/lmove.$(manext)
+	$(INSTALL_DATA) $(MAN)/suck.1 $(DESTDIR)$(mandir)/suck.$(manext)
+	$(INSTALL_DATA) $(MAN)/rpost.1 $(DESTDIR)$(mandir)/rpost.$(manext)
+	$(INSTALL_DATA) $(MAN)/testhost.1 $(DESTDIR)$(mandir)/testhost.$(manext)
+	$(INSTALL_DATA) $(MAN)/lmove.1 $(DESTDIR)$(mandir)/lmove.$(manext)
 
 #install_sman: $(SMAN)/suck.1 $(SMAN)/rpost.1 $(SMAN)/testhost.1 $(SMAN)/lpost.1
 #	$(MAKE) -C $(SMAN)
 
 install_lpost: lpost $(MAN)/lpost.1
 	- strip -s lpost
-	$(INSTALL_PROGRAM) lpost $(bindir)/lpost
-	$(INSTALL_DATA) $(MAN)/lpost.1 $(mandir)/lpost.$(manext)
+	$(INSTALL_PROGRAM) lpost $(DESTDIR)$(bindir)/lpost
+	$(INSTALL_DATA) $(MAN)/lpost.1 $(DESTDIR)$(mandir)/lpost.$(manext)
 
 installall: install install_lpost
 
