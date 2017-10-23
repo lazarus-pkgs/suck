@@ -177,7 +177,6 @@ install: install_bin install_man
 
 install_bin: suck rpost testhost lmove
 	- mkdir -p $(DESTDIR)$(bindir)
-	- strip -s suck rpost testhost lmove
 	$(INSTALL_PROGRAM) suck $(DESTDIR)$(bindir)/suck
 	$(INSTALL_PROGRAM) rpost $(DESTDIR)$(bindir)/rpost
 	$(INSTALL_PROGRAM) testhost $(DESTDIR)$(bindir)/testhost
@@ -195,7 +194,6 @@ install_man: $(MAN)/suck.1 $(MAN)/rpost.1 $(MAN)/testhost.1 $(MAN)/lmove.1
 #	$(MAKE) -C $(SMAN)
 
 install_lpost: lpost $(MAN)/lpost.1
-	- strip -s lpost
 	$(INSTALL_PROGRAM) lpost $(DESTDIR)$(bindir)/lpost
 	$(INSTALL_DATA) $(MAN)/lpost.1 $(DESTDIR)$(mandir)/lpost.$(manext)
 
