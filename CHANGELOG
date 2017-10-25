@@ -1,6 +1,18 @@
-
 CHANGES
 =======
+-- Changes from suck-4.3.2 -> Suck-4.3.3
+
+- General code cleanup
+- Applying patches from Debian, Fedora and openSUSE
+- Add support for IPv6
+- Manpage fixes
+- Default path for history file is now /var/lib/news/history
+- Default path for phrases file is now /etc/suck/phrases
+- Install to DESTDIR
+- Don't strip binaries
+
+October 25, 2017 - Suck-4.3.3 released
+
 -- Changes from suck-4.3.1 -> Suck-4.3.2
 
 Wherever a hostname is specified on the command line, the form Host:Port
