@@ -104,7 +104,7 @@ void chkhistory(PMaster master) {
 	if(master->debug == TRUE) {
 		do_debug("Opening history database: %s\n", master->history_file);
 	}
-	
+
 	if(open_history(master->history_file) != TRUE) {
 		error_log(ERRLOG_REPORT, chkh_phrases[0], master->history_file, NULL);
 	}
@@ -117,7 +117,7 @@ void chkhistory(PMaster master) {
 		/* okay cycle thru our list, checking each against the history DB */
 		curr = master->head;
 		prev = NULL;
-		
+
 		while(curr != NULL ) {
 			if(check_history(curr->msgnr) == TRUE) {
 				if(master->debug == TRUE) {
@@ -156,7 +156,7 @@ void chkhistory(PMaster master) {
 }
 /*------------------------------------------------------------------------*/
 int open_history(const char *history_file) {
-	
+
 	int retval = FALSE;
 
 #if defined (USE_DBM) || defined (USE_DBZ)
@@ -166,7 +166,7 @@ int open_history(const char *history_file) {
 	}
 #endif
 
-#if defined (USE_INN2) 
+#if defined (USE_INN2)
 	/* first, set our options */
 	dbzoptions opt;
 
@@ -175,13 +175,13 @@ int open_history(const char *history_file) {
 #else
 #ifndef USE_INN23
 	opt.idx_incore=INCORE_MEM;  /* per man page speeds things up, inn-2.3 doesn't need this */
-#endif	
+#endif
 #endif
 	opt.exists_incore=INCORE_MEM;
 	dbzsetoptions(opt);
 	retval = dbzinit(history_file);
 #endif
-	
+
 #if defined (USE_NDBM)
 	if((db = dbm_open(history_file, O_RDONLY, 0)) != NULL) {
 		retval = TRUE;
@@ -205,10 +205,10 @@ int check_history(char *msgid) {
 	input.dsize = strlen(msgid) +1;
 
 #if defined (USE_DBM)
-	
+
 	result = fetch(input);
 
-#elif defined (USE_DBZ) 
+#elif defined (USE_DBZ)
 
 	result = dbzfetch(input);
 
@@ -223,10 +223,10 @@ int check_history(char *msgid) {
 
 #if defined (USE_INN2)
 	HASH msgid_hash;
-	
+
 	msgid_hash=HashMessageID(msgid);	/* have to hash it first */
 	return dbzexists(msgid_hash);
-	
+
 #endif
 #if defined(USE_GDBM)
 	datum input;
@@ -235,5 +235,5 @@ int check_history(char *msgid) {
 	input.dsize = strlen(msgid)+1;
 
 	return gdbm_exists(dbf, input);
-#endif	
-}		
+#endif
+}

@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 	Groups grp;
 	long count;
 	int retval = 0;
-	
+
 	if(argc == 1) {
 		fin = "suck.db";
 		fout = "suck.db.out";
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		fin = argv[1];
 		fout = argv[2];
 	}
-	
+
 	if(retval == 0) {
 		if((fdin = open(fin, O_RDONLY)) == -1) {
 			perror(fin);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 			else {
 				read(fdin, &count, sizeof(long)); /* get group count */
 				fprintf(fpout, "%ld\n", count);
-				
+
 				while(count >= 0 && read(fdin, &grp, sizeof(grp)) == sizeof(grp)) {
 					fprintf(fpout, "%s-%d\n", grp.group, grp.nr);
 					count--;
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
-		
+
 	}
 	return retval;
 }

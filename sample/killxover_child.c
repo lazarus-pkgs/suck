@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG
 	do_debug("Got %d bytes '%s'\n", i, buf);
 #endif
-	
+
 	nron = 0;
 	do {
 		i = read(0, buf, LENGTHLEN);
@@ -71,7 +71,7 @@ void do_debug(const char *fmt, ...) {
 	if((fptr = fopen(N_DEBUG, "a")) == NULL) {
 		fptr = stderr;
 	}
-		
+
 	va_start(args, fmt);
 	vfprintf(fptr, fmt, args);
 	va_end(args);

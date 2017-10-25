@@ -79,7 +79,7 @@ char *number(char *sp, int *intPtr) {
 	char *retval;
 
 	if(sp==NULL) {
-		*intPtr=0; 
+		*intPtr=0;
 		retval = sp;
 	}
 	else {
@@ -161,7 +161,7 @@ int connect_to_nntphost(const char *host, char * name, size_t namelen, FILE *msg
 	int sockfd = -1;
 	struct addrinfo * ai;
 	char buffer[60]; // if not given by caller. NI_MAXHOST would be better, but that's ok as well.
-	
+
 #ifdef HAVE_LIBSSL
 	SSL *ssl_struct = NULL;
 	SSL_CTX *test1 = NULL;
@@ -191,9 +191,9 @@ int connect_to_nntphost(const char *host, char * name, size_t namelen, FILE *msg
 		*ptr = '\0';  /* null terminate host name */
 		portnr = atoi(++ptr); /* get port number */
 	}
-	
-	
-	
+
+
+
 	sprintf(sport, "%hu", portnr);	/* cause print_phrases wants all strings */
 	print_phrases(msgs, both_phrases[1], sport, NULL);
 
@@ -272,11 +272,11 @@ void disconnect_from_nntphost(int fd, int do_ssl, void **ssl) {
 	}
 #endif
 	close(fd);
-	
+
 }
 /*----------------------------------------------------------------*/
 int sputline(int fd, const char *outbuf, int do_ssl, void *ssl_buf) {
-	
+
 #ifdef DEBUG1
 	do_debug("\nSENT: %s", outbuf);
 #endif
@@ -302,7 +302,7 @@ void do_debug(const char *fmt, ...) {
 	if((fptr = fopen(N_DEBUG, "a")) == NULL) {
 		fptr = stderr;
 	}
-		
+
 	va_start(args, fmt);
 	vfprintf(fptr, fmt, args);
 	va_end(args);
@@ -327,7 +327,7 @@ void do_debug_binary(int len, const char *str) {
 /*-----------------------------------------------------------*/
 void do_debug_vl(const char *fmt, va_list args) {
 	FILE *fptr = NULL;
-	
+
 	if((fptr = fopen(N_DEBUG, "a")) == NULL) {
 		fptr = stderr;
 	}
@@ -344,14 +344,14 @@ void MyPerror(const char *message) {
 	/* can't just use perror, since it goes to stderr */
 	/* and I need to route it to my errlog */
 	/* so I have to recreate perror's format */
-	
+
 	/* in case of NULL ptr */
-	
+
 	if(message == NULL) {
 		message="";
 	}
 #ifdef HAVE_STRERROR
-	error_log(ERRLOG_REPORT, "%v1%: %v2%\n", message, strerror(errno), NULL);	  
+	error_log(ERRLOG_REPORT, "%v1%: %v2%\n", message, strerror(errno), NULL);
 #else
 	error_log(ERRLOG_REPORT, both_phrases[9], message, errno, NULL);
 #endif
@@ -389,8 +389,8 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 		ret = -1;
 	}
 	else if(eob == start || (ptr = findnl(start, eob)) == NULL) {
-		
-		/* TEST for not a full line in buffer */	
+
+		/* TEST for not a full line in buffer */
 		/* the eob == start test is needed in case the buffer is */
 		/* empty, since we don't know what is in it. */
 
@@ -416,7 +416,7 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 			FD_SET(fd, &myset);
 			mytimes.tv_sec = TimeOut;
 			mytimes.tv_usec = 0;
-	
+
 #ifdef MYSIGNAL
 			signal_block(MYSIGNAL_BLOCK);
 			/* block so we can't get interrupted by our signal defined in config.h */
@@ -463,7 +463,7 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 				}
 			}
 			else
-#endif		
+#endif
 			i = recv(fd, eob, MAXLINLEN-len, 0);	/* get line */
 #endif
 
@@ -478,7 +478,7 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 				do_debug_binary(i,eob);
 				do_debug(":END GOT");
 			}
-			
+
 #endif
 
 			if(i < 1) {
@@ -496,7 +496,7 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 				eob += i;	/* increment buffer end */
 				*eob = '\0';	/* NULL terminate it  */
 
-				len += i;				
+				len += i;
 				ptr = findnl(start, eob);
 			}
 		} while(ptr == NULL && len < MAXLINLEN && ret == 0);
@@ -540,7 +540,7 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 	else {
 		do_debug("\nRETURNING error, ret = %d", ret);
 	}
-#endif  
+#endif
 	if(eob == start) {
 		/* nothing left in buffer, reset pointers to start of buffer */
 		/* to give us a full buffer to receive next data into */
@@ -555,11 +555,11 @@ int sgetline(int fd, char **inbuf, int do_ssl, void *ssl_buf) {
 	}
 
 	return ret;
-}		
+}
 /*----------------------------------------------------*/
 #ifdef MYSIGNAL
 void signal_block(int action) {
-#ifdef HAVE_SIGACTION	
+#ifdef HAVE_SIGACTION
 	static sigset_t blockers;
 	static int do_block = FALSE;
 
@@ -582,7 +582,7 @@ void signal_block(int action) {
 			if(do_block == TRUE) {
 				if(sigprocmask(SIG_BLOCK, &blockers, NULL) == -1) {
 					MyPerror(both_phrases[13]);
-				}	
+				}
 			}
 			break;
 		case MYSIGNAL_UNBLOCK:
@@ -607,9 +607,9 @@ void error_log(int mode, const char *fmt, ...) {
 	va_list args;
 	static char errfile[PATH_MAX] = { '\0' };
 	static int debug = FALSE;
-	
+
 	va_start(args, fmt);	/* set up args */
-	
+
 	switch(mode) {
 	  case ERRLOG_SET_DEBUG:
 		debug = TRUE;
@@ -673,7 +673,7 @@ char **build_args(const char *fname, int *nrargs) {
 		}
 #ifdef DEBUG1
 		do_debug("Counted %d args in %s\n", counter, fname);
-#endif  
+#endif
 		if((args = calloc( counter, sizeof(char *))) == NULL) {
 			error_log(ERRLOG_REPORT, both_phrases[15], fname, NULL);
 		}
@@ -772,7 +772,7 @@ void free_array(int n, char **arr) {
 			}
 		}
 		free(arr);
-	}	
+	}
 }
 /*--------------------------------------------------------------------------------*/
 char *do_a_phrase(char linein[]) {
@@ -781,10 +781,10 @@ char *do_a_phrase(char linein[]) {
 	int i, stt, end;
 	static char default_phrase[] = "";
 
-	
+
 	i = strlen(linein);
 	lineout = NULL;
-	
+
 	/* find start and finish of string */
 	for(stt = 0; stt != i && linein[stt] != '"'; stt++) {
 	}
@@ -837,17 +837,17 @@ void convert_nl(char *linein) {
 					for ( x = i + 1; x < len ; x++ ) {
 						linein[x] = linein[x+1];
 					}
-					len--;		
+					len--;
 				}
 			}
 		}
-	}				
+	}
 }
 /*-----------------------------------------------------------------------------------*/
 void print_phrases(FILE *fpout, const char *argstr, ... ){
 
 	va_list vargs;
-	
+
 	va_start(vargs, argstr);
 
 	if(fpout != NULL) {
@@ -861,7 +861,7 @@ void print_phrases(FILE *fpout, const char *argstr, ... ){
 /*-----------------------------------------------------------------------------------*/
 void vprint_phrases(FILE *fpout, const char *argstr, va_list vargs) {
 	/* this routine takes in argstr, parses it for args and prints everything */
-	/* out, the args may not be in order ("hi %v2% there %v1% guys")	  */  
+	/* out, the args may not be in order ("hi %v2% there %v1% guys")	  */
 	/* args are %v#%.  The varargs are all char ptrs */
 
 	const char *ptr, *pnumber;
@@ -874,7 +874,7 @@ void vprint_phrases(FILE *fpout, const char *argstr, va_list vargs) {
 	while(tptr != NULL && nrvars < PHRASES_MAX_NR_VARS) {
 		in[nrvars++] = tptr;
 		tptr = va_arg(vargs, char *);
-	}		
+	}
 
 	varyn = FALSE;
 	ptr = argstr;
@@ -920,30 +920,30 @@ void vprint_phrases(FILE *fpout, const char *argstr, va_list vargs) {
 }
 /*----------------------------------------------------------*/
 char *str_int(int nrin) {
-	
+
 	static char strings[PHRASES_MAX_NR_VARS][12];	/* lets pray ints don't get bigger than this */
 	static int which = 0;
-	
+
 	/* use a set of rotating buffers so can make multiple str_int calls */
 	if(++which == PHRASES_MAX_NR_VARS) {
 		which = 0;
 	}
-	
+
 	sprintf(strings[which], "%d", nrin);
 
 	return strings[which];
 }
 /*----------------------------------------------------------*/
 char *str_long(long nrin) {
-	
+
 	static char strings[PHRASES_MAX_NR_VARS][20];	/* lets pray longs don't get bigger than this */
 	static int which = 0;
-	
+
 	/* use a set of rotating buffers so can make multiple str_int calls */
 	if(++which == PHRASES_MAX_NR_VARS) {
 		which = 0;
 	}
-	
+
 	sprintf(strings[which], "%ld", nrin);
 
 	return strings[which];

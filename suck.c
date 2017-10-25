@@ -51,7 +51,7 @@
 #include "xover.h"
 #include "db.h"
 
-#ifdef MYSIGNAL 
+#ifdef MYSIGNAL
 #include <signal.h>
 #endif
 
@@ -80,7 +80,7 @@ void pause_signal(int, PMaster);
 enum {PAUSE_SETUP, PAUSE_DO};
 
 /*------------------------------------------*/
-int GotSignal = FALSE;		
+int GotSignal = FALSE;
 /* the only static variable allowed, it's   */
 /* the only graceful way to handle a signal */
 /*------------------------------------------*/
@@ -118,7 +118,7 @@ enum {
 	ARG_HIST_FILE, ARG_HEADER_ONLY, ARG_ACTIVE_LASTREAD, ARG_USEXOVER, ARG_RESETCOUNTER, \
 	ARG_LOW_READ, ARG_SHOW_GROUP, ARG_USE_SSL, ARG_LOCAL_SSL, ARG_BATCH_POST_NR, \
 	ARG_PASSWD_ENV,
-}; 
+};
 
 typedef struct Arglist{
 	const char *sarg;
@@ -135,26 +135,26 @@ const Args arglist[] = {
 	{"bl", "batch_lmove",  1, ARG_BATCH_LMOVE, 40},
 	{"bf", "batch_innfeed",1, ARG_BATCH_INNFEED, 40},
 	{"bp", "batch_post",   0, ARG_BATCH_POST, -1},
-	{"bP", "batch_post_nr", 1, ARG_BATCH_POST_NR, 72},	
+	{"bP", "batch_post_nr", 1, ARG_BATCH_POST_NR, 72},
 	{"c",  "cleanup",      0, ARG_CLEANUP, -1},
 	{"dt", "dir_temp",    1, ARG_DIR_TEMP, 37},
 	{"dd", "dir_data",    1, ARG_DIR_DATA, 37},
 	{"dm", "dir_msgs",    1, ARG_DIR_MSGS, 37},
 	{"e",  "def_error_log", 0, ARG_DEF_ERRLOG, -1},
 	{"f",  "reconnect_dedupe", 0, ARG_CONN_DEDUPE, -1},
-	{"g",  "header_only", 0, ARG_HEADER_ONLY, -1},	
+	{"g",  "header_only", 0, ARG_HEADER_ONLY, -1},
 	{"h",  "host", 1, ARG_HOST, 51},
 	{"hl", "localhost", 1, ARG_LOCALHOST, 50},
-	{"i",  "default_activeread", 1, ARG_ACTIVE_LASTREAD, 65},	
+	{"i",  "default_activeread", 1, ARG_ACTIVE_LASTREAD, 65},
 	{"k",  "kill_no_postfix", 0, ARG_NO_POSTFIX, -1},
 	{"l",  "language_file", 1, ARG_LANGUAGE, 47},
-	{"lr", "low_read", 0, ARG_LOW_READ, -1},	
+	{"lr", "low_read", 0, ARG_LOW_READ, -1},
 	{"m",  "multifile", 0, ARG_MULTIFILE, -1},
 	{"n",  "number_mode", 0, ARG_NRMODE, -1},
 	{"p",  "postfix", 1, ARG_POSTFIX, 36},
 	{"q",  "quiet", 0, ARG_QUIET, -1},
 	{"r",  "rnews_size", 1, ARG_RNEWSSIZE, 35},
-	{"rc", "reset_counter", 0, ARG_RESETCOUNTER, -1},	
+	{"rc", "reset_counter", 0, ARG_RESETCOUNTER, -1},
 	{"s",  "def_status_log", 0, ARG_DEF_STATLOG, -1},
 	{"sg", "show_group", 0, ARG_SHOW_GROUP, -1},
 #ifdef HAVE_LIBSSL
@@ -163,11 +163,11 @@ const Args arglist[] = {
 	{"u",  "auto_authorization", 0, ARG_AUTOAUTH, -1},
 	{"w",  "wait_signal", 2, ARG_WAIT_SIG, 46},
 	{"x",  "no_chk_msgid", 0, ARG_NO_CHK_MSGID, -1},
-	{"y",  "post_filter", 1, ARG_POST_FILTER, 62},	
-	{"z",  "no_dedupe", 0, ARG_NODEDUPE, -1},	
+	{"y",  "post_filter", 1, ARG_POST_FILTER, 62},
+	{"z",  "no_dedupe", 0, ARG_NODEDUPE, -1},
 	{"A",  "active", 0, ARG_ACTIVE, -1},
 	{"AL", "read_active", 1, ARG_READACTIVE, 56},
-	{"B",  "pre-batch", 0, ARG_PREBATCH, -1},	
+	{"B",  "pre-batch", 0, ARG_PREBATCH, -1},
 	{"C",  "reconnect", 1, ARG_RECONNECT, 49},
 	{"D",  "debug", 0, ARG_DEBUG, -1},
 	{"E",  "error_log", 1, ARG_ERRLOG, 41},
@@ -182,7 +182,7 @@ const Args arglist[] = {
 	{"LL", "kill_log_long",  0, ARG_KLOG_LONG, -1},
 	{"M",  "mode_reader", 0, ARG_MODEREADER, -1},
 	{"N",  "portnr", 1, ARG_PORTNR, 45},
-	{"O",  "skip_on_restart", 0, ARG_SKIP_ON_RESTART, -1},	
+	{"O",  "skip_on_restart", 0, ARG_SKIP_ON_RESTART, -1},
 	{"P",  "password", 1, ARG_PASSWD, 44},
         {"Q",  "password_env", 0, ARG_PASSWD_ENV, -1},
 	{"R",  "no_rescan", 0, ARG_RESCAN, -1},
@@ -192,13 +192,13 @@ const Args arglist[] = {
 #endif
 #ifdef TIMEOUT
 	{"T",  "timeout", 1, ARG_TIMEOUT, 52},
-#endif	
+#endif
 	{"U",  "userid",  1, ARG_USERID,  43},
 	{"V",  "version", 0, ARG_VERSION, -1},
 	{"W",  "wait", 2, ARG_WAIT, 46},
 	{"X",  "no_xover", 0, ARG_XOVER, -1},
 	{"Z",  "use_xover", 0, ARG_USEXOVER, -1},
-	
+
 };
 
 #define MAX_ARG_PARAMS 2	/* max nr of params with any arg */
@@ -206,14 +206,14 @@ const Args arglist[] = {
 
 /*------------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-	
+
 	struct stat sbuf;
 	Master master;
 	PList temp;
 	PGroups ptemp;
 	POverview pov;
 	char *inbuf, **args, **fargs = NULL;
-	int nr, resp, loop, fargc, retval = RETVAL_OK;	
+	int nr, resp, loop, fargc, retval = RETVAL_OK;
 
 #ifdef LOCKFILE
 	const char *lockfile = NULL;
@@ -222,8 +222,8 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_SIGACTION
 	struct sigaction sigs;
 #endif
-#endif	
-	
+#endif
+
 	/* initialize master structure */
 	master.head = master.curr = NULL;
 	master.nritems = master.nrgot = 0;
@@ -290,7 +290,7 @@ int main(int argc, char *argv[]) {
 	master.local_ssl_struct = NULL;
 	master.batch_post_nr = 0;
 	master.passwd_env = FALSE;
-	
+
 	/* have to do this next so if set on cmd line, overrides this */
 
 #ifdef N_PHRASES		/* in case someone nukes def */
@@ -298,9 +298,9 @@ int main(int argc, char *argv[]) {
 		/* we have a regular phrases file make it the default */
 		master.phrases = N_PHRASES;
 	}
-	
+
 #endif
-	
+
 	/* allow no args, only the hostname, or hostname as first arg */
 	/* also have to do the file argument checking */
 	switch(argc) {
@@ -312,12 +312,12 @@ int main(int argc, char *argv[]) {
 			if((fargs = build_args(&argv[1][1], &fargc)) != NULL) {
 				retval = scan_args(&master, fargc, fargs);
 			}
-		}   
+		}
 		else if(argv[1][0] == '-') {
 			/* in case of suck -V */
 			retval = scan_args(&master, 1, &(argv[1]));
-		} 
-		else{	
+		}
+		else{
 			master.host = argv[1];
 		}
 		break;
@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
 				if((fargs = build_args(&argv[loop][1], &fargc)) != NULL) {
 					retval = scan_args(&master, fargc, fargs);
 				}
-			}   
+			}
 		}
 		/* this is here so anything at command line overrides file */
 		if(argv[1][0] != '-' && argv[1][0] != FILE_CHAR) {
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
 			args = &(argv[1]);
 			argc--;
 		}
-		retval = scan_args(&master, argc, args);	
+		retval = scan_args(&master, argc, args);
 		break;
 	}
 	/* print out status stuff */
@@ -407,8 +407,8 @@ int main(int argc, char *argv[]) {
 		retval = RETVAL_ERROR;
 		error_log(ERRLOG_REPORT, suck_phrases[74], NULL);
 	}
-	
-	
+
+
 	/* okay now the main stuff */
 	if(retval == RETVAL_OK) {
 		if(master.status_file == FALSE) {
@@ -436,7 +436,7 @@ int main(int argc, char *argv[]) {
 			MyPerror(suck_phrases[67]);
 		}
 		else {
-			signal_block(MYSIGNAL_SETUP);	/* set up sgetline() to block signal */ 
+			signal_block(MYSIGNAL_SETUP);	/* set up sgetline() to block signal */
 			pause_signal(PAUSE_SETUP, &master);	/* set up routine for pause swap if signal */
 		}
 #else
@@ -445,7 +445,7 @@ int main(int argc, char *argv[]) {
 		signal(MYSIGNAL2, sighandler);
 		signal(PAUSESIGNAL, sighander);
 		pause_signal(PAUSE_SETUP, &master);
-#endif	
+#endif
 #endif
 		load_phrases(&master);	/* this has to be here so rest prints okay */
 
@@ -483,9 +483,9 @@ int main(int argc, char *argv[]) {
 			case BATCH_LIHAVE:
 				do_localpost(&master);
 				break;
-			}	   
+			}
 		}
-		
+
 		/* now parse the killfile */
 #ifdef KILLFILE
 		if(master.do_killfile == TRUE) {
@@ -496,24 +496,24 @@ int main(int argc, char *argv[]) {
 		if(master.do_xover == TRUE) {
 			master.xoverp = parse_killfile(KILL_XOVER, master.killfile_log, master.debug, master.kill_ignore_postfix);
 		}
-		
-		print_phrases(master.msgs, suck_phrases[1], master.host, NULL);		
+
+		print_phrases(master.msgs, suck_phrases[1], master.host, NULL);
 		if(do_connect(&master, CONNECT_FIRST) != RETVAL_OK) {
 			retval = RETVAL_ERROR;
 		}
-		else {	 
+		else {
 			/* if we have XOVER killfiles, we need to get the format of em before any processing */
 			if(master.xoverp != NULL || master.use_xover == TRUE) {
 				get_xoverview(&master);
 				killprg_sendoverview(&master);
 			}
-			
+
 			/* first, check for restart articles, */
 			/* then scan for any new articles */
 			if((loop = restart_yn(&master)) == RESTART_ERROR) {
 				retval = RETVAL_ERROR;
 			}
-			else if(loop == RESTART_NO || master.rescan == TRUE) { 
+			else if(loop == RESTART_NO || master.rescan == TRUE) {
 				/* we don't do scan if we had restart and option = FALSE */
 				/* do we scan the local active file? */
 				if(master.do_active == TRUE || master.activefile != NULL) {
@@ -559,7 +559,7 @@ int main(int argc, char *argv[]) {
 						retval = get_articles(&master);
 					}
 				}
-				
+
 			}
 			if(retval == RETVAL_OK) { /* if we got disconnected above, don't do this */
 				/* send quit, and get reply */
@@ -573,9 +573,9 @@ int main(int argc, char *argv[]) {
 						if(master.debug == TRUE) {
 							do_debug("Quitting GOT: %s", inbuf);
 						}
-						number(inbuf, &nr);					
+						number(inbuf, &nr);
 					}
-			
+
 				}while(nr != 205 && resp > 0);
 			}
 		}
@@ -603,7 +603,7 @@ int main(int argc, char *argv[]) {
 			  case BATCH_LIHAVE:
 				  do_post_filter(&master);
 				  do_localpost(&master);
-				  break;  
+				  break;
 			  default:
 				  break;
 			}
@@ -612,7 +612,7 @@ int main(int argc, char *argv[]) {
 			print_phrases(master.msgs, suck_phrases[7], NULL);
 			do_cleanup(&master);
 		}
-		
+
 		/* close out status log */
 		if(master.msgs != NULL && master.msgs != stdout && master.msgs != stderr) {
 			fclose(master.msgs);
@@ -641,21 +641,21 @@ int main(int argc, char *argv[]) {
 			free(master.xoverview);
 			master.xoverview = pov;
 		}
-		
+
 #ifdef KILLFILE
 		free_killfile(master.killp);
 #endif
 		free_killfile(master.xoverp);
-		
+
 		if(fargs != NULL) {
 			free_args(fargc, fargs);
-		}		
+		}
 #ifdef LOCKFILE
-		lockfile = full_path(FP_GET, FP_TMPDIR, N_LOCKFILE);	
+		lockfile = full_path(FP_GET, FP_TMPDIR, N_LOCKFILE);
 		if(lockfile != NULL) {
 			unlink(lockfile);
 		}
-#endif	
+#endif
 	}
 	free_phrases();	/* do this last so everything is displayed correctly */
 	exit(retval);
@@ -666,8 +666,8 @@ int do_connect(PMaster master, int which_time) {
 	char *inbuf;
 	int nr, resp, retval = RETVAL_OK;
 	FILE *fp;
-	
-	
+
+
 	if(which_time != CONNECT_FIRST) {
 		/* close down previous connection */
 		sputline(master->sockfd, "quit\r\n", master->do_ssl, master->ssl_struct);
@@ -679,7 +679,7 @@ int do_connect(PMaster master, int which_time) {
 				}
 				number(inbuf, &nr);
 			}
-			
+
 		}while(nr != 205 && resp > 0);
 		disconnect_from_nntphost(master->sockfd, master->do_ssl, &master->ssl_struct);
 
@@ -687,16 +687,16 @@ int do_connect(PMaster master, int which_time) {
 		if(master->curr != NULL) {
 			(master->curr)->sentcmd = FALSE;
 		}
-		master->grpnr = -1;		
+		master->grpnr = -1;
 	}
-	
+
 	if(master->debug == TRUE) {
 		do_debug("Connecting to %s on port %d\n", master->host, master->portnr);
 	}
 	fp = (which_time == CONNECT_FIRST) ? master->msgs : NULL;
 
 	master->sockfd = connect_to_nntphost( master->host, NULL, 0, fp, master->portnr, master->do_ssl, &master->ssl_struct);
-	
+
 	if(master->sockfd < 0 ) {
 		retval = RETVAL_ERROR;
 	}
@@ -715,10 +715,10 @@ int do_connect(PMaster master, int which_time) {
 		number(inbuf, &resp);
 		if(resp == 480 ) {
 			retval = do_authenticate(master);
-		}		
+		}
 		if(retval == RETVAL_OK && master->do_modereader == TRUE) {
 			retval = send_command(master, "mode reader\r\n", &inbuf, 0);
-			if(retval == RETVAL_OK) {			
+			if(retval == RETVAL_OK) {
 				/* Again the announcement */
 				if(which_time == CONNECT_FIRST) {
 					fprintf(master->msgs ,"%s",inbuf);
@@ -731,7 +731,7 @@ int do_connect(PMaster master, int which_time) {
 				retval = RETVAL_ERROR;
 			}
 			else {
-				
+
 				/* auto authorize */
 				retval = do_authenticate(master);
 			}
@@ -745,7 +745,7 @@ int get_message_index(PMaster master) {
 
 	long lastread;
 	int nrread, retval, maxread;
-	
+
 	char buf[MAXLINLEN], group[512];
 	FILE *ifp,*tmpfp;
 
@@ -812,9 +812,9 @@ int do_one_group(PMaster master, char *buf, char *group, FILE *newrc, long lastr
 	char *sp, *inbuf, cmd[MAXLINLEN];
 	long count,low,high;
 	int response,retval,i;
-	
+
 	retval = RETVAL_OK;
-	
+
 
 	sprintf(cmd,"group %s\r\n",group);
 	if(send_command(master,cmd,&inbuf,0) != RETVAL_OK) {
@@ -843,12 +843,12 @@ int do_one_group(PMaster master, char *buf, char *group, FILE *newrc, long lastr
   			sp = get_long(sp, &low);
 			sp = get_long(sp, &high);
   			fprintf(newrc, "%s %ld", group, high);
-			
+
 			if(maxread > 0) {
 				fprintf(newrc, " %d", maxread);
 			}
 			fputs("\n", newrc);
-  			
+
   			/* add a sanity check in case remote host changes its numbering scheme */
 			/* the > 0 is needed, since if a nnrp site has no article it will reset */
 			/* the count to 0.  So not an error */
@@ -878,7 +878,7 @@ int do_one_group(PMaster master, char *buf, char *group, FILE *newrc, long lastr
 			/* or if low > high no messages either */
 			if (low <= high && count > 0 && lastread < high && lastread >= 0) {
 				/* add group name to list of groups */
-				
+
    				if(lastread < low) {
 					lastread = low - 1;
 				}
@@ -920,7 +920,7 @@ int do_one_group(PMaster master, char *buf, char *group, FILE *newrc, long lastr
 							}
 						} while (retval == RETVAL_OK && *inbuf != '.' && *(inbuf+1) != '\n');
 					} /* end if response */
-				} /* end if xover */	
+				} /* end if xover */
   			} /* end if lastread */
 		} /* end response */
 	} /* end else */
@@ -938,11 +938,11 @@ int get_articles(PMaster master) {
 	PGroups grps;
 	const char *grpname;
 	const char *empty = "";
-	
+
 #ifdef HAVE_GETTIMEOFDAY
 	double bps;
 #endif
-	
+
 #ifdef KILLFILE
 	int ( *get_message)(PMaster, int, long); /* which function will we use get_one_article or get_one_article_kill) */
 
@@ -955,13 +955,13 @@ int get_articles(PMaster master) {
 #endif
 	retval = RETVAL_OK;
 	downloaded = loop = 0; /* used to track how many downloaded, for reconnect option */
-	
+
 	/* figure out how many digits wide the articleCount is for display purposes */
-	/* this used to be log10()+1, but that meant I needed the math library */ 
+	/* this used to be log10()+1, but that meant I needed the math library */
 	for(logcount=1, i=master->nritems; i > 9 ; logcount++) {
 		i /= 10;
 	}
- 
+
 	if(master->MultiFile == TRUE && checkdir(full_path(FP_GET, FP_MSGDIR, NULL)) == FALSE) {
 		retval = RETVAL_ERROR;
 	}
@@ -997,7 +997,7 @@ int get_articles(PMaster master) {
 				if((master->curr)->downloaded == FALSE) {
 					/* we haven't yet downloaded this article */
 					downloaded++;
-					
+
 				        /* to be polite to the server, lets allow for a pause every once in a while */
 					if(master->pause_time > 0 && master->pause_nrmsgs > 0) {
 						if((downloaded > 0) && (downloaded % master->pause_nrmsgs == 0)) {
@@ -1040,7 +1040,7 @@ int get_articles(PMaster master) {
 												grplen = strlen(grpname);
 											}
 										}
-									}		
+									}
 								}
 								else {
 									grpnr = -1;
@@ -1065,7 +1065,7 @@ int get_articles(PMaster master) {
 						retval = db_mark_dled(master, master->curr);
 					}
 				}
-				
+
 				master->curr = (master->curr)->next; 	/* get next article */
 
 				/* to be NOT polite to the server reconnect every X msgs to combat the INND */
@@ -1090,7 +1090,7 @@ int get_articles(PMaster master) {
 						}
 					}
 				}
- 
+
 		 	} /* end while */
 			db_close(master);
 			if(retval == RETVAL_OK && master->nritems == loop) {
@@ -1109,7 +1109,7 @@ int get_articles(PMaster master) {
 }
 /*-----------------------------------------------*/
 /* add items from supplemental list to link list */
-/* ----------------------------------------------*/ 
+/* ----------------------------------------------*/
 int do_supplemental(PMaster master) {
 
 	int retval, oldkept;
@@ -1117,7 +1117,7 @@ int do_supplemental(PMaster master) {
 	char linein[MAXLINLEN+1];
 
 	retval = RETVAL_OK;
-	oldkept = master->nritems;		
+	oldkept = master->nritems;
 
 	if((fp = fopen(full_path(FP_GET, FP_DATADIR, N_SUPPLEMENTAL), "r")) != NULL) {
 		print_phrases(master->msgs, suck_phrases[17], NULL);
@@ -1136,7 +1136,7 @@ int do_supplemental(PMaster master) {
 			str_int(master->nritems), NULL);
 		fclose(fp);
 	}
-	
+
 	return retval;
 }
 /*------------------------------------------------------------------------------------------*/
@@ -1149,7 +1149,7 @@ int do_supplemental(PMaster master) {
 	 char grpname[MAX_GRP_LEN], cmd[MAXLINLEN], *resp;
 	 int i, done;
 	 long nrlow, nrhigh;
-	 
+
 	 if(master->debug == TRUE) {
 		 do_debug("supplemental adding %s", linein);
 	 }
@@ -1187,11 +1187,11 @@ int do_supplemental(PMaster master) {
 					 }
 				 }
 			 }
-		 }	 
+		 }
 	 }
-	 
+
 	 return retval;
-	 
+
  }
  /*---------------------------------------------------------------------*/
  int do_nodownload(PMaster master) {
@@ -1200,7 +1200,7 @@ int do_supplemental(PMaster master) {
 	 PList item, prev;
 	 char linein[MAXLINLEN+1];
 	 long nrlines = 0, nrnuked = 0;
-	 
+
 	 if((fp = fopen(full_path(FP_GET, FP_DATADIR, N_NODOWNLOAD), "r")) != NULL) {
 		print_phrases(master->msgs, suck_phrases[68], NULL);
 		while(retval == RETVAL_OK && fgets(linein, MAXLINLEN, fp) != NULL) {
@@ -1226,7 +1226,7 @@ int do_supplemental(PMaster master) {
 				if(master->debug == TRUE) {
 					do_debug("Checking Nodownload - %s\n", linein);
 				}
-				
+
 				while((item != NULL) && (cmp_msgid(linein, item->msgnr) == FALSE)) {
 					prev = item;
 					item = item->next;
@@ -1260,7 +1260,7 @@ int do_supplemental(PMaster master) {
 
 	 PGroups grps, gptr;
 	 int groupnr = 0;
-	 
+
          /* first, find out if it doesn't exist already */
 	 gptr = master->groups;
 	 while(gptr != NULL && groupnr == 0) {
@@ -1272,7 +1272,7 @@ int do_supplemental(PMaster master) {
 			 gptr = gptr->next;
 		 }
 	 }
-	 
+
 	 if(groupnr == 0) {
 		 /* add group to group list and get group nr */
 		 if((grps = malloc(sizeof(Groups))) == NULL) {
@@ -1296,27 +1296,27 @@ int do_supplemental(PMaster master) {
 				 grps->nr = gptr->nr + 1;
 			 }
 			 groupnr = grps->nr;
-				 
+
 			 if(master->debug == TRUE) {
 				 do_debug("Adding to group list: %d %s\n", grps->nr, grps->group);
 			 }
 		 }
 	 }
 	 return groupnr;
-	 
- }		 
+
+ }
 /*-----------------------------------------------------------------------*/
 int allocnode(PMaster master, char *linein, int mandatory, char *group, long msgnr_in) {
 	/* if msgnr_in is not filled in (0), then parse the msgnr off the linein */
-	
+
 	/* if allocate memory here, must free in free_one_node */
-	
+
 	PList ptr = NULL;
 	char *end_ptr, *st_ptr;
 	static PList curr = NULL;	/* keep track of current end of list */
 	int groupnr = 0, retval = RETVAL_OK;
 	long msgnr = 0;
-	
+
 	static int warned = FALSE;
 
 	/* get the article nr */
@@ -1337,12 +1337,12 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 				error_log(ERRLOG_REPORT, suck_phrases[53], NULL);
 			}
 		}
-		
+
 		if(msgnr > 0 && group != NULL) {
 			groupnr = get_group_number(master, group);
 		}
 	}
-	
+
 	if(retval == RETVAL_OK) {
 		/* find the message id */
 		while(*st_ptr != '<' && *st_ptr != '\0') {
@@ -1357,7 +1357,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 		}
 		else {
 			*(end_ptr+1) = '\0';	/* ensure null termination */
-		
+
 			if((ptr = malloc(sizeof(List))) == NULL) {
 				error_log(ERRLOG_REPORT, suck_phrases[22], NULL);
 				retval = RETVAL_ERROR;
@@ -1376,11 +1376,11 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 				ptr->downloaded = FALSE;
 				ptr->dbnr = 0L;
 				ptr->delete = FALSE;
-				
+
 				if(master->debug == TRUE) {
 					do_debug("MSGID %s NR %d GRP %d MANDATORY %c added\n",ptr->msgnr, ptr->nr, ptr->groupnr, ptr->mandatory);
 				}
-			
+
 				/* now put on list */
 				if( curr == NULL) {
 					if(master->head == NULL) {
@@ -1393,11 +1393,11 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 						while(curr->next != NULL) {
 							curr = curr->next;
 						}
-						
+
 						/* now add node on */
 						curr->next = ptr;
 						curr = ptr;
-					}	
+					}
 				}
 				else {
 					curr->next = ptr;
@@ -1407,12 +1407,12 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 			}
 		}
 	}
-	
+
 	return retval;
 }
 /*------------------------------------------------------------------------*/
  void free_one_node(PList node) {
-		 
+
 	free(node);
 }
 /*----------------------------------------------------------------------------------*/
@@ -1421,9 +1421,9 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 	 static int warned = FALSE;
 	 char *resp;
 	 char grpcmd[MAXLINLEN+1];
-	 
+
 	 PGroups grps;
-	 
+
 	 /* build command to get article/head/body */
 	 /* if nrmode is on send group cmd if needed */
 	 if(master->nrmode == TRUE) {
@@ -1445,7 +1445,7 @@ int allocnode(PMaster master, char *linein, int mandatory, char *group, long msg
 					 /* so don't redo group command on next one */
 					 master->grpnr = grps->nr;
 				 }
-			 }	    
+			 }
 		 }
 		 if(master->nrmode == TRUE) {
 			 /* everything hunky dory, we've switched groups, and got a good nr */
@@ -1473,16 +1473,16 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 
 	char *resp;
 	PList plist;
-	
+
 	FILE *fptr = stdout;	/* the default */
 
 	fname[0] = '\0';	/* just in case */
-	
+
 	/* first send command to get article if not already sent */
 	if((master->curr)->sentcmd == FALSE) {
 		cmd = (master->header_only == FALSE)
 			? build_command(master, "article", master->curr)
-			: build_command(master, "head", master->curr); 
+			: build_command(master, "head", master->curr);
 		if(master->debug == TRUE) {
 			do_debug("Sending command: \"%s\"",cmd);
 		}
@@ -1499,7 +1499,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 				/* send next command */
 				cmd = (master->header_only == FALSE)
 					? build_command(master, "article", plist)
-					: build_command(master, "head", plist); 
+					: build_command(master, "head", plist);
 				if(master->debug == TRUE) {
 					do_debug("Sending command: \"%s\"",cmd);
 				}
@@ -1546,7 +1546,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 			if(plist != NULL) {
 				plist->sentcmd = FALSE;	/* cause its gonna error out in do_auth() */
 			}
-			
+
 			if(do_authenticate(master) == RETVAL_OK) {
 				/* resend command for current article */
 				cmd = build_command(master, "article", master->curr);
@@ -1559,12 +1559,12 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 					do_debug("got answer: %s", resp);
 				}
 				TimerFunc(TIMER_ADDBYTES, len, NULL);
-				number(resp, &nr);		
+				number(resp, &nr);
 			}
 			else {
 				retval = RETVAL_ERROR;
 			}
-		}	
+		}
 		/* 221 = header 220 = article */
 		if(nr == 220 || nr == 221 ) {
 			/* get the article */
@@ -1585,7 +1585,7 @@ int get_one_article(PMaster master, int logcount, long itemon) {
 	if(fptr != NULL && fptr != stdout) {
 		fclose(fptr);
 	}
-	
+
 	if(master->MultiFile == TRUE) {
 		if(retval == RETVAL_ERROR || (nr != 221 && nr != 220)) {
 			unlink(tname);
@@ -1608,7 +1608,7 @@ int get_a_chunk(PMaster master, FILE *fptr) {
 	int done, partial, len, retval;
 	char *inbuf;
 	size_t nr;
-	
+
 	retval = RETVAL_OK;
 	done = FALSE;
 	partial = FALSE;
@@ -1617,11 +1617,11 @@ int get_a_chunk(PMaster master, FILE *fptr) {
 	/* this is needed to avoid a scenario where the line is MAXLINLEN+1 */
 	/* long and the last character is a ., which would make us think */
 	/* that we are at the end of the article when we actually aren't */
-	
+
 	while(done == FALSE && (len = sgetline(master->sockfd, &inbuf, master->do_ssl, master->ssl_struct)) >= 0) {
 
 		TimerFunc(TIMER_ADDBYTES, len, NULL);
-			
+
 		if(inbuf[0] == '.' && partial == FALSE) {
 			if(len == 2 && inbuf[1] == '\n') {
 				done = TRUE;
@@ -1642,7 +1642,7 @@ int get_a_chunk(PMaster master, FILE *fptr) {
 				}
 			}
 			partial= (len==MAXLINLEN&&inbuf[len-1]!='\n') ? TRUE : FALSE;
- 		} 
+ 		}
 	}
 	if(len < 0) {
 		retval = RETVAL_ERROR;
@@ -1656,7 +1656,7 @@ int restart_yn(PMaster master) {
 	long itemnr;
 	const char *fname;
 	struct stat buf;
-	
+
 	fname = full_path(FP_GET, FP_TMPDIR, N_DBFILE);
 	if(stat(fname, &buf) == 0) {
 		/* restart file exists */
@@ -1696,7 +1696,7 @@ RETSIGTYPE sighandler(int what) {
 		pause_signal(PAUSE_DO, NULL);
 		/* if we don't do this, the next time called, we'll abort */
 /*		signal(PAUSESIGNAL, sighandler); */
-/*		signal_block(MYSIGNAL_SETUP); */	/* just to be on the safe side */ 
+/*		signal_block(MYSIGNAL_SETUP); */	/* just to be on the safe side */
 		break;
 	  case MYSIGNAL:
 	  case MYSIGNAL2:
@@ -1730,7 +1730,7 @@ void pause_signal(int action, PMaster master) {
 			print_phrases(psave->msgs, suck_phrases[26], NULL);
 		}
 	}
-}		
+}
 #endif
 /*----------------------------------------------------------------*/
  int send_command(PMaster master, const char *cmd, char **ret_response, int good_response) {
@@ -1743,10 +1743,10 @@ void pause_signal(int action, PMaster master) {
 		 do_debug("sending command: %s", cmd);
 	 }
 	 sputline(master->sockfd, cmd, master->do_ssl, master->ssl_struct);
-	 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);	
-	 if( len < 0) {	
-		 retval = RETVAL_ERROR;		  	
-	 }					
+	 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
+	 if( len < 0) {
+		 retval = RETVAL_ERROR;
+	 }
 	 else {
 		 if(master->debug == TRUE) {
 			 do_debug("got answer: %s", resp);
@@ -1755,7 +1755,7 @@ void pause_signal(int action, PMaster master) {
 		 TimerFunc(TIMER_ADDBYTES, len, NULL);
 
 		 number(resp, &nr);
-		 if(nr == 480 ) { 
+		 if(nr == 480 ) {
 			 /* we must do authorization */
 			 retval = do_authenticate(master);
 			 if(retval == RETVAL_OK) {
@@ -1765,8 +1765,8 @@ void pause_signal(int action, PMaster master) {
 					 do_debug("sending command: %s", cmd);
 				 }
 				 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
-				 if( len < 0) {	
-					 retval = RETVAL_ERROR;		  	
+				 if( len < 0) {
+					 retval = RETVAL_ERROR;
 				 }
 				 else {
 					 number(resp,&nr);
@@ -1804,17 +1804,17 @@ void do_cleanup(PMaster master) {
 	if(master->debug == TRUE) {
 		do_debug("checking for existance of suck.newrc\n");
 	}
-	
+
 	if(stat(full_path(FP_GET, FP_TMPDIR, N_NEWRC), &buf) == 0) {
 		if(master->debug == TRUE) {
 			do_debug("found suck.newrc\n");
 		}
-		
+
 		/* we do the above test, in case we were in a restart */
 		/* with -R which would cause no suck.newrc to be created */
 		/* since message_index() would be skipped */
 		/* since no suck.newrc, don't move any of the sucknewrcs around */
-		strcpy(ptr,full_path(FP_GET, FP_DATADIR, N_OLDRC));	
+		strcpy(ptr,full_path(FP_GET, FP_DATADIR, N_OLDRC));
 		/* must strcpy since full path overwrites itself everytime */
 		oldptr = full_path(FP_GET, FP_DATADIR, N_OLD_OLDRC);
 
@@ -1838,7 +1838,7 @@ void do_cleanup(PMaster master) {
 	else if( errno != ENOENT) {
 		MyPerror(full_path(FP_GET, FP_DATADIR, N_NEWRC));
 		okay = FALSE;
-	}		
+	}
 	if(okay == TRUE && unlink(full_path(FP_GET, FP_DATADIR, N_SUPPLEMENTAL)) != 0 && errno != ENOENT) {
 		/* ENOENT is not an error since this file may not always exist */
 		MyPerror(suck_phrases[33]);
@@ -1852,7 +1852,7 @@ int scan_args(PMaster master, int argc, char *argv[]) {
 	for(loop = 0 ; loop < argc && retval == RETVAL_OK ; loop++) {
 		arg = ARG_NO_MATCH;
 		whicharg = -1;
-		
+
 		if(master->debug == TRUE) {
 			do_debug("Checking arg #%d-%d: '%s'\n", loop, argc, argv[loop]);
 		}
@@ -1861,7 +1861,7 @@ int scan_args(PMaster master, int argc, char *argv[]) {
 			/* totally skip these they are processed elsewhere */
 			continue;
 		}
-		
+
 		if(argv[loop][0] == '-' && argv[loop][1] == '-') {
 			/* check long args */
 			for(i = 0 ; i < NR_ARGS && arg == ARG_NO_MATCH ; i++) {
@@ -1903,14 +1903,14 @@ int scan_args(PMaster master, int argc, char *argv[]) {
 			}
 		}
 	}
-	
+
 	return retval;
-}		 
+}
 /*---------------------------------------------------------------------------------------*/
 int parse_args(PMaster master, int arg, char *argv[]) {
 
 	int x, retval = RETVAL_OK;
-	
+
 	switch(arg) {
 	case ARG_ALWAYS_BATCH:
 		/* if we have downloaded at least one article, then batch up */
@@ -1918,7 +1918,7 @@ int parse_args(PMaster master, int arg, char *argv[]) {
 		master->always_batch = TRUE;
 		break;
 /* batch file implies MultiFile mode */
-	case  ARG_BATCH_INN: 
+	case  ARG_BATCH_INN:
 		master->batch = BATCH_INNXMIT;
 		master->MultiFile = TRUE;
 		master->batchfile = argv[0];
@@ -1965,7 +1965,7 @@ int parse_args(PMaster master, int arg, char *argv[]) {
 	case ARG_HOST:	/* host name */
 		master->host = argv[0];
 		break;
-	case ARG_NO_POSTFIX:	/* kill files don't use the postfix */	
+	case ARG_NO_POSTFIX:	/* kill files don't use the postfix */
 		master->kill_ignore_postfix = TRUE;
 		break;
 	case ARG_LANGUAGE: 	/* load language support */
@@ -2131,9 +2131,9 @@ int parse_args(PMaster master, int arg, char *argv[]) {
 		master->local_ssl = TRUE;
 		break;
 #endif
-			
+
 	}
-	
+
 	return retval;
 
 }
@@ -2157,16 +2157,16 @@ int do_authenticate(PMaster master) {
 		 }
 		 sputline(master->sockfd, buf, master->do_ssl, master->ssl_struct);
 		 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
-		 if( len < 0) {	
-			 retval = RETVAL_ERROR;		  	
-		 }					
+		 if( len < 0) {
+			 retval = RETVAL_ERROR;
+		 }
 		 else {
 			 if(master->debug == TRUE) {
 				 do_debug("got answer: %s", resp);
 			 }
-			 
+
 			 TimerFunc(TIMER_ADDBYTES, len, NULL);
-			 
+
 			 number(resp, &nr);
 			 if(nr == 480) {
 				 /* this is because of the pipelining code */
@@ -2175,10 +2175,10 @@ int do_authenticate(PMaster master) {
 				 /* which should be the 381 we need */
 				 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
 				 TimerFunc(TIMER_ADDBYTES, len, NULL);
-				 
+
 				 number(resp, &nr);
 			 }
-			 
+
 			 if(nr != 381) {
 				 error_log(ERRLOG_REPORT, suck_phrases[27], resp, NULL);
 				 retval = RETVAL_NOAUTH;
@@ -2190,20 +2190,20 @@ int do_authenticate(PMaster master) {
 					 do_debug("sending command: %s", buf);
 				 }
 				 len = sgetline(master->sockfd, &resp, master->do_ssl, master->ssl_struct);
-				 if(len < 0) {	
-					 retval = RETVAL_ERROR;		  	
-				 }					
+				 if(len < 0) {
+					 retval = RETVAL_ERROR;
+				 }
 				 else {
 					 if(master->debug == TRUE) {
 						 do_debug("got answer: %s", resp);
 					 }
-					 
+
 					 TimerFunc(TIMER_ADDBYTES, len, NULL);
 
 					 number(resp, &nr);
 					 switch(nr) {
 					 case 281: /* bingo */
-						 retval = RETVAL_OK;  
+						 retval = RETVAL_OK;
 						 break;
 					 case 502: /* permission denied */
 						 retval = RETVAL_NOAUTH;
@@ -2231,7 +2231,7 @@ void load_phrases(PMaster master) {
 	char buf[MAXLINLEN];
 
 	if(master->phrases != NULL) {
-		
+
 		if((fpi = fopen(master->phrases, "r")) == NULL) {
 			MyPerror(master->phrases);
 		}
@@ -2258,7 +2258,7 @@ void load_phrases(PMaster master) {
 					error = FALSE;
 				}
 			}
-			
+
 		}
 		fclose(fpi);
 		if(error == TRUE) {
@@ -2278,7 +2278,7 @@ void load_phrases(PMaster master) {
 			xover_phrases=default_xover_phrases;
 			xover_reasons=default_xover_reasons;
 		}
-	}		
+	}
 }
 /*--------------------------------------------------------------------------------*/
 void free_phrases(void) {
@@ -2323,8 +2323,8 @@ void free_phrases(void) {
 			free_array(NR_XOVER_REASONS, xover_reasons);
 		}
 
-		
-		
+
+
 }
 
-		 
+

@@ -24,15 +24,15 @@ void inssort(PList *, int, int);
 
 /* Support functions */
 
-#ifndef min 
-#define min(a, b) ((a)<=(b) ? (a) : (b)) 
+#ifndef min
+#define min(a, b) ((a)<=(b) ? (a) : (b))
 #endif
 
 /*-------------------------------------------------------------*/
 void swap(PList *a, int i, int j) {
 	PList t = a[i];
 	a[i] = a[j];
-	a[j] = t; 
+	a[j] = t;
 }
 /*--------------------------------------------------------------*/
 void vecswap(PList *a, int i, int j, int n) {
@@ -86,7 +86,7 @@ void ssort(PList *a, int n, int depth) {
 	swap(a, 0, pm);
 	v = a[0]->msgnr[depth];
 	for (le = 1; le < n && a[le]->msgnr[depth] == v; le++) {
-		;	
+		;
 	}
 	if (le == n) {
 		if (v != 0) {
@@ -120,20 +120,20 @@ void ssort(PList *a, int n, int depth) {
 	if (v != 0) {
 		ssort(a + lt-le, le + n-ge-1, depth+1);
 	}
-	ssort(a + n-(ge-gt), ge-gt, depth); 
-} 
+	ssort(a + n-(ge-gt), ge-gt, depth);
+}
 /*-------------------------------------------------------------------------------*/
 PList my_bsearch(PList *arr, char *matchnr, int nrin) {
 
 	int val, my_index, left = 0, right = nrin ;
-	
+
 	PList retval = NULL;
-	
+
 	while( left < right ) {
 		my_index = ( right + left) / 2;  /* find halfway pt */
-		
+
 		val = qcmp_msgid(matchnr, arr[my_index]->msgnr);
-		
+
 		if(val < 0) {
 			right = my_index ;
 		}
@@ -144,9 +144,9 @@ PList my_bsearch(PList *arr, char *matchnr, int nrin) {
 			retval = arr[my_index];
 			break;
 		}
-		
+
 	}
 
 	return retval;
 }
- 
+

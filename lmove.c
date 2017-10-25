@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 		do_debug("master.link_type = %s\n", ptr);
-		
+
 	}
 	if(master.basedir == NULL || master.basedir[0] == '\0') {
 		error_log(ERRLOG_REPORT, lmove_phrases[5], NULL);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		error_log(ERRLOG_REPORT, lmove_phrases[7], NULL);
 		retval = RETVAL_ERROR;
 	}
-	
+
 	if(retval == RETVAL_OK) {
 
 #ifdef LOCKFILE
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 					if(retval == RETVAL_OK) {
 						retval = rewrite_active(&master);
 					}
-				}	
+				}
 			}
 			free_active(&master);
 #ifdef LOCKFILE
@@ -177,7 +177,7 @@ int rewrite_active(PMaster master) {
 	FILE *fpo;
 	char fname[PATH_MAX+1];
 	int i, retval = RETVAL_OK;
-	
+
 	sprintf(fname, "%s.old", master->active_file);
 	if(rename(master->active_file, fname) != 0) {
 		MyPerror(fname);
@@ -223,7 +223,7 @@ int move_msgs(PMaster master) {
 #else
 	linkit = (master->link_type == LINK_SYM) ? symlink : link;
 #endif
-	
+
 	if((dptr = opendir(master->msgdir)) == NULL) {
 		MyPerror(master->msgdir);
 		retval = RETVAL_ERROR;
@@ -241,7 +241,7 @@ int move_msgs(PMaster master) {
 					/* we pass a pointer to a pointer so that the subroutine can modify it */
 					/* and return where we left off, so we can do multiple groups on one line */
 					while(ptr != NULL && *ptr != '\0' && (group = match_group(master, &ptr)) != NULL) {
-						count++;						
+						count++;
 						sprintf(n_fname, "%s/%d", make_dirname(master->basedir, group->group), group->highnr);
 						if(stat(n_fname, &sbuf) == 0) {
 							/* file exists */
@@ -268,7 +268,7 @@ int move_msgs(PMaster master) {
 									if(master->debug == TRUE) {
 										do_debug("Moved %s to %s\n", o_fname, n_fname, NULL);
 									}
-									
+
 									group->highnr++;
 									strcpy(o_fname, n_fname); /* so we can link to this file */
 								}
@@ -283,7 +283,7 @@ int move_msgs(PMaster master) {
 								if(master->debug == TRUE) {
 									do_debug("linking %s to %s\n", n_fname, o_fname, NULL);
 								}
-								
+
 								if((*linkit)(o_fname, n_fname) != 0) {
 									MyPerror(n_fname);
 								}
@@ -296,7 +296,7 @@ int move_msgs(PMaster master) {
 					if(count == 0) {
 						error_log(ERRLOG_REPORT, lmove_phrases[12], entry->d_name, NULL);
 					}
-				}				
+				}
 			}
 		}
 		closedir(dptr);
@@ -308,9 +308,9 @@ int move_msgs(PMaster master) {
 PGroup match_group(PMaster master, char **newsgroups) {
 	PGroup retval = NULL;
 	int i;
-	char *ptr, *eptr, save; 
+	char *ptr, *eptr, save;
         /* this gets a null-terminated line of newsgroups */
-	
+
 	ptr = eptr = *newsgroups; /* this is a pointer to a pointer, so can do multiple groups per line */
 
 	/* in case the newsgroup line is formatted badly, and has extra spaces in the front */
@@ -377,7 +377,7 @@ char *find_groups(PMaster master, char *fname) {
 		}
 		fclose(fpi);
 	}
-	return retval;	
+	return retval;
 }
 /*-----------------------------------------------------------------------------------*/
 int load_config(PMaster master) {
@@ -396,7 +396,7 @@ int load_config(PMaster master) {
 			if(linein[i-1] == '\n') {
 				linein[i-1] = '\0';
 			}
-			
+
 			if(strncmp(linein, CONFIG_BASE, CONFIG_BASE_LEN) == 0) {
 				strcpy(master->basedir, &linein[CONFIG_BASE_LEN]);
 			}
@@ -407,11 +407,11 @@ int load_config(PMaster master) {
 				error_log(ERRLOG_REPORT, lmove_phrases[20], NULL);
 			}
 		}
-		
+
 		fclose(fpi);
 	}
 	return retval;
-}	
+}
 /*-----------------------------------------------------------------------------------*/
 int load_active(PMaster master) {
 	int i, j, retval = RETVAL_OK;
@@ -439,7 +439,7 @@ int load_active(PMaster master) {
 		if(master->debug == TRUE) {
 			do_debug("Nr of groups in active = %d\n", master->nrgroups);
 		}
-		fseek(fpi, 0L, SEEK_SET);	/* rewind for pass two */			
+		fseek(fpi, 0L, SEEK_SET);	/* rewind for pass two */
 		/* pass two, put them into the master->groups array */
 		if((master->groups = calloc(master->nrgroups, sizeof(Group))) == NULL) {
 			error_log(ERRLOG_REPORT, lmove_phrases[8], NULL);
@@ -476,7 +476,7 @@ int load_active(PMaster master) {
 					}
 				}
 			}
-		}	
+		}
 		fclose(fpi);
 	}
 	return retval;
@@ -551,15 +551,15 @@ int check_dirs(PMaster master) {
 					error_log(ERRLOG_REPORT, lmove_phrases[10], ptr, NULL);
 					retval = RETVAL_ERROR;
 				}
-			}				
+			}
 	 	}
 	}
-	
+
 	return retval;
 }
 /*------------------------------------------------------------------------------------*/
 void scan_args(PMaster master, int argc, char *argv[]) {
-		
+
 	int loop;
 
 	for(loop = 1; loop < argc; loop++) {
@@ -602,7 +602,7 @@ void scan_args(PMaster master, int argc, char *argv[]) {
 				error_log(ERRLOG_SET_FILE, ERROR_LOG,NULL);
 				break;
 			case 'E':	/* error log path */
-				if(loop+1 == argc) { 
+				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, "%s\n",lmove_phrases[1],NULL);
 				}
 				else {
@@ -626,8 +626,8 @@ void scan_args(PMaster master, int argc, char *argv[]) {
 			default:
 				error_log(ERRLOG_REPORT, lmove_phrases[0], argv[loop],NULL);
 				break;
-			
-			} 
+
+			}
 		}
 	}
 }
@@ -641,7 +641,7 @@ char *make_dirname(char *base, char *group) {
 	/* and return the full path */
 	i = strlen(base);
 	strcpy(path, base);
-	
+
 	ptr = &path[i];
 	sprintf(path, "%s/%s", base, group);
 	while ( *ptr != '\0' ) {
@@ -695,7 +695,7 @@ int do_lockfile(PMaster master, int option) {
 			}
 		}
 		if(retval == RETVAL_OK) {
-			if((f_lock = fopen(lockfile, "w")) != NULL) { 
+			if((f_lock = fopen(lockfile, "w")) != NULL) {
 				fprintf(f_lock, "%ld", (long) getpid());
 				fclose(f_lock);
 			}
@@ -718,10 +718,10 @@ void load_phrases(PMaster master) {
 	int error=TRUE;
 	FILE *fpi;
 	char buf[MAXLINLEN];
-	
+
 
 	if(master->phrases != NULL) {
-		
+
 		if((fpi = fopen(master->phrases, "r")) == NULL) {
 			MyPerror(master->phrases);
 		}
@@ -752,7 +752,7 @@ void load_phrases(PMaster master) {
 			lmove_phrases = default_lmove_phrases;
 			both_phrases = default_both_phrases;
 		}
-	}		
+	}
 }
 /*--------------------------------------------------------------------------------*/
 void free_phrases(void) {
@@ -763,5 +763,5 @@ void free_phrases(void) {
 		if(both_phrases != default_both_phrases) {
 			free_array(NR_BOTH_PHRASES, both_phrases);
 		}
-		
+
 }

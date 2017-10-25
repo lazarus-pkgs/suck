@@ -45,7 +45,7 @@ int do_group_xover(PMaster master, char *grpname, long startnr, long endnr) {
 	PKillStruct xoverkill;
 	PGroup grpkill = NULL;
 	PGrpList glist = NULL, gat = NULL, gptr;
-	
+
 	sprintf(cmd, "xover %ld-%ld\r\n", startnr,endnr);
 	retval = send_command(master, cmd, &resp, 0);
 	if(retval == RETVAL_OK) {
@@ -94,7 +94,7 @@ int do_group_xover(PMaster master, char *grpname, long startnr, long endnr) {
 					  }
 				  }
 			  }
-			  
+
 			  /* okay, do it */
 			  done = FALSE;
 			  while((done == FALSE) && (retval == RETVAL_OK)) {
@@ -119,24 +119,24 @@ int do_group_xover(PMaster master, char *grpname, long startnr, long endnr) {
 		free(glist);
 		glist = gptr;
 	}
-	
+
 	return retval;
 }
 /*-----------------------------------------------------------------------------------*/
 int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, int tie_delete) {
 
 	/* take in one line of xover, then run it thru the kill routines */
-	
+
 	int why = REASON_NONE, len, msgidlen = 0, retval = RETVAL_OK, match = REASON_NONE, keep = FALSE, del = FALSE;
 	char *msgid = NULL, *ptr, *reason = NULL, tmp = '\0';
 	long msgnr;
 	POverview overv;
 	PGroup grpkill;
-	
+
 	PKillStruct masterk = master->xoverp; /* our master killstruct */
 	overv = master->xoverview;
 	ptr  = get_long(linein, &msgnr);  /* get our message number */
-	
+
 	/* first go thru and match up the header with the fields in the line, and fill */
 	/* in the pointers in the xoverview with pointers to start of field */
 	while( *ptr != '\0' && overv != NULL) {
@@ -157,7 +157,7 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 			ptr++;
 		}
 		overv->fieldlen = len;
-		
+
 		/* save Message-ID location for later passing to subroutines */
 		if(strcasecmp("Message-ID:", overv->header) == 0) {
 			msgid = overv->field;
@@ -176,7 +176,7 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 	}
 	if(msgid == NULL) {
 		error_log(ERRLOG_REPORT, xover_phrases[13], linein, NULL);
-	}	
+	}
 	else {
 		if(masterk->child.Pid != -1) {
 		/* send to child program */
@@ -184,14 +184,14 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 		}
 #ifdef PERL_EMBED
 		else if(masterk->perl_int != NULL) {
-			/* send to perl subroutine */			
+			/* send to perl subroutine */
 			match = (killperl_sendxover(master, linein) == TRUE) ? REASON_PERL : REASON_NONE;
 		}
 #endif
 		else {
 			/* we have to check against master killfile and group kill file */
 			match = chk_a_group( master, &(masterk->master), master->xoverview, &reason);
-		
+
 			if((grpskill != NULL) && (match == REASON_NONE || masterk->grp_override == TRUE)) {
 				/* we have to check against group */
 				while ( grpskill != NULL) {
@@ -217,7 +217,7 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 					}
 					grpskill = grpskill->next;
 				}
-			
+
 				/* now do tie-breaking */
 				if(del == FALSE && keep == FALSE) {
 				/* match nothing */
@@ -233,14 +233,14 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 				}
 			}
 		}
-		
+
 		/* now we need to null terminate the msgid, for allocing or printing */
 
 		if(msgid != NULL) {
 			tmp = msgid[msgidlen];
 			msgid[msgidlen] = '\0';
 		}
-	
+
 		if(match == REASON_NONE) {
 			/* we keep it */
 			retval= allocnode(master, msgid, MANDATORY_OPTIONAL, group, msgnr);
@@ -252,7 +252,7 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 					MyPerror(xover_phrases[11]);
 				}
 			}
-			
+
 			if(masterk->logfp != NULL) {
 				/* Log it */
 				if(match == REASON_HEADER) {
@@ -283,21 +283,21 @@ int do_one_line(PMaster master, char *group, char *linein, PGrpList grpskill, in
 			}
 		}
 	}
-	
+
 	return retval;
 }
 /*----------------------------------------------------------------------------------------*/
 void get_xoverview(PMaster master) {
 	/* get in the xoverview.fmt list, so we can parse what xover returns later */
 	/* we'll put em in a linked list */
-	
+
 	int done, retval, len, full;
 	char *resp;
 	POverview tmp, tmp2, curptr;
-	
+
 	retval = RETVAL_OK;
 	curptr = NULL;  /* where we are currently at in the linked list */
-	
+
 	if(send_command(master, "list overview.fmt\r\n", &resp, 215) == RETVAL_OK) {
 		done = FALSE;
 		/* now get em in, until we hit .\n which signifies end of response */
@@ -314,13 +314,13 @@ void get_xoverview(PMaster master) {
 				len = strlen(resp);
                                 /* does this have a full flag on it, which means the field name */
                                 /* will be in the xover string */
-				full = (strstr(resp, ":full") == NULL) ?  FALSE : TRUE; 
+				full = (strstr(resp, ":full") == NULL) ?  FALSE : TRUE;
 				/* now get rid of everything back to : */
 				while(resp[len] != ':') {
 					resp[len--] = '\0';
 				}
 				len++; /* so we point past colon */
-				
+
 				if((tmp = malloc(sizeof(Overview))) == NULL) {
 					error_log(ERRLOG_REPORT, xover_phrases[12], NULL);
 					retval = RETVAL_ERROR;
@@ -332,15 +332,15 @@ void get_xoverview(PMaster master) {
 				else {
 					/* initialize the structure */
 
-					/* do this first so we don't wipe out with null termination */ 
+					/* do this first so we don't wipe out with null termination */
 					strncpy(tmp->header, resp, len); /* so we get the colon */
 					tmp->header[len] = '\0';
 					tmp->next = NULL;
 					tmp->field = NULL;
 					tmp->fieldlen = 0;
 					tmp->full = full;
-		
-					
+
+
 					if(curptr == NULL) {
 						/* at head of list */
 						curptr = tmp;
@@ -383,13 +383,13 @@ void get_xoverview(PMaster master) {
 int chk_a_group(PMaster master, POneKill grp, POverview overv, char **reason) {
 	/* return REASON_  if xover matches group */
 	/* linein should be at tab after the Message Number */
- 
+
 	int i, match = REASON_NONE;
 	unsigned long bytes;
 	int lines;
 	char tchar, *tptr;
 	static char reasonstr[MAXLINLEN];
-	
+
 	pmy_regex ptr;
 	POverview tmp;
 	*reason = reasonstr;
@@ -409,7 +409,7 @@ int chk_a_group(PMaster master, POneKill grp, POverview overv, char **reason) {
 					else if((grp->bodysmall > 0) && (bytes < grp->bodysmall)) {
 						match = REASON_LOWBYTES;
 					}
-				}	
+				}
 			}
 			/* test the number of lines in the article */
 			if((match == REASON_NONE) && (grp->hilines > 0 || grp->lowlines > 0)) {
@@ -469,7 +469,7 @@ int match_group(char *match_grp, char *group, int debug) {
 		if(debug == TRUE) {
 			do_debug("Xover - matching %s against %s\n", match_grp, group);
 		}
-		
+
 		while( *group == *match_grp && *group != '\0') {
 			group++;
 			match_grp++;
@@ -481,17 +481,17 @@ int match_group(char *match_grp, char *group, int debug) {
 		if(debug == TRUE) {
 			do_debug("match = %s\n", true_str(match));
 		}
-		
+
 	}
 	return match;
 }
 /*-------------------------------------------------------------------------------*/
 int get_xover(PMaster master, char *group, long startnr, long endnr) {
-	
+
 	int len, nr, done, retval = RETVAL_OK;
 	char cmd[MAXLINLEN], *resp, *ptr, *msgid;
 	long msgnr;
-	
+
 	sprintf(cmd, "xover %ld-%ld\r\n", startnr,endnr);
 	retval = send_command(master, cmd, &resp, 0);
 	if(retval == RETVAL_OK) {
@@ -515,7 +515,7 @@ int get_xover(PMaster master, char *group, long startnr, long endnr) {
 				  if(master->debug == TRUE) {
 					  do_debug("Got xover line: %s", resp);
 				  }
-				  
+
 				  /* have we got the last one? */
 				  if((len == 2) && (strcmp(resp, ".\n") == 0)) {
 					  done = TRUE;
@@ -529,11 +529,11 @@ int get_xover(PMaster master, char *group, long startnr, long endnr) {
 					  if(msgid == NULL) {
 						  error_log(ERRLOG_REPORT, xover_phrases[13], resp);
 					  }
-					  else {						  
+					  else {
 						  /* alloc the memory for it */
 						  retval= allocnode(master, msgid, MANDATORY_OPTIONAL, group, msgnr);
 					  }
-					  
+
 				  }
 			  }
 			  break;
@@ -591,7 +591,7 @@ char *find_msgid(PMaster master, char *xover) {
 	return retval;
 }
 
-	
-	
 
-	
+
+
+

@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>	
+#include <errno.h>
 #include <string.h>
 #include "suck_config.h"
 

@@ -57,7 +57,7 @@ int do_innbatch(PMaster master) {
 	struct dirent *entry;
 
 	print_phrases(master->msgs, batch_phrases[3], NULL);
-	
+
 	if((fptr = fopen(master->batchfile, "w")) == NULL) {
 		MyPerror(master->batchfile);
 		retval = RETVAL_ERROR;
@@ -160,11 +160,11 @@ int do_rnewsbatch(PMaster master) {
 							}
 						}
 						if(retval == RETVAL_OK ) {
-							unlink(tptr);	/* we are done with it, nuke it */	
+							unlink(tptr);	/* we are done with it, nuke it */
 							cursize += sbuf.st_size;
 							/* keep track of current file size, we can ignore the #! rnews */
 							/* size, since it adds so little to the overall size */
-							
+
 							if(master->rnews_size > 0L && cursize > master->rnews_size) {
 								/* reached file size length */
 								cursize = 0L;	/* this will force a close and open on next article */
@@ -178,7 +178,7 @@ int do_rnewsbatch(PMaster master) {
 		if(fptr != NULL) {
 			fclose(fptr);
 		}
-		
+
 		closedir(dptr);
 	}
 	return retval;
@@ -213,7 +213,7 @@ void do_lmovebatch(PMaster master) {
 	}
 	args[i] = NULL;
 
-	if(master->debug == TRUE) { 
+	if(master->debug == TRUE) {
 		do_debug("Calling lmove with args:");
 		for(x = 0; x < i; x++) {
 			do_debug(" %s", args[x]);
@@ -240,7 +240,7 @@ void do_lmovebatch(PMaster master) {
 }
 /*---------------------------------------------------------------------------*/
 int do_localpost(PMaster master) {
-	
+
 	/* post articles to local server using IHAVE */
 	int sockfd, count = 0, retval = RETVAL_OK;
 	FILE *fp_list;
@@ -248,9 +248,9 @@ int do_localpost(PMaster master) {
 	const char *fname;
 
 	TimerFunc(TIMER_START, 0, NULL);
-	
+
 	print_phrases(master->msgs, batch_phrases[5], master->localhost, NULL);
-	
+
 	if(master->batchfile == NULL) {
 		error_log(ERRLOG_REPORT, batch_phrases[6], NULL);
 		retval = RETVAL_ERROR;
@@ -260,7 +260,7 @@ int do_localpost(PMaster master) {
 		if((fp_list = fopen(fname, "r")) == NULL ) {
 			MyPerror(fname);
 			retval = RETVAL_ERROR;
-		}		 
+		}
 		else {
 			if((sockfd = connect_local(master)) < 0) {
 				retval = RETVAL_ERROR;
@@ -288,7 +288,7 @@ int do_localpost(PMaster master) {
 	TimerFunc(TIMER_TIMEONLY, 0,master->msgs);
 
 	return retval;
-	
+
 }
 /*------------------------------------------------------------------------------------------------*/
 int post_one_msg(PMaster master, int sockfd, char *msg) {
@@ -296,7 +296,7 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 	int len, nr, longline, do_unlink = FALSE, retval = RETVAL_OK;
 	char *msgid, *resp, linein[MAXLINLEN+4]; /* the extra in case of . in first pos */
 	FILE *fpi;
-	
+
 	/* msg contains the path and msgid */
 	msgid = strstr(msg, " <"); /* find the start of the msgid */
 	if(msgid == NULL) {
@@ -305,7 +305,7 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 	else {
 		*msgid = '\0';	/* end the path name */
 		msgid++;	/* so we point to the < */
-		
+
 		len = strlen(msgid);
 		/* strip a nl */
 		if(msgid[len-1] == '\n') {
@@ -314,7 +314,7 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 		if(master->debug == TRUE) {
 			do_debug("File Name = \"%s\"\n", msg);
 		}
-		
+
 		if((fpi = fopen(msg, "r")) == NULL) {
 			MyPerror(msg);
 		}
@@ -351,14 +351,14 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 						if(master->debug == TRUE) {
 							do_debug("sending line-%s--\n", linein);
 						}
-						
+
 						len = strlen(linein);
 						if(longline == FALSE && linein[0] == '.') {
 							/* double the . at beginning of line */
 							memmove(linein+1,linein,++len);
 							linein[0] = '.';
 						}
-						
+
 						longline = ( linein[len - 1] == '\n' ) ? FALSE : TRUE ;
 						if(longline == FALSE) {
 							/* replace nl with cr nl */
@@ -395,32 +395,32 @@ int post_one_msg(PMaster master, int sockfd, char *msg) {
 						else {
 							error_log(ERRLOG_REPORT, batch_phrases[9], msgid, resp, NULL);
 						}
-					}			
+					}
 				}
 			}
 			fclose(fpi);
 			if(do_unlink == TRUE) {
 				unlink(msg);
 			}
-			
+
 		}
 	}
-		
+
 	return retval;
-	
+
 }
 /*--------------------------------------------------------------------------*/
 void do_post_filter(PMaster master) {
 	/* call lpost filter prgm with batchfile as argument */
 	const char *msgdir;
 	pid_t pid;
-	
+
 	if(master->post_filter != NULL) {
 		msgdir = full_path(FP_GET, FP_MSGDIR, "");
 		if(master->debug == TRUE) {
 			do_debug("Running %s with %s as args\n", master->post_filter, msgdir);
 		}
-	
+
 		pid = fork();
 		if(pid == 0) {
 			/* in child */
@@ -428,7 +428,7 @@ void do_post_filter(PMaster master) {
 				/* big error */
 				MyPerror(master->post_filter);
 				exit(-1); /* so we aren't running two sucks */
-			}		
+			}
 		}
 		else if(pid == -1) {
 			/* whoops */

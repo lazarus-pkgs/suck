@@ -105,7 +105,7 @@ char *filter_perl(Pargs, char *);
 #define TEMP_ARTICLE "tmp-article" /* name for temp article in rnews_path */
 
 /* stuff needed for language phrases */
-	/* set up defaults */	
+	/* set up defaults */
 char **rpost_phrases = default_rpost_phrases;
 char **both_phrases = default_both_phrases;
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[], char *env[]) {
 		/* we have a regular phrases file make it the default */
 		myargs.phrases = N_PHRASES;
 	}
-	
+
 #endif
 
 	/* allow no args, only the hostname, or hostname as first arg */
@@ -169,7 +169,7 @@ int main(int argc, char *argv[], char *env[]) {
 			if((fargs = build_args(&argv[1][1], &fargc)) != NULL) {
 				retval = scan_args(&myargs, fargc, fargs);
 			}
-		}   
+		}
 		else {
 			myargs.host = argv[1];
 		}
@@ -180,7 +180,7 @@ int main(int argc, char *argv[], char *env[]) {
 				if((fargs = build_args(&argv[loop][1], &fargc)) != NULL) {
 					retval = scan_args(&myargs, fargc, fargs);
 				}
-			}   
+			}
 		}
 		/* this is here so anything at command line overrides file */
 		if(argv[1][0] != '-' && argv[1][0] != FILE_CHAR) {
@@ -192,7 +192,7 @@ int main(int argc, char *argv[], char *env[]) {
 			args = &(argv[1]);
 			argc--;
 		}
-		retval = scan_args(&myargs, argc, args);	
+		retval = scan_args(&myargs, argc, args);
 		break;
 	}
 	load_phrases(&myargs);	/* this has to be here so rest prints okay */
@@ -258,7 +258,7 @@ int main(int argc, char *argv[], char *env[]) {
 				}
 				if(retval == RETVAL_OK && myargs.do_modereader == TRUE) {
 					retval = send_command(&myargs, "mode reader\r\n", &inbuf, 0);
-					if( retval  == RETVAL_OK) {				
+					if( retval  == RETVAL_OK) {
 						/* Again the announcement */
 						fputs(inbuf, myargs.status_fptr );
 						number(inbuf, &response);
@@ -278,7 +278,7 @@ int main(int argc, char *argv[], char *env[]) {
 						retval = do_authenticate(&myargs);
 					}
 				}
-				
+
 			}
 		}
 		if(retval == RETVAL_OK) {
@@ -307,7 +307,7 @@ int main(int argc, char *argv[], char *env[]) {
 	if(myargs.perl_int != NULL) {
 		perl_done(&myargs);
 	}
-#endif		
+#endif
 	if(myargs.status_fptr != NULL && myargs.status_fptr != stdout) {
 		fclose(myargs.status_fptr);
 	}
@@ -384,8 +384,8 @@ int do_article(Pargs myargs, FILE *fptr) {
 			if(response == 441) {
 				number(ptr, &response);
 			}
-			if(response == 435) { 
-				dupeyn = TRUE;	
+			if(response == 435) {
+				dupeyn = TRUE;
 			}
 			else {
 				/* M$ server sends "441 (615) Article Rejected -- Duplicate Message ID" handle that */
@@ -395,7 +395,7 @@ int do_article(Pargs myargs, FILE *fptr) {
 					number(++ptr, &response);
 					if(response == 615) {
 						dupeyn = TRUE;
-					}		
+					}
 				}
 				else if (strstr(inbuf, RPOST_DUPE_STR) != NULL || strstr(inbuf, RPOST_DUPE_STR2)) {
 					dupeyn = TRUE;
@@ -423,17 +423,17 @@ int send_command(Pargs myargs, const char *cmd, char **ret_response, int good_re
 		do_debug("sending command: %s", cmd);
 	}
 	sputline(myargs->sockfd, cmd, myargs->do_ssl, myargs->ssl_struct);
-	len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);	
-	if( len < 0) {	
-		retval = RETVAL_ERROR;		  	
-	}					
+	len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
+	if( len < 0) {
+		retval = RETVAL_ERROR;
+	}
 	else {
 	  if(myargs->debug == TRUE) {
 	    do_debug("got answer: %s", resp);
 	  }
 
 	  number(resp, &nr);
-	  if(nr == 480 ) { 
+	  if(nr == 480 ) {
 		  /* we must do authorization */
 		  retval = do_authenticate(myargs);
 		  if(retval == RETVAL_OK) {
@@ -443,8 +443,8 @@ int send_command(Pargs myargs, const char *cmd, char **ret_response, int good_re
 				  do_debug("sending command: %s", cmd);
 			  }
 			  len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
-			  if( len < 0) {	
-				  retval = RETVAL_ERROR;		  	
+			  if( len < 0) {
+				  retval = RETVAL_ERROR;
 			  }
 			  else {
 				  number(resp,&nr);
@@ -475,20 +475,20 @@ int do_authenticate(Pargs myargs) {
 	 if((myargs->auth).userid == NULL || (myargs->auth).passwd == NULL) {
 		 error_log(ERRLOG_REPORT, rpost_phrases[43], NULL);
 		 retval = RETVAL_NOAUTH;
-		 
+
 	 }
 	 else {
 		 print_phrases(myargs->status_fptr, rpost_phrases[41], NULL);
-	 
+
 		 sprintf(buf, "AUTHINFO USER %s\r\n", (myargs->auth).userid);
 		 if(myargs->debug == TRUE) {
 			 do_debug("sending command: %s", buf);
 		 }
 		 sputline(myargs->sockfd, buf, myargs->do_ssl, myargs->ssl_struct);
 		 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
-		 if( len < 0) {	
-			 retval = RETVAL_ERROR;		  	
-		 }					
+		 if( len < 0) {
+			 retval = RETVAL_ERROR;
+		 }
 		 else {
 			 if(myargs->debug == TRUE) {
 				 do_debug("got answer: %s", resp);
@@ -505,7 +505,7 @@ int do_authenticate(Pargs myargs) {
 				 }
 				 else {
 					 number(resp, &nr);
-				 } 
+				 }
 			 }
 			 if(retval == RETVAL_OK) {
 				 if(nr != 381) {
@@ -519,9 +519,9 @@ int do_authenticate(Pargs myargs) {
 						 do_debug("sending command: %s", buf);
 					 }
 					 len = sgetline(myargs->sockfd, &resp, myargs->do_ssl, myargs->ssl_struct);
-					 if(len < 0) {	
-						 retval = RETVAL_ERROR;		  	
-					 }					
+					 if(len < 0) {
+						 retval = RETVAL_ERROR;
+					 }
 					 else {
 						 if(myargs->debug == TRUE) {
 							 do_debug("got answer: %s", resp);
@@ -545,7 +545,7 @@ int do_authenticate(Pargs myargs) {
 				 }
 			 }
 		 }
-		 
+
 	 }
 	 return retval;
 }
@@ -553,7 +553,7 @@ int do_authenticate(Pargs myargs) {
 int scan_args(Pargs myargs, int argc, char *argv[]) {
 
 	int loop, retval = RETVAL_OK;
-	
+
 	for(loop=0;loop<argc && retval == RETVAL_OK;loop++) {
 		if(myargs->debug == TRUE) {
 			do_debug("Checking arg #%d-%d: '%s'\n", loop, argc, argv[loop]);
@@ -576,17 +576,17 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 					error_log(ERRLOG_REPORT, rpost_phrases[20], NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					myargs->host = argv[++loop];
 				}
 				break;
-				
+
 			  case 'b':	/* batch file Mode, next arg = batch file */
 				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, rpost_phrases[21], NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					myargs->batch = argv[++loop];
 				}
 				break;
@@ -620,12 +620,12 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 					parse_perl(myargs, argv[++loop]);
 				}
 				break;
-#endif	  
+#endif
 			  case 'e':	/* use default error log path */
 				error_log(ERRLOG_SET_FILE, ERROR_LOG,NULL);
 				break;
 			  case 'E':	/* error log path */
-				if(loop+1 == argc) { 
+				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, "%s\n",rpost_phrases[24],NULL);
 					retval = RETVAL_ERROR;
 				}
@@ -640,10 +640,10 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 				}
 				break;
 			  case 'S':	/* status log path */
-				if(loop+1 == argc) { 
+				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, rpost_phrases[26],NULL);
 					retval = RETVAL_ERROR;
-				}	
+				}
 				else if((myargs->status_fptr = fopen(argv[++loop], "a")) == NULL) {
 					MyPerror(rpost_phrases[25]);
 					retval = RETVAL_ERROR;
@@ -660,7 +660,7 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 					error_log(ERRLOG_REPORT, rpost_phrases[27],NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					myargs->auth.userid = argv[++loop];
 				}
 				break;
@@ -669,7 +669,7 @@ int scan_args(Pargs myargs, int argc, char *argv[]) {
 					error_log(ERRLOG_REPORT, rpost_phrases[28],NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					myargs->auth.passwd = argv[++loop];
 				}
 				break;
@@ -752,10 +752,10 @@ void parse_perl(Pargs args, char *fname) {
 
 	/* this code is copied from killprg.c killperl_setup() */
 	/* which comes from PERLEMBED man page */
-	
+
 	char *ptr = NULL;
 	char *prgs[] = { ptr, ptr };
-	
+
 	if ((args->perl_int = perl_alloc()) == NULL) {
 		error_log(ERRLOG_REPORT, rpost_phrases[34], NULL);
 	}
@@ -772,7 +772,7 @@ void parse_perl(Pargs args, char *fname) {
 			error_log(ERRLOG_REPORT, rpost_phrases[35], fname, NULL);
 			perl_done(args);
 		}
-	} 
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 void perl_done(Pargs args) {
@@ -792,7 +792,7 @@ char *filter_perl(Pargs myargs, char *file) {
 	 char *infile=NULL;
 	 dSP; /* perl stack pointer */
 	 SV *fname; /* used to get fname off of perl stack */
-	 
+
 				/* here's where we send it to perl and get back our filename */
 				/* we need infile to become our file name to post*/
 				/* this code comes from chk_msg_kill_perl() which uses */
@@ -803,13 +803,13 @@ char *filter_perl(Pargs myargs, char *file) {
 	 if(myargs->debug == TRUE) {
 		 do_debug("Calling %s with arg %s\n", PERL_RPOST_SUB, file);
 	 }
-				
+
 	 ENTER;
 	 SAVETMPS;
 	 PUSHMARK(SP);
 
 	 i = perl_call_argv(PERL_RPOST_SUB, G_SCALAR | G_EVAL | G_KEEPERR, args);
-	 
+
 	 SPAGAIN;
 
 	 if(SvTRUE(ERRSV)) {
@@ -837,15 +837,15 @@ char *filter_perl(Pargs myargs, char *file) {
 	 LEAVE;
 
 	 return infile;
-	 
+
 }
 #endif
 /*---------------------------------------------------------------------------------------*/
 int parse_filter_args(Pargs myargs, int argcount, char **args) {
-	 
+
 	 int argon, loop, i, retval = RETVAL_OK;
-	 
-	 /* build filter args */ 
+
+	 /* build filter args */
 	 i = strlen(RPOST_FILTER_OUT);
 
 	 /* just in case */
@@ -859,7 +859,7 @@ int parse_filter_args(Pargs myargs, int argcount, char **args) {
 		 if(myargs->debug == TRUE) {
 			 do_debug("loop=%d argon=%d arg=%s\n", loop, argon, args[loop]);
 		 }
-		 
+
 		 if(strcmp(args[loop], RPOST_FILTER_IN) == 0) {
 			 /* substitute infile name */
 			 myargs->filter_args[argon] = NULL; /* just so debug.suck looks okay */
@@ -895,9 +895,9 @@ int parse_filter_args(Pargs myargs, int argcount, char **args) {
 char *do_filter(Pargs myargs, char *filename) {
 	char *infile = NULL;
 	int i;
-	
+
 	myargs->filter_args[myargs->filter_infilenr] = filename; /* so this points to the right name */
-	
+
 	if( myargs->debug == TRUE) {
 		do_debug("ARGS:");
 		for(i=0;i<myargs->filter_argc;i++) {
@@ -918,7 +918,7 @@ char *do_filter(Pargs myargs, char *filename) {
 	  default:	/* in parent, wait for child to finish */
 		wait(NULL);		/* no status check on finish */
 		infile = myargs->filter_outfile;
-	}					
+	}
 
 	return infile;
 }
@@ -928,11 +928,11 @@ int filter_post_article(Pargs myargs, char *filename) {
 	 char *infile = NULL; /* this is the filename that gets passed to do_article() */
 	 int retval = RETVAL_OK;
 	 FILE *fpi_msg;
-	 
+
 #ifdef PERL_EMBED
 	 if(myargs->perl_int != NULL) {
 		 infile  = filter_perl(myargs, filename);
-	 }		
+	 }
 	 else
 #endif
 		 if(myargs->filter_argc >0) {
@@ -941,8 +941,8 @@ int filter_post_article(Pargs myargs, char *filename) {
 		 else {
 				/* so we open up the right file */
 			 infile = filename;
-		 } 
-	 
+		 }
+
 	 if(infile == NULL) {
 		 error_log(ERRLOG_REPORT, rpost_phrases[11], NULL);
 		 retval = RETVAL_ERROR;
@@ -952,7 +952,7 @@ int filter_post_article(Pargs myargs, char *filename) {
 			 /* show the file name */
 			 print_phrases(myargs->status_fptr, rpost_phrases[40], infile, NULL);
 		 }
-		 
+
 		 if((fpi_msg = fopen(infile, "r")) == NULL) {
 			 /* skip to next article if infile don't exist */
 			 error_log(ERRLOG_REPORT, rpost_phrases[12],NULL);
@@ -964,7 +964,7 @@ int filter_post_article(Pargs myargs, char *filename) {
 			 }
 			 fclose(fpi_msg);
 		 }
-	 }	
+	 }
 	 return retval;
 }
 /*--------------------------------------------------------------------------------*/
@@ -983,7 +983,7 @@ int do_batch(Pargs myargs) {
 		MyPerror(myargs->batch);
 		retval = RETVAL_ERROR;
 	}
-	else {		
+	else {
 		while((retval != RETVAL_ERROR) && (fgets(buf, MAXLINLEN, fpi_batch) != NULL)) {
 			/* build file name */
 			/* if no prefix, or if this is a inn token (not a real file), just copy it */
@@ -1025,19 +1025,19 @@ int do_batch(Pargs myargs) {
 			else if (retval == RETVAL_ARTICLE_PROB) {
 				log_fail(myargs->batch, buf);
 			}
-		
+
 		}
 		if(retval == RETVAL_ERROR) {
 			/* write out the rest of the batch file to the failed file */
 			do {
 				log_fail(myargs->batch, buf);
 			} while (fgets(buf, MAXLINLEN, fpi_batch) != NULL);
-		}	
+		}
 	 	fclose(fpi_batch);
 
 		if(retval != RETVAL_ERROR) {
 			retval = (nrok == nrdone) ? RETVAL_OK : RETVAL_ARTICLE_PROB;
-		}		
+		}
 		if(myargs->deleteyn == TRUE && retval == RETVAL_OK) {
 			unlink(myargs->batch);
 			print_phrases(myargs->status_fptr, rpost_phrases[13], myargs->batch,NULL);
@@ -1073,7 +1073,7 @@ int do_rnews(Pargs myargs) {
 	 struct dirent *dentry;
 
 	 sprintf(temp_path, "%s/%s", myargs->rnews_path, TEMP_ARTICLE); /* only need to do this once */
-	 
+
 	 if(myargs->rnews_file == NULL || myargs->rnews_path == NULL) {
 		 error_log(ERRLOG_REPORT, rpost_phrases[39], NULL);
 		 retval = RETVAL_ERROR;
@@ -1086,7 +1086,7 @@ int do_rnews(Pargs myargs) {
 		 if(myargs->debug == TRUE) {
 			 do_debug("Reading directory %s\n", myargs->rnews_path);
 		 }
-		 
+
 		 len = strlen(myargs->rnews_file);
 		 /* work our way thru the directory find our files that */
 		 /* start with our rnews_file prefix */
@@ -1100,7 +1100,7 @@ int do_rnews(Pargs myargs) {
 				 if(myargs->debug == TRUE) {
 					 do_debug("Trying to read rnews file %s\n", rnews_path);
 				 }
-				 
+
 				 if((f_rnews = fopen(rnews_path, "r")) == NULL) {
 					 MyPerror(rnews_path);
 					 retval = RETVAL_ERROR;
@@ -1112,7 +1112,7 @@ int do_rnews(Pargs myargs) {
 						 if(strncmp(linein, RNEWS_START, RNEWS_START_LEN) == 0) {
 							 if(myargs->debug == TRUE) {
 								 do_debug("Found rnews line %s", linein);
-							 }	 
+							 }
 							 if(f_temp != NULL) {
 								 /* close out the old file, and process it */
 								 fclose(f_temp);
@@ -1130,7 +1130,7 @@ int do_rnews(Pargs myargs) {
 						 else if(f_temp != NULL) {
 							 /* write the line out to the file */
 							 fputs(linein, f_temp);
-						 } 
+						 }
 					 }
 					 if(f_temp != NULL) {
 						 /* close out our final article */
@@ -1144,7 +1144,7 @@ int do_rnews(Pargs myargs) {
 					 fclose(f_rnews);
 					 if(retval != RETVAL_ERROR) {
 						 retval = (nrok == nrdone) ? RETVAL_OK : RETVAL_ARTICLE_PROB;
-					 }		
+					 }
 					 if(myargs->deleteyn == TRUE && retval == RETVAL_OK) {
 						 unlink(rnews_path);
 						 print_phrases(myargs->status_fptr, rpost_phrases[13], rnews_path,NULL);
@@ -1154,9 +1154,9 @@ int do_rnews(Pargs myargs) {
 		 }
 		 closedir(dptr);
 	 }
-	 
+
 	 return retval;
-} 
+}
 
 /*--------------------------------------------------------------------------------*/
 /* THE strings in this routine is the only one not in the arrays, since           */
@@ -1169,7 +1169,7 @@ void load_phrases(Pargs myargs) {
 	char buf[MAXLINLEN];
 
 	if(myargs->phrases != NULL) {
-		
+
 		if((fpi = fopen(myargs->phrases, "r")) == NULL) {
 			MyPerror(myargs->phrases);
 		}
@@ -1190,7 +1190,7 @@ void load_phrases(Pargs myargs) {
 			rpost_phrases = default_rpost_phrases;
 			both_phrases = default_both_phrases;
 		}
-	}		
+	}
 }
 /*--------------------------------------------------------------------------------*/
 void free_phrases(void) {
@@ -1201,5 +1201,5 @@ void free_phrases(void) {
 		if(both_phrases != default_both_phrases) {
 			free_array(NR_BOTH_PHRASES, both_phrases);
 		}
-		
+
 }

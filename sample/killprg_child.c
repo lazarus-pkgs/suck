@@ -56,7 +56,7 @@ void do_debug(const char *fmt, ...) {
 	if((fptr = fopen(N_DEBUG, "a")) == NULL) {
 		fptr = stderr;
 	}
-		
+
 	va_start(args, fmt);
 	vfprintf(fptr, fmt, args);
 	va_end(args);

@@ -24,7 +24,7 @@ void dedupe_list(PMaster master) {
 
 	PList *array, ptr, curr, prev;
 	int i=0, nrfound=0;
-	
+
 	print_phrases(master->msgs, dedupe_phrases[0], NULL);
 	fflush(master->msgs);	/* so msg gets printed */
 
@@ -42,15 +42,15 @@ void dedupe_list(PMaster master) {
 			i++;
 			ptr = ptr->next;
 		}
-	
+
 		TimerFunc(TIMER_START, 0L, NULL) ;
-		
+
 		/* step 2, sort em */
 		ssort(array, master->nritems, 1);  /* start with depth of 1 cause all start with < */
 
 		/* TimerFunc(TIMER_TIMEONLY, 0L, master->msgs); */
-		
-		
+
+
 		/* step 3, mark dupes */
 		for(i=0;i<(master->nritems-1);i++) {
 			if(cmp_msgid(array[i]->msgnr,array[i+1]->msgnr) == TRUE) {
@@ -62,14 +62,14 @@ void dedupe_list(PMaster master) {
 				else {
 					array[i]->delete = TRUE;
 				}
-				
+
 				nrfound++;
 			}
 		}
 		/* step 4, delete em */
 		curr = master->head;
 		prev = NULL;
-		while(curr != NULL) {			
+		while(curr != NULL) {
 			if( curr->delete == TRUE) {
 				/* nuke it */
 				master->nritems--;
@@ -88,9 +88,9 @@ void dedupe_list(PMaster master) {
 			else {
 				prev = curr;
 				curr = curr->next;
-			}				
+			}
 		}
-		
+
 		/* all done free up mem */
 		free(array);
 	}

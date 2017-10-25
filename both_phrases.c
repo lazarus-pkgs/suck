@@ -1,4 +1,4 @@
-const char *default_both_phrases[] = { 
+const char *default_both_phrases[] = {
 	"No hostname given!\n",			/* 0 */
 	"Using Port %v1%\n",
 	"Could not get host information",

@@ -52,13 +52,13 @@ Pactive read_active(PMaster, Pignore);
 
 /*-------------------------------------------------------------------------*/
 int get_message_index_active(PMaster master) {
-	
+
 	int retval = RETVAL_OK;
 	Pactive listhead = NULL;
 	Pignore ignorehead = NULL;
 
 	TimerFunc(TIMER_START, 0, NULL);
-	
+
 	/* first get our groups to ignore */
 	ignorehead = read_ignore(master);
 
@@ -91,7 +91,7 @@ int get_message_index_active(PMaster master) {
 	else {
 		print_phrases(master->msgs, active_phrases[5], str_int(master->nritems), NULL);
 	}
-	
+
 	return retval;
 }
 /*------------------------------------------------------------------------*/
@@ -101,7 +101,7 @@ Pactive nntp_active(PMaster master, Pignore ignorehead) {
 	char *resp;
 	Pactive listhead = NULL;
 	int retval = RETVAL_OK;
-	
+
 	/* get active file from nntp host */
 	if((localfd = connect_local(master)) < 0 ) {
 		error_log(ERRLOG_REPORT, active_phrases[0], NULL);
@@ -109,7 +109,7 @@ Pactive nntp_active(PMaster master, Pignore ignorehead) {
 	else {
 		/* now get the list of groups */
 		print_phrases(master->msgs, active_phrases[2], master->localhost, NULL);
-		
+
 		if(master->debug == TRUE) {
 			do_debug("Sending command: LIST\n");
 		}
@@ -125,13 +125,13 @@ Pactive nntp_active(PMaster master, Pignore ignorehead) {
 						if(master->debug == TRUE) {
 							do_debug("Got groupline: %s", resp);
 						}
-						if(resp[0] != '.' ) {	
+						if(resp[0] != '.' ) {
 							retval = add_to_list(&listhead, resp, ignorehead,master->debug);
 						}
 					}
 					else {
 						retval = RETVAL_ERROR;
-					}		
+					}
 				}
 				while(resp[0] != '.' && retval == RETVAL_OK);
 				if(retval != RETVAL_OK) {
@@ -164,7 +164,7 @@ Pactive read_active(PMaster master, Pignore ignorehead) {
 			if(master->debug == TRUE) {
 				do_debug("Got line: %s", linein);
 			}
-			
+
 			retval = add_to_list(&listhead, linein, ignorehead, master->debug);
 		}
 		fclose(fpi);
@@ -174,11 +174,11 @@ Pactive read_active(PMaster master, Pignore ignorehead) {
 		}
 	}
 	return listhead;
-	
+
 }
 /*------------------------------------------------------------------------*/
 int connect_local(PMaster master) {
-	
+
 	/* connect to localhost NNTP server */
 	int fd;
 	char *inbuf;
@@ -188,7 +188,7 @@ int connect_local(PMaster master) {
 	if(master->debug == TRUE) {
 		do_debug("Connecting to %s on port %d\n", master->localhost, port);
 	}
-	
+
 	if((fd = connect_to_nntphost(master->localhost, NULL, 0, NULL, port, master->local_ssl, &master->local_ssl_struct)) >= 0) {
 		/* get the announcement line */
 		if(sgetline(fd, &inbuf, master->local_ssl, master->local_ssl_struct) < 0) {
@@ -198,22 +198,22 @@ int connect_local(PMaster master) {
 		else if(master->debug == TRUE) {
 			do_debug("Got: %s", inbuf);
 		}
-	}	
+	}
 	return fd;
 }
 /*----------------------------------------------------------------------------*/
 int add_to_list(Pactive *head, const char *groupline, Pignore ignorehead, int debug) {
-	
+
 	/* add one group to group list */
 	Pactive temp, tptr;
 	Pignore pignore;
 	int len, retval= RETVAL_OK;
 	char postyn;
-	
+
 #ifdef HAVE_REGEX_H
 	int reg_match;
 #endif
-	
+
 	len = 0;
 	/* get length of group name */
 	while(groupline[len] != ' ' && groupline[len] != '\0') {
@@ -234,7 +234,7 @@ int add_to_list(Pactive *head, const char *groupline, Pignore ignorehead, int de
 		temp->done = FALSE;
 		strncpy(temp->group, groupline, len);
 		temp->group[len] = '\0'; /* NULL terminate it */
-		
+
 		sscanf(groupline, "%*s%*ld%*ld%c", &postyn);
 		temp->postyn = (postyn == 'n') ? FALSE : TRUE;
 
@@ -248,7 +248,7 @@ int add_to_list(Pactive *head, const char *groupline, Pignore ignorehead, int de
 		}
 #else
 		reg_match = FALSE;
-		
+
 		while(pignore != NULL && reg_match == FALSE) {
 			if(pignore->use_regex == FALSE) {
 				if(strcmp(pignore->group, temp->group) == 0) {
@@ -291,23 +291,23 @@ int add_to_list(Pactive *head, const char *groupline, Pignore ignorehead, int de
 				tptr->next = temp;
 			}
 		}
-		
-	}	
+
+	}
 	return retval;
 }
 /*---------------------------------------------------------------------------------*/
 void do_free(Pactive head, Pignore ihead) {
 
 	/* free both linked lists and any alloced strings */
-	
+
 	Pactive temp;
 	Pignore itemp;
-	
+
 	while(head != NULL) {
 		if(head->group != NULL) {
 			free(head->group);
 		}
-		
+
 		temp=head->next;
 		free(head);
 		head = temp;
@@ -320,20 +320,20 @@ void do_free(Pactive head, Pignore ihead) {
 		free(ihead);
 		ihead = itemp;
 	}
-	
+
 }
 /*-------------------------------------------------------------------------------*/
 int get_msgids(PMaster master, Pactive head) {
 
 	/* read in the sucknewsrc, check to see if group is in active list */
 	/* then download msgids and write it out to the new.sucknewsrc */
-	
+
 	FILE *oldrc, *newrc;
 	int retval = RETVAL_OK, nrread, maxread;
 	long lastread;
 	char buf[MAXLINLEN+1], group[512], *ptr;
 	Pactive plist;
-	
+
 	oldrc = newrc = NULL;
 
 
@@ -341,14 +341,14 @@ int get_msgids(PMaster master, Pactive head) {
 		MyPerror(full_path(FP_GET, FP_TMPDIR, N_NEWRC));
 		retval = RETVAL_ERROR;
 	}
-	
+
 	if((oldrc = fopen(full_path(FP_GET, FP_DATADIR, N_OLDRC), "r" )) == NULL) {
 		/* this isn't actually an error, since we can create it */
-		print_phrases(master->msgs, active_phrases[6], NULL);	
+		print_phrases(master->msgs, active_phrases[6], NULL);
 	}
 	else {
 		print_phrases(master->msgs, active_phrases[9], NULL);
-		
+
 		while(retval == RETVAL_OK && fgets(buf, MAXLINLEN-1, oldrc) != NULL) {
 			ptr = buf;
 			if(*ptr == SUCKNEWSRC_COMMENT_CHAR) {
@@ -356,7 +356,7 @@ int get_msgids(PMaster master, Pactive head) {
 				while(! isalpha(*ptr)) {
 					ptr++;
 				}
-			
+
 			}
 			maxread = -1; /* just in case */
 			nrread = sscanf(ptr, "%s %ld %d\n", group, &lastread, &maxread);
@@ -392,7 +392,7 @@ int get_msgids(PMaster master, Pactive head) {
 						plist->done = TRUE;
 					}
 				}
-			}	
+			}
 		}
 
                 /* this is in case we had to abort the above while loop (due to loss of pipe to server) */
@@ -403,27 +403,27 @@ int get_msgids(PMaster master, Pactive head) {
 			}
 			while(fgets(buf, MAXLINLEN-1, oldrc) != NULL);
 		}
-		
+
 		fclose(oldrc);
 	}
-	
+
 	if(retval == RETVAL_OK) {
 		/* okay add any new groups from active that weren't already in sucknewsrc */
 		plist = head;
 		if(plist != NULL) {
 			print_phrases(master->msgs, active_phrases[8], NULL);
 		}
-		
+
 		while( plist != NULL) {
 			if(plist->done == FALSE) {
 				/* create a line for newsrc file */
 				lastread = master->active_lastread;
 				maxread = 0;
-				
+
 				sprintf(buf,"%s %ld\n", plist->group, lastread);
 
 				print_phrases(master->msgs, active_phrases[10], plist->group, NULL);
-				
+
 				if(plist->postyn == FALSE) {
 					/* we can't post, comment the line out */
 					fprintf(newrc, "# %s", buf);
@@ -431,15 +431,15 @@ int get_msgids(PMaster master, Pactive head) {
 				else {
 					retval = do_one_group(master, buf, plist->group, newrc, lastread, maxread);
 					plist->done = TRUE;
-				}			
+				}
 			}
 			plist = plist->next;
-		}	
+		}
 	}
 	if(newrc != NULL) {
 		fclose(newrc);
 	}
-	
+
 	return retval;
 }
 /*--------------------------------------------------------------------------------------------------*/
@@ -451,7 +451,7 @@ Pignore read_ignore(PMaster master) {
 	Pignore head, temp, last;
 	char buf[MAXLINLEN+1], *ptr;
 	int errflag = FALSE;
-	
+
 #ifdef HAVE_REGEX_H
 	int err;
 	char errmsg[256];
@@ -459,13 +459,13 @@ Pignore read_ignore(PMaster master) {
 #endif
 
 	head = last = NULL;
-	
+
 	/* first check if one with postfix is present, if not, use non postfix version */
 	fpi = fopen(full_path(FP_GET, FP_DATADIR, N_ACTIVE_IGNORE), "r");
 	if(fpi == NULL) {
 		fpi = fopen(full_path(FP_GET_NOPOSTFIX, FP_DATADIR, N_ACTIVE_IGNORE), "r");
 	}
-	
+
 	if(fpi != NULL) {
 		while(fgets(buf, MAXLINLEN, fpi) != NULL) {
 			/* strip off any trailing spaces from group name */
@@ -474,7 +474,7 @@ Pignore read_ignore(PMaster master) {
 				ptr++;
 			}
 			*ptr = '\0';
-			
+
 			if((temp = malloc(sizeof(Ignore))) == NULL) {
 				error_log(ERRLOG_REPORT, active_phrases[7], NULL);
 				errflag = TRUE;
@@ -487,7 +487,7 @@ Pignore read_ignore(PMaster master) {
 				if(master->debug == TRUE) {
 					do_debug("Ignoring group %s\n", buf);
 				}
-				
+
 				/* add to list */
 				strcpy(temp->group, buf);
 				temp->next = NULL;
@@ -513,16 +513,16 @@ Pignore read_ignore(PMaster master) {
 					buf[i] = '$';
 					buf[i+1] = '\0';
 				}
-				
+
                                 /* now regcomp it for later comparision */
 				temp->use_regex = TRUE;
-				if((err = regcomp(&(temp->match), buf, REG_NOSUB | REG_ICASE | REG_EXTENDED)) != 0) 
+				if((err = regcomp(&(temp->match), buf, REG_NOSUB | REG_ICASE | REG_EXTENDED)) != 0)
 				{
 					regerror(err, &(temp->match), errmsg, sizeof(errmsg));
 					error_log(ERRLOG_REPORT, active_phrases[12], buf, errmsg, NULL);
 					temp->use_regex = FALSE;
 				}
-				
+
 #endif
 			}
 		}

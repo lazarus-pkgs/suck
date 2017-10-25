@@ -29,11 +29,11 @@ void chkhistory(PMaster master) {
 	int nrin=0, nrfound=0;
 	long valinhist = 0, nrinhist = 0;
 	char *cptr, linein[MAXLINLEN+1];
-	
+
 	if((fhist = fopen(master->history_file, "r")) == NULL) {
 		MyPerror(master->history_file);
 	}
-	else {	
+	else {
 		if(master->debug == TRUE) {
 			do_debug("Chking %d master->nritems\nReading history file - %s\n",
 				 master->nritems, master->history_file);
@@ -88,14 +88,14 @@ void chkhistory(PMaster master) {
 				error_log(ERRLOG_REPORT, chkh_phrases[6], master->history_file, NULL);
 				clearerr(fhist);
 			}
-			
+
 			if(master->debug == TRUE) {
 				do_debug("%d lines in history, %d valid lines, %d duplicates found\n", nrinhist, valinhist, nrfound);
 			}
 			/* step 4, delete em */
 			curr = master->head;
 			prev = NULL;
-			while(curr != NULL) {			
+			while(curr != NULL) {
 				if( curr->delete == TRUE) {
 				/* nuke it */
 					master->nritems--;
@@ -114,15 +114,15 @@ void chkhistory(PMaster master) {
 				else {
 					prev = curr;
 					curr = curr->next;
-				}				
+				}
 			}
-		
+
 			/* all done free up mem */
 			free(array);
 		}
 		fclose(fhist);
 		TimerFunc(TIMER_TIMEONLY, 0l, master->msgs);
 		print_phrases(master->msgs, chkh_phrases[3], str_int(nrfound), NULL);
-	}	
+	}
 }
 

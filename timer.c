@@ -34,11 +34,11 @@ double get_elapsed(struct timeval *);
 
 /*-----------------------------------------------------------*/
 #ifdef HAVE_GETTIMEOFDAY
-double TimerFunc(int which_function, long nradd, FILE *fpi) { 
+double TimerFunc(int which_function, long nradd, FILE *fpi) {
 #else
 void TimerFunc(int which_function, long nradd, FILE *fpi) {
 #endif
-		
+
 #ifdef HAVE_GETTIMEOFDAY
 	static struct timeval start;
 	char strmins[32], strsecs[32], strbps[32];
@@ -62,9 +62,9 @@ void TimerFunc(int which_function, long nradd, FILE *fpi) {
 		nrbytes += nradd;
 		break;
 	  case TIMER_GET_BPS:
-		elapsed = get_elapsed(&start);  
+		elapsed = get_elapsed(&start);
 		retval = (elapsed > 0.0) ? nrbytes / elapsed : 0.0;
-		break;	
+		break;
 	  case TIMER_DISPLAY:
 #ifdef HAVE_GETTIMEOFDAY
 		if(nrbytes > 0) {
@@ -99,7 +99,7 @@ void TimerFunc(int which_function, long nradd, FILE *fpi) {
 #else
 		print_phrases(fpi, timer_phrases[3], strbytes, NULL);
 #endif
-		break;	
+		break;
 	  default:
 		/* ignore invalid commands */
 		break;

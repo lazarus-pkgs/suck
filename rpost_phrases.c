@@ -6,22 +6,22 @@ const char *default_rpost_phrases[] = {
 	"Sorry, Can't post to this host\n",
 	"Closing connection to %v1%\n",
 	"Bad luck.  You can't use this server.\n",		/* 5 */
-	"Duplicate article, unable to post\n",		
+	"Duplicate article, unable to post\n",
 	"Malfunction, Unable to post Article!\n%v1%",
 	"Invalid argument: %v1%\n",
 	"Using Built-In default %v1%\n",
 	"No infile specification, aborting\n",		/* 10 */
-	"No file to process, aborting\n",			
-	"Empty file, skipping\n", 
+	"No file to process, aborting\n",
+	"Empty file, skipping\n",
 	"Deleting batch file: %v1%\n",
 	"Execl",
 	"Fork",						/* 15 */
-	"Weird Response to Authorization: %v1%\n",	
+	"Weird Response to Authorization: %v1%\n",
 	"Authorization Denied",
 	"*** Unexpected response to command: %v1%\n%v2%\n",
 	"Invalid argument: %v1%\n",
 	"No Host Name Specified\n",			/* 20 */
-	"No Batch file Specified\n",			
+	"No Batch file Specified\n",
 	"No prefix Supplied\n",
 	"No args to use for filter\n",
 	"No Error Log name provided\n",

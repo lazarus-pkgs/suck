@@ -58,7 +58,7 @@
 #ifdef PERL_EMBED
 #include <EXTERN.h>
 #include <perl.h>
-#ifdef OLD_PERL  
+#ifdef OLD_PERL
 #ifndef ERRSV
 # define ERRSV (GvSV(errgv)) /* needed for perl 5.004 and earlier */
 #endif
@@ -89,7 +89,7 @@ int killprg_forkit(PKillStruct mkill, char *args, int debug, int which) {
 /*-------------------------------------------------------------------------*/
 	int i, newstdin[2], newstdout[2], retval = FALSE;
 	char *prg[KILLPRG_MAXARGS+1], *myargs = NULL, *ptr, *nptr;
-	
+
 	/* first parse args into array */
 	i = strlen(args);
 	/* do this so can muck around with string with messing up original */
@@ -102,9 +102,9 @@ int killprg_forkit(PKillStruct mkill, char *args, int debug, int which) {
 		if(myargs[i-1] == '\n') {
 			myargs[i-1] = '\0';
 		}
-		
+
 		/* build array of pointers to string, by finding spaces and */
-		/* replacing them with \0 */ 
+		/* replacing them with \0 */
 		i = 0;
 		ptr = myargs;
 		do {
@@ -114,7 +114,7 @@ int killprg_forkit(PKillStruct mkill, char *args, int debug, int which) {
 				*nptr = '\0';
 				nptr++;
 			}
-			ptr = nptr;				
+			ptr = nptr;
 		}
 		while(ptr != NULL && i < KILLPRG_MAXARGS);
 		prg[i] = NULL;		/* must do this for execv */
@@ -123,7 +123,7 @@ int killprg_forkit(PKillStruct mkill, char *args, int debug, int which) {
 	if(debug == TRUE) {
 		do_debug("Prg = %s, %d args\n", prg[0], i);
 	}
-	if(prg[0] != NULL && find_in_path(prg[0]) == TRUE ) { 
+	if(prg[0] != NULL && find_in_path(prg[0]) == TRUE ) {
 		/* okay it exists, fork, execl, etc */
 		/* first set up our pipes */
 		if(pipe(newstdin) == 0) {
@@ -178,7 +178,7 @@ int killprg_forkit(PKillStruct mkill, char *args, int debug, int which) {
 				}
 			}
 		}
-	
+
 	}
 	if(myargs != NULL) {
 		free(myargs);
@@ -189,7 +189,7 @@ int killprg_forkit(PKillStruct mkill, char *args, int debug, int which) {
 /*-----------------------------------------------------------------------*/
 int find_in_path(char *prg) {
 	/* parse the path and search thru it for the program to see if it exists */
-	
+
 	int retval = FALSE, len;
 	char fullpath[PATH_MAX+1], *ptr, *mypath, *nptr;
 	struct stat buf;
@@ -200,7 +200,7 @@ int find_in_path(char *prg) {
 		if(ptr != NULL) {
 			len = strlen(ptr)+1;
 			/* now have to copy the environment, since I can't touch the ptr */
-			if((mypath = malloc(len)) == NULL) { 
+			if((mypath = malloc(len)) == NULL) {
 				error_log(ERRLOG_REPORT, "%s %s", killp_phrases[2], NULL);
 			}
 			else {
@@ -230,7 +230,7 @@ int find_in_path(char *prg) {
 				while(ptr != NULL && retval == FALSE);
 				free(mypath);
 			}
-		}	
+		}
 	}
 	/* last ditch try, in case of a relative path or current directory */
 	if (retval == FALSE) {
@@ -265,7 +265,7 @@ int chk_msg_kill_fork(PMaster master, PKillStruct pkill, char *header, int heade
 		/* first write the length down */
 		sprintf(len, "%-*d\n", KILLPRG_LENGTHLEN-1, headerlen);
 		if(write(pkill->child.Stdin, len, KILLPRG_LENGTHLEN) <= 0) {
-			error_log(ERRLOG_REPORT,  killp_phrases[4], NULL);		
+			error_log(ERRLOG_REPORT,  killp_phrases[4], NULL);
 		}
 		/* then write the actual header */
 		else if(write(pkill->child.Stdin, header, headerlen) <= 0) {
@@ -284,7 +284,7 @@ int chk_msg_kill_fork(PMaster master, PKillStruct pkill, char *header, int heade
 					keep[2] = '\0';	/* just in case */
 					do_debug("killprg: read '%s'\n", keep);
 				}
-				keepyn = keep[0] - '0';	/* convert ascii to 0/1 */ 
+				keepyn = keep[0] - '0';	/* convert ascii to 0/1 */
 			}
 		}
 	}
@@ -293,7 +293,7 @@ int chk_msg_kill_fork(PMaster master, PKillStruct pkill, char *header, int heade
 	}
 	else { /* child died */
 		error_log(ERRLOG_REPORT,  killp_phrases[7], NULL);
-	} 		
+	}
 
 	switch (keepyn) {
 	  case 0:
@@ -346,7 +346,7 @@ RETSIGTYPE pipe_sighandler(int what) {
 
 	/* we don't have to do anything else, since the routine above will detect a dead child */
 	/* and handle it appropriately*/
-	
+
 	int status;
 	error_log(ERRLOG_REPORT, killp_phrases[8], NULL);
 	wait(&status);
@@ -372,7 +372,7 @@ int killperl_setup(PKillStruct master, char *prg, int debug, int which) {
 
 	char *prgs[] = { ptr, ptr};
 
-	
+
 	if((master->perl_int = perl_alloc()) == NULL) {
 		retval = FALSE;
 		error_log(ERRLOG_REPORT, killp_phrases[14], NULL);
@@ -381,7 +381,7 @@ int killperl_setup(PKillStruct master, char *prg, int debug, int which) {
 		if(debug == TRUE) {
 			do_debug("Perl program name = %s\n", prg);
 		}
-		
+
                 perl_construct(master->perl_int);
                 prgs[1] = prg;
                 if(perl_parse(master->perl_int, NULL, 2, prgs, NULL) == 0) {
@@ -395,7 +395,7 @@ int killperl_setup(PKillStruct master, char *prg, int debug, int which) {
 			error_log(ERRLOG_REPORT, killp_phrases[15], prg, NULL);
 			killperl_done(master);
 		}
-		
+
 	}
         return retval;
 }
@@ -424,10 +424,10 @@ int chk_msg_kill_perl(PMaster master, PKillStruct killp, char *hdr, int hdrlen) 
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	
+
 	i = perl_call_argv(PERL_PACKAGE_SUB, G_SCALAR | G_EVAL | G_KEEPERR, args);
 	SPAGAIN;
-	
+
 	if(SvTRUE(ERRSV)) {
                 error_log(ERRLOG_REPORT, killp_phrases[16], SvPV(ERRSV,PL_na), NULL);
 		POPs;
@@ -443,8 +443,8 @@ int chk_msg_kill_perl(PMaster master, PKillStruct killp, char *hdr, int hdrlen) 
 		if(master->debug == TRUE) {
 			do_debug("retval = %d\n", i);
 		}
-		
-		retval = (i == 0) ? FALSE : TRUE;           
+
+		retval = (i == 0) ? FALSE : TRUE;
 	}
 	PUTBACK;
 	FREETMPS;
@@ -480,10 +480,10 @@ void killprg_sendoverview(PMaster master) {
 #ifdef PERL_EMBED
 	char *args[2] = { NULL, NULL};
 #endif
-	
+
 	killp = master->xoverp;
 	overp = master->xoverview;
-	
+
 	/* send the overview.fmt to the child process, if it exists */
 	if(killp != NULL && overp != NULL) {
 		/* first, rebuild the overview.fmt */
@@ -511,7 +511,7 @@ void killprg_sendoverview(PMaster master) {
 						/* first write the length down */
 				sprintf(len, "%-*d\n", KILLPRG_LENGTHLEN-1, count);
 				if(write(killp->child.Stdin, len, KILLPRG_LENGTHLEN) <= 0) {
-					error_log(ERRLOG_REPORT,  killp_phrases[4], NULL);		
+					error_log(ERRLOG_REPORT,  killp_phrases[4], NULL);
 				}
 				/* then write the actual header */
 				else if(write(killp->child.Stdin, buf, count) <= 0) {
@@ -534,10 +534,10 @@ void killprg_sendoverview(PMaster master) {
 			ENTER;
 			SAVETMPS;
 			PUSHMARK(SP);
-	
+
 			status = perl_call_argv(PERL_OVER_SUB, G_VOID | G_EVAL | G_KEEPERR, args);
 			SPAGAIN;
-	
+
 			if(SvTRUE(ERRSV)) {
 				error_log(ERRLOG_REPORT, killp_phrases[16], SvPV(ERRSV,PL_na), NULL);
 				POPs;
@@ -547,7 +547,7 @@ void killprg_sendoverview(PMaster master) {
 				if(master->debug == TRUE) {
 					do_debug("return from perl_call_argv = %d\n", status);
 				}
-				
+
 				error_log(ERRLOG_REPORT, killp_phrases[17], PERL_OVER_SUB, NULL);
 				killperl_done(killp);
 			}
@@ -569,7 +569,7 @@ int killprg_sendxover(PMaster master, char *linein) {
 
 	headerlen = strlen(linein);
 	pkill = master->xoverp;
-	
+
 	/* first make sure our child is alive WNOHANG so if its alive, immed return */
 	keepyn = -1;	/* our error status */
 	waitstatus = waitpid(pkill->child.Pid, &status, WNOHANG);
@@ -580,7 +580,7 @@ int killprg_sendxover(PMaster master, char *linein) {
 		/* first write the length down */
 		sprintf(len, "%-*d\n", KILLPRG_LENGTHLEN-1, headerlen);
 		if(write(pkill->child.Stdin, len, KILLPRG_LENGTHLEN) <= 0) {
-			error_log(ERRLOG_REPORT,  killp_phrases[4], NULL);		
+			error_log(ERRLOG_REPORT,  killp_phrases[4], NULL);
 		}
 		/* then write the actual header */
 		else if(write(pkill->child.Stdin, linein, headerlen) <= 0) {
@@ -599,7 +599,7 @@ int killprg_sendxover(PMaster master, char *linein) {
 					keep[2] = '\0';	/* just in case */
 					do_debug("killprg: read '%s'\n", keep);
 				}
-				keepyn = keep[0] - '0';	/* convert ascii to 0/1 */ 
+				keepyn = keep[0] - '0';	/* convert ascii to 0/1 */
 			}
 		}
 	}
@@ -611,7 +611,7 @@ int killprg_sendxover(PMaster master, char *linein) {
 	}
 
 	retval = ( keepyn == 1) ? TRUE : FALSE;
-	
+
 	return retval;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -622,7 +622,7 @@ int killperl_sendxover(PMaster master, char *linein) {
 
 	int i, retval = FALSE;
 	char *args[2] = { NULL, NULL};
-	
+
 	dSP; /* Perl stack pointer */
 
 	/* first set up args */
@@ -634,10 +634,10 @@ int killperl_sendxover(PMaster master, char *linein) {
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	
+
 	i = perl_call_argv(PERL_XOVER_SUB, G_SCALAR | G_EVAL | G_KEEPERR, args);
 	SPAGAIN;
-	
+
 	if(SvTRUE(ERRSV)) {
                 error_log(ERRLOG_REPORT, killp_phrases[16], SvPV(ERRSV,PL_na), NULL);
 		POPs;
@@ -653,8 +653,8 @@ int killperl_sendxover(PMaster master, char *linein) {
 		if(master->debug == TRUE) {
 			do_debug("retval = %d\n", i);
 		}
-		
-		retval = (i == 0) ? FALSE : TRUE;           
+
+		retval = (i == 0) ? FALSE : TRUE;
 	}
 	PUTBACK;
 	FREETMPS;

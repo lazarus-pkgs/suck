@@ -96,7 +96,7 @@ const struct {
 	{10, "NON_REGEX=", 0, ""},
 	{5,  "PERL=", 0, ""},
 	{14, "XOVER_LOG_LONG", 0, ""}, /* make Xover killlog look like regular kill lo)*/
-	{7,  "NRXREF=", 6, "Xref: "}, 
+	{7,  "NRXREF=", 6, "Xref: "},
 };
 
 
@@ -116,7 +116,7 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 	int doperl = FALSE;
 #endif
 	KillStruct *Masterkill = NULL;
-	
+
 	/* kill file is going to get three passes, 1st one to count how many group files to process */
 	/* so can allocate memory for all the group stuff. */
 	/* also check for group override of masterkillfile */
@@ -143,13 +143,13 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 		Masterkill->xover_log_long = FALSE;
 /* initialize the master struct */
 		Masterkill->child.Stdin = Masterkill->child.Stdout = -1;
-		Masterkill->child.Pid = -1;		
+		Masterkill->child.Pid = -1;
 		initialize_one_kill(&(Masterkill->master));
 
 #ifdef PERL_EMBED
 		Masterkill->perl_int = NULL;
 #endif
-		
+
 		Masterkill->logyn = logfile_yn;
 		/* which option to we use in call to full_path() ?  Do we use the postfix or not? */
 		Masterkill->ignore_postfix = ( ignore_postfix == TRUE) ? FP_GET_NOPOSTFIX : FP_GET ;
@@ -159,7 +159,7 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 		if(debug == TRUE) {
 			do_debug("Trying to read killfile: %s\n", full_path(Masterkill->ignore_postfix, FP_DATADIR, filename));
 		}
-		
+
 		/* FIRST PASS THRU MASTER KILLFILE - look for group delete/keeps and count em  and check for PROGRAM call*/
 		if((fptr = fopen(full_path(Masterkill->ignore_postfix, FP_DATADIR, filename), "r")) == NULL) {
 			/* this is not really an error, so don't report it as such */
@@ -169,7 +169,7 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 			if(debug == TRUE) {
 				do_debug("Pass 1 & 2 kill file: %s\n", full_path(Masterkill->ignore_postfix, FP_DATADIR, filename));
 			}
-	
+
 			while(fgets(buf, MAXLINLEN, fptr) != NULL && doprg == FALSE) {
 				/* nuke nl, so file names are correct, etc */
 				i = strlen(buf);
@@ -181,7 +181,7 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 				}
 				if(strncmp(buf, Params[PARAM_GROUP].name, (size_t) Params[PARAM_GROUP].len) == 0) {
 					Masterkill->totgrps++;	/* how many group files must we process */
-				}						
+				}
 				if(strncmp(buf, Params[PARAM_PROGRAM].name, (size_t) Params[PARAM_PROGRAM].len) == 0) {
 #ifdef PERL_EMBED
 					if(Masterkill->perl_int == NULL) {
@@ -203,21 +203,21 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 				if(strncmp(buf, Params[PARAM_XOVER_LOG_LONG].name, (size_t) Params[PARAM_XOVER_LOG_LONG].len) == 0) {
 					Masterkill->xover_log_long = TRUE;
 				}
-	   
-#ifdef PERL_EMBED				
+
+#ifdef PERL_EMBED
 				if(strncmp(buf, Params[PARAM_PERL].name, (size_t) Params[PARAM_PERL].len) == 0) {
 					if(doprg == FALSE) {
 						doperl = killperl_setup(Masterkill, &buf[Params[PARAM_PERL].len], debug, which);
 					}
 				}
-#endif	
+#endif
 			}
 			(void) fclose(fptr);
 #ifndef PERL_EMBED
 			if(doprg == TRUE) {
 #else
 			if(doprg == TRUE || Masterkill->perl_int != NULL) {
-#endif		
+#endif
 				Masterkill->totgrps = 0;
 			}
 			else {
@@ -233,7 +233,7 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 				}
 			}
 		}
-		
+
 		/* do we have an error OR do we have empty killfiles */
 		if((retval == FALSE) || (mastergrp == RETVAL_EMPTYKILL && Masterkill->totgrps == 0 && doprg == FALSE)) {
 #ifdef PERL_EMBED
@@ -249,7 +249,7 @@ PKillStruct parse_killfile(int which, int logfile_yn, int debug, int ignore_post
 			print_debug(Masterkill, filename);
 		}
 	}
-	
+
 	return Masterkill;
 }
 /*-------------------------------------------------------------------------------------------*/
@@ -277,7 +277,7 @@ int pass_two(PKillStruct killp, int debug, const char *filename ) {
 	else {
 		while(retval == RETVAL_OK && fgets(buf, MAXLINLEN, fptr) != NULL) {
 			if(strncmp(buf, Params[PARAM_GROUP].name, (size_t) Params[PARAM_GROUP].len) == 0 ) {
-				
+
 				/* now parse the line for the 3 required elements */
 				/* keep/delete group_name filename */
 				delkeep = &buf[Params[PARAM_GROUP].len];
@@ -304,7 +304,7 @@ int pass_two(PKillStruct killp, int debug, const char *filename ) {
 						else {
 							*grpfile = '\0';	/* truncate the group name for easier copying later */
 							++grpfile;
-						
+
 							/* nuke newline */
 							i = strlen(grpfile) - 1;
 							if(grpfile[i] == '\n') {
@@ -331,7 +331,7 @@ int pass_two(PKillStruct killp, int debug, const char *filename ) {
 							grpon--;  /* so that we reuse this grp entry */
 							killp->totgrps--;
 						}
-						
+
 					}
 				}
 				grpon++;	/* finished with this group */
@@ -346,7 +346,7 @@ int pass_two(PKillStruct killp, int debug, const char *filename ) {
 void free_killfile(PKillStruct master) {
 
 	int i;
-		
+
 	if(master != NULL) {
 		/* first kill off killprg if its there */
 		if(master->killfunc==chk_msg_kill_fork || master->child.Pid != -1) {
@@ -377,7 +377,7 @@ void free_killfile(PKillStruct master) {
 void free_node(OneKill node) {
 
 	pmy_regex curr, next;
-	
+
 		curr = node.list;
 
 		if (node.header != NULL) {
@@ -409,7 +409,7 @@ void free_node(OneKill node) {
 			free(curr);
 			curr = next;
 		}
-	
+
 }
 /*--------------------------------------------------------------------------*/
 int get_one_article_kill(PMaster master, int logcount, long itemon) {
@@ -428,9 +428,9 @@ int get_one_article_kill(PMaster master, int logcount, long itemon) {
 
 	killp->pbody = NULL;	/* since we haven't downloaded anything yet for this article */
 	killp->bodylen = 0;
-	
+
 	retval =get_chunk_mem(master, &len, CHUNK_HEADER, &inbuf);
-	
+
 	/* the killfunc pointer points to either chk_msg_kill(), chk_msg_kill_fork(), or chk_msg_kill_perl() */
 	/* do we have to download this sucker, is it mandatory? */
 	if(retval == RETVAL_OK && ((master->curr)->mandatory == MANDATORY_YES || (*killp->killfunc)(master, killp, inbuf, len) == FALSE)) {
@@ -509,25 +509,25 @@ int get_one_article_kill(PMaster master, int logcount, long itemon) {
 	if(retval == RETVAL_UNEXPECTEDANS) {
 		retval = RETVAL_OK; /* so don't abort */
 	}
-	
+
 	return retval;
 }
 /*---------------------------------------------------------------*/
 /* this routine gets the header or body into memory, keeping separate buffers for each */
 int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf) {
 
-	
+
 	static char *header_buf = NULL;
 	static char *body_buf = NULL;
 	static int header_size = 8192;
 	static unsigned long body_size = KILL_BODY_BUF_SIZE;
-	
+
 	int done, partial, len, i, retval;
 	char *inbuf, *newbuf, *buf;
 	const char *cmd;
 	unsigned long temp, bufsize, currbuf; /* bufsize = alloced memory, currbuf = what retrieved so far */
-	
-	
+
+
 	done = FALSE;
 	partial = FALSE;
 	currbuf = 0;
@@ -548,7 +548,7 @@ int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf)
 			retval = RETVAL_ERROR;
 		}
 	}
-	
+
 	if(buf != NULL) {
 		/* build command */
 		if(which == CHUNK_HEADER) {
@@ -558,7 +558,7 @@ int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf)
 		else {
 			cmd = build_command(master, "body", master->curr);
 			i = 222;
-		}	
+		}
 		if((retval = send_command(master, cmd, NULL, i)) != RETVAL_OK) {
 			free(buf);
 			buf = NULL;
@@ -604,7 +604,7 @@ int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf)
 				else {
 					buf = newbuf;
 				}
-			}	
+			}
 			if(buf != NULL) {
 				/* put string in buffer, use memmove in case of nulls*/
 				memmove(buf+currbuf, inbuf, len);
@@ -631,7 +631,7 @@ int get_chunk_mem(PMaster master, unsigned long *size, int which, char **retbuf)
 	if(buf != NULL) {
 		buf[currbuf] = '\0';
 	}
-	
+
 	*retbuf = buf;
 	return retval;
 }
@@ -646,7 +646,7 @@ int chk_msg_kill(PMaster master, PKillStruct killp, char *headerbuf, int buflen)
 
 	goodwhy = why = killf_reasons[REASON_NONE];
 	killyn = FALSE;
-	
+
 	/* first check against master delete */
 	masterkill = check_a_group(master, &(killp->master), headerbuf, &why);
 	if(masterkill == TRUE && killp->grp_override == FALSE) {
@@ -715,7 +715,7 @@ int chk_msg_kill(PMaster master, PKillStruct killp, char *headerbuf, int buflen)
 		if(killp->logfp != NULL) {
 			/* first print our one-line reason */
 			print_phrases(killp->logfp,killf_phrases[4], group ,why, (master->curr)->msgnr, NULL);
-		     
+
 			if(killp->logyn == KILL_LOG_LONG) {
 				/* print the header as well */
 				/* the nl so I get a blank line between em */
@@ -724,7 +724,7 @@ int chk_msg_kill(PMaster master, PKillStruct killp, char *headerbuf, int buflen)
 
 		}
 	}
-	return killyn;			
+	return killyn;
 }
 /*-----------------------------------------------------------------------*/
 int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
@@ -734,9 +734,9 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 	pmy_regex curr;
 	static char reason[MAXLINLEN];
 	PKillStruct temp;
-	
+
 	/* check hilines first */
-	if(killp->hilines > 0) { 
+	if(killp->hilines > 0) {
 		if((startline = strstr(headerbuf, Params[PARAM_HILINE].header)) != NULL)  {
 			i = 0;	/* just in case */
 			sscanf(startline+Params[PARAM_HILINE].headerlen, "%d", &i);
@@ -746,10 +746,10 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 				*why = killf_reasons[REASON_TOOMANYLINES];
 			}
 		}
-		
+
 	}
 	/* now check low lines */
-	if(match == FALSE && killp->lowlines > 0) { 
+	if(match == FALSE && killp->lowlines > 0) {
 		if((startline = strstr(headerbuf, Params[PARAM_LOWLINE].header)) != NULL)  {
 			i = 0;	/* just in case */
 			sscanf(startline+Params[PARAM_LOWLINE].headerlen, "%d", &i);
@@ -759,7 +759,7 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 				*why = killf_reasons[REASON_NOTENUFLINES];
 			}
 		}
-		
+
 	}
 	/* now check nrgrps */
 	if(match == FALSE && killp->maxgrps > 0) {
@@ -777,7 +777,7 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 			if(i > killp->maxgrps) {
 				match = TRUE;
 				*why = killf_reasons[REASON_NRGRPS];
-			}		
+			}
 		}
 	}
 	/* now check nrxref */
@@ -795,11 +795,11 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 			if(i > killp->maxxref) {
 				match = TRUE;
 				*why = killf_reasons[REASON_NRXREF];
-			}		
+			}
 		}
 	}
 	curr = killp->list;
-	
+
 	while(match == FALSE && curr != NULL) {
 		if(regex_check(headerbuf, curr, master->debug) == TRUE) {
 			match = TRUE;
@@ -824,7 +824,7 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 		temp = master->killp;
 		if(temp->pbody == NULL) {
 			/* have to get the body first */
-			get_chunk_mem(master, &(temp->bodylen), CHUNK_BODY, &(temp->pbody));	
+			get_chunk_mem(master, &(temp->bodylen), CHUNK_BODY, &(temp->pbody));
 		}
 		if(killp->bodybig > 0 && temp->bodylen > killp->bodybig) {
 			match = TRUE;
@@ -848,7 +848,7 @@ int check_a_group(PMaster master, POneKill killp, char *headerbuf, char **why) {
 			}
 		}
 	}
-	
+
 	return match;
 }
 /*--------------------------------------------------------------------------*/
@@ -859,7 +859,7 @@ int check_newsgroups(char *header, const char *whichgroup) {
 	int match = FALSE;
 	char *startline, *ptr;
 	const char *ptr_group;
-	
+
 	if((startline = strstr(header, NEWSGROUP_HEADER)) != NULL) {
 		ptr = startline + strlen(NEWSGROUP_HEADER);
 		while( match == FALSE && *ptr != '\0' && *ptr != '\n' ) {
@@ -894,7 +894,7 @@ int check_newsgroups(char *header, const char *whichgroup) {
 }
 /*-------------------------------------------------------------------------------*/
 void initialize_one_kill(POneKill mykill) {
-	/* initialize the various elements*/	
+	/* initialize the various elements*/
 	mykill->list = NULL;
 	mykill->header = NULL;
 	mykill->body = NULL;
@@ -929,11 +929,11 @@ int parse_a_file(const char *fname, const char *group, POneKill mykill, int debu
 		if(debug == TRUE) {
 			do_debug("Pass 3 kill file: %s\n", full_path(ignore_prefix, FP_DATADIR, fname));
 			do_debug("Pass 3 options: group=%s, use_extended_regex=%s, ignore_prefix=%s\n",
-				 group, true_str(use_e_regex), true_str(ignore_prefix));	 
+				 group, true_str(use_e_regex), true_str(ignore_prefix));
 		}
 		while(fgets(buf, MAXLINLEN, fptr) != NULL) {
 			buf[MAXLINLEN] = '\0';	/* just in case */
-			
+
 			i = strlen(buf);
 			/* strip nls off so they don't get added to regex scan, etc..*/
 			if(buf[i-1] == '\n') {
@@ -1012,7 +1012,7 @@ int parse_a_file(const char *fname, const char *group, POneKill mykill, int debu
 							break;
 						default:		/* handle all other lines aka do nothing*/
 							break;
-					  
+
 						}
 					}
 				}
@@ -1063,7 +1063,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 
 	pmy_regex which = NULL;
 	int err = FALSE;
-	
+
 	if(linein != NULL) {
 		/* first find the : in the line to skip the parameter part */
 		tptr = linein;
@@ -1078,7 +1078,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 			startline++;
 #ifdef HAVE_REGEX_H
 			useregex = FALSE;
-#endif		
+#endif
 		}
 		/* case sensitive search?? */
 		if(*startline == quotechar) {
@@ -1104,7 +1104,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 				}
 			}
 		}
-	
+
 #endif
 		/* now count each of em, so that can alloc my array of regex_t */
 		if(*tptr != '\0') {
@@ -1119,7 +1119,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 					err = TRUE;
 					error_log(ERRLOG_REPORT, killf_phrases[5], NULL);
 				}
-				else {					
+				else {
 					strcpy(which->string,startline);
 					which->next = NULL;	/* initialize */
 					which->case_sensitive = case_sens;
@@ -1133,7 +1133,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 					else {
 						strncpy(which->header, linein, len);
 						which->header[len] = '\0';	/* just in case */
-#ifdef HAVE_REGEX_H						
+#ifdef HAVE_REGEX_H
 						if(useregex == TRUE) {
 							if((which->ptrs = malloc(sizeof(regex_t))) == NULL) {
 								error_log(ERRLOG_REPORT, killf_phrases[5], NULL);
@@ -1156,7 +1156,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 							/* first fill in max skip for all chars (len of string) */
 							/* See Algorithms/Sedgewick pg 287-289 for explanation */
 							y=strlen(which->string);
-	
+
 							for(x=0;x<sizeof(which->skiparray);x++) {
 								which->skiparray[x] = y;
 							}
@@ -1176,16 +1176,16 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 									which->skiparray[(unsigned char) which->string[x]] = (y-1)-x;
 								}
 							}
-							
-							
+
+
 #ifdef HAVE_REGEX_H
 						}
 #endif
 					}
 				}
 			}
-			
-		}			
+
+		}
 	}
 	if(which != NULL && err == TRUE) {
 		/* error, free up everything */
@@ -1193,7 +1193,7 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 		if(which->ptrs != NULL) {
 			free(which->ptrs);
 		}
-#endif	
+#endif
 		if(which->string != NULL) {
 			free(which->string);
 		}
@@ -1203,19 +1203,19 @@ pmy_regex regex_scan(char *linein, char quotechar, int debug, int use_e_regex, c
 		if(which != NULL) {
 			free(which);
 			which = NULL;
-		}	
+		}
 	}
-	
+
 	return which;
 }
 /*------------------------------------------------------------------------------------*/
 int regex_check(char *headerbuf, pmy_regex expr, int debug) {
 	int match = FALSE;
 	char *startline, *endline;
-	
+
 	if(expr->header != NULL) {
 		if((startline = strstr(headerbuf, expr->header)) != NULL) {
-			endline = strchr(startline, '\n');		
+			endline = strchr(startline, '\n');
 			/* end this line, so we only search the right header line */
 			if(endline != NULL) {
 				*endline = '\0';
@@ -1228,8 +1228,8 @@ int regex_check(char *headerbuf, pmy_regex expr, int debug) {
 			}
 #ifdef HAVE_REGEX_H
 			if(expr->ptrs != NULL) {
-	
-				
+
+
 				if(regexec(expr->ptrs, startline+strlen(expr->header)+1, 0, NULL, 0) == 0) {
 					match = TRUE;
 				}
@@ -1237,19 +1237,19 @@ int regex_check(char *headerbuf, pmy_regex expr, int debug) {
 			else {
 #endif
 				match = find_string(debug, expr, startline+strlen(expr->header)+1);
-#ifdef HAVE_REGEX_H		
+#ifdef HAVE_REGEX_H
 			}
 #endif
 			/* put the nl back on that we deleted */
 			if(endline != NULL) {
 				*endline = '\n';
 			}
-		}	
+		}
 	}
 	if(debug== TRUE) {
 		do_debug("Returning match=%s\n", (match == TRUE) ? "True" : "False");
 	}
-	
+
 	return match;
 }
 /*------------------------------------------------------------------------------------*/
@@ -1257,7 +1257,7 @@ int regex_block(char *what, pmy_regex where, int debug) {
 
 	/* find a string in a block */
 	int match = FALSE;
-	
+
 	if(debug == TRUE && where->string != NULL) {
 		do_debug("Checking for -%s-\n", where->string);
 	}
@@ -1273,13 +1273,13 @@ int regex_block(char *what, pmy_regex where, int debug) {
 #ifdef HAVE_REGEX_H
 	}
 #endif
-	return match;	
+	return match;
 }
 /*---------------------------------------------------------------------------------------------*/
 int find_string(int debug, pmy_regex expr, char *str) {
 
 	/* the search mechanism is based on the Boyer-Moor Algorithms (pg 286- of Algorithms book) */
-	int match = FALSE;	
+	int match = FALSE;
 	char *ptr;		/* pointer to pattern */
 	int lenp;		/* length of pattern */
 	int lens;		/* length of string we are searching  */
@@ -1290,7 +1290,7 @@ int find_string(int debug, pmy_regex expr, char *str) {
 	ptr = expr->string;
 	lenp = strlen(ptr);
 	lens = strlen(str);
-	
+
 
 	if(expr->case_sensitive == TRUE ) {
 		/* do case-sensitive search */
@@ -1300,7 +1300,7 @@ int find_string(int debug, pmy_regex expr, char *str) {
 		i = j = lenp-1;
 		do {
 			if(str[i] == ptr[j]) {
-				i--; 
+				i--;
 				j--;
 			}
 			else {
@@ -1322,7 +1322,7 @@ int find_string(int debug, pmy_regex expr, char *str) {
 		i = j = lenp-1;
 		do {
 			if(tolower(str[i]) == tolower(ptr[j])) {
-				i--; 
+				i--;
 				j--;
 			}
 			else {
@@ -1336,12 +1336,12 @@ int find_string(int debug, pmy_regex expr, char *str) {
 		}
 	}
 	return match;
-	
+
 }
 /*------------------------------------------------------------------------------------*/
 void print_debug(PKillStruct master, const char *fname) {
 	int i;
-	
+
 	/* print out status of master killstruct to debug file */
 	do_debug("--%s-- Master KillStruct\n",fname);
 	do_debug("logyn=%s\n",true_str(master->logyn));
@@ -1351,22 +1351,22 @@ void print_debug(PKillStruct master, const char *fname) {
 	do_debug("ignore_postfix=%s\n",true_str(master->ignore_postfix));
 	do_debug("use_extended_regex=%s\n", true_str(master->use_extended_regex));
 	do_debug("xover_long_long=%s\n", true_str(master->xover_log_long));
-	
+
 	do_debug("Master kill group");
 	debug_one_kill(&(master->master));
-	
-	for(i = 0 ; i < master->totgrps ; i++ ) {	
+
+	for(i = 0 ; i < master->totgrps ; i++ ) {
 		do_debug("Group %d = %s\n", i, master->grps[i].group);
 		do_debug("--delkeep =%s\n", (master->grps[i].delkeep == DELKEEP_KEEP) ? "keep" : "delete");
 		debug_one_kill(&(master->grps[i].match));
-	
+
 	}
 	do_debug("--%s-- End of Killstruct\n", fname);
 }
 /*------------------------------------------------------------------------*/
-void debug_one_kill(POneKill ptr) {	
+void debug_one_kill(POneKill ptr) {
 	pmy_regex temp;
-	
+
 	do_debug("--hilines =%d\n", ptr->hilines);
 	do_debug("--lowlines=%d\n", ptr->lowlines);
 	do_debug("--maxgrps=%d\n", ptr->maxgrps);

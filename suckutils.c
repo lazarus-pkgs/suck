@@ -41,7 +41,7 @@
 /* return TRUE if made/exists and can write to it			  */
 /* -----------------------------------------------------------------------*/
 int checkdir(const char *dirname) {
-	
+
 	struct stat buf;
 	int retval = TRUE;
 
@@ -67,8 +67,8 @@ int checkdir(const char *dirname) {
 		/* huh? */
 		MyPerror(dirname);
 		retval = FALSE;
-	} 
-	return retval;	
+	}
+	return retval;
 }
 /*--------------------------------------------------------------*/
 /* if which = FP_SET, store directory in array 			*/
@@ -90,7 +90,7 @@ const char *full_path(int which, int dir, const char *fname) {
 
 	retptr = NULL;
 
-	switch(which) { 
+	switch(which) {
 	  case FP_GET:
 	  case FP_GET_NOPOSTFIX:
 		/* put the right directory as the first part of the path */
@@ -108,7 +108,7 @@ const char *full_path(int which, int dir, const char *fname) {
 				/* tack on remainder of path */
 				/* the 1 so skip . */
 				strcat(path, &dirs[dir][1]);
-			}		
+			}
 		}
 		if(fname != NULL && fname[0] != '\0') {
 			i = strlen(path);
@@ -203,7 +203,7 @@ int do_lockfile(PMaster master) {
 		}
 	}
 	if(retval == RETVAL_OK) {
-		if((f_lock = fopen(lockfile, "w")) != NULL) { 
+		if((f_lock = fopen(lockfile, "w")) != NULL) {
 			fprintf(f_lock, "%ld", (long) getpid());
 			fclose(f_lock);
 		}
@@ -218,7 +218,7 @@ int do_lockfile(PMaster master) {
 /*-------------------------------------------------------------------------*/
 int qcmp_msgid(const char *nr1, const char *nr2) {
 	/* return -1 if a < b, 0 if a == b, 1 if a > b */
-	
+
 	int retval = 0;
 
         /* cmp two article id numbers */
@@ -227,10 +227,10 @@ int qcmp_msgid(const char *nr1, const char *nr2) {
 	/* then use case insensitive compares on the organization */
 	/* this is to conform to rfc822 */
 
-	if(nr1 != NULL && nr2 != NULL) {		
+	if(nr1 != NULL && nr2 != NULL) {
 		while ( *nr1 == *nr2 && *nr1 != '\0' && *nr1 != '@') {
 			nr1++;
-			nr2++;			
+			nr2++;
 		}
 		if(*nr1 == '@') {
 			while( tolower(*nr1) == tolower(*nr2) && *nr1 != '\0') {
@@ -248,7 +248,7 @@ int qcmp_msgid(const char *nr1, const char *nr2) {
 			/* one is longer than the other */
 			retval = (*nr1 == '\0') ? -1 : 1;
 		}
-	}	
+	}
 	return retval;
 }
 /*------------------------------------------------------------------------------*/
@@ -260,11 +260,11 @@ int cmp_msgid(const char *nr1, const char *nr2) {
 	/* this is to conform to rfc822 */
 	int retval = FALSE;
 
-	if(nr1 != NULL && nr2 != NULL) { 
-		
+	if(nr1 != NULL && nr2 != NULL) {
+
 		while ( *nr1 == *nr2 && *nr1 != '\0' && *nr1 != '@') {
 			nr1++;
-			nr2++;			
+			nr2++;
 		}
 		if(*nr1 == '@') {
 			while( tolower(*nr1) == tolower(*nr2) && *nr1 != '\0') {
@@ -289,7 +289,7 @@ int move_file(const char *src, const char *dest) {
 	int retval = RETVAL_OK;
 	size_t nrread;
 
-	
+
 
 	/* first try the easy way */
 	if(src == NULL || dest == NULL) {
@@ -330,7 +330,7 @@ int move_file(const char *src, const char *dest) {
 					error_log(ERRLOG_REPORT, sucku_phrases[8], src, NULL) ;
 				}
 				fclose(fpi);
-				fclose(fpo);				
+				fclose(fpo);
 			}
 			/* now that copy is successful, nuke it */
 			if(retval == RETVAL_OK) {

@@ -38,7 +38,7 @@ int db_delete(PMaster master) {
 
 	int retval = RETVAL_OK;
 	const char *ptr;
-	
+
 	db_close(master); /* just in case */
 	ptr = full_path(FP_GET, FP_TMPDIR, N_DBFILE);
 	if(master->debug == TRUE) {
@@ -61,12 +61,12 @@ int db_write(PMaster master) {
 	long itemnr, grpnr;
 	PList itemon;
 	PGroups grps;
-	
+
 	fname = full_path(FP_GET, FP_TMPDIR, N_DBFILE);
 	if(master->debug == TRUE) {
 		do_debug("Writing entire db - %s\n", fname);
 	}
-	
+
 	if((fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC
 #ifdef EMX /* OS-2 */
 		      | O_BINARY
@@ -82,7 +82,7 @@ int db_write(PMaster master) {
 		/* first write out number of items, so can read em in later*/
 		itemnr = master->nritems;
 		write(fd, &itemnr, sizeof(itemnr));
-		
+
 		/* now write the list */
 		itemon = master->head;
 		itemnr = 0L;
@@ -95,7 +95,7 @@ int db_write(PMaster master) {
 			itemon = itemon->next;
 			itemnr++;
 		}
-		
+
 		/* now write out the groups */
 		/* first write out the number of items, so can read em in later */
 		grps = master->groups;
@@ -105,7 +105,7 @@ int db_write(PMaster master) {
 			grpnr++;
 		}
 		write(fd, &grpnr, sizeof(grpnr));
-		
+
 		grps = master->groups;
 		grpnr = 0L;
 		while (grps != NULL) {
@@ -131,7 +131,7 @@ int db_read(PMaster master) {
 	PList itemon, ptr;
 	PGroups grpon, gptr;
 	long itemnr;
-	
+
 	fname = full_path(FP_GET, FP_TMPDIR, N_DBFILE);
 	if(master->debug == TRUE) {
 		do_debug("Reading entire db - %s\n", fname);
@@ -143,11 +143,11 @@ int db_read(PMaster master) {
 		)) != -1) { /* read em in */
 		print_phrases(master->msgs, suck_phrases[2], NULL);
 		read(fd, &itemnr, sizeof(itemon)); /* get the number of items */
-		
+
 		master->nritems = itemnr;
 		itemon = NULL;
 		/* have to malloc em first */
-		do { 
+		do {
 			if((ptr = malloc(sizeof(List))) == NULL) {
 				retval = RETVAL_ERROR;
 				error_log(ERRLOG_REPORT, suck_phrases[22], NULL);
@@ -174,7 +174,7 @@ int db_read(PMaster master) {
 					MyPerror(fname);
 				}
 			}
-			
+
 		}
 		while(retval == RETVAL_OK && itemnr > 0);
 		/* now get the groups */
@@ -186,7 +186,7 @@ int db_read(PMaster master) {
 				retval = RETVAL_ERROR;
 				error_log(ERRLOG_REPORT, suck_phrases[22], NULL);
 			}
-			else 
+			else
 			{
 				if(read(fd, gptr, sizeof(Groups)) == sizeof(Groups)) {
 					itemnr--;
@@ -232,7 +232,7 @@ int db_open(PMaster master) {
 
 	int retval = RETVAL_OK;
 	const char *fname;
-	
+
 	if(master->db != -1) {
 		/* just to be on the safe side */
 		close(master->db);
@@ -253,13 +253,13 @@ int db_open(PMaster master) {
 void db_close(PMaster master) {
 	if(master->db != -1) {
 		close(master->db);
-	}	
+	}
 }
 /*------------------------------------------------------------------------------*/
 int db_mark_dled(PMaster master, PList itemon) {
 	int retval = RETVAL_OK;
 	off_t offset;
-	
+
         /* first figure out where we need to be writing to */
 	offset = sizeof(long) + (itemon->dbnr * sizeof(List));
         /* the extra long to skip the number we write out at beginning of file */
@@ -275,7 +275,7 @@ int db_mark_dled(PMaster master, PList itemon) {
 			retval = RETVAL_ERROR;
 		}
 	}
-	
+
 	return retval;
 }
 

@@ -1,4 +1,4 @@
-const char *default_timer_phrases[] = { 
+const char *default_timer_phrases[] = {
 	"Elapsed Time = %v1% mins %v2% seconds\n",		/* 0 */
 	"%v1% Bytes received in %v2% mins %v3% secs, BPS = %v4%\n",
 	"%v1% BPS",
@@ -32,7 +32,7 @@ const char *default_killf_reasons[] = {
 	"Body match:",
 	"Body Size exceeded, size=",
 	"Body Size too small, size="
-	"Too many Groups in Xref",             /* 10 */    
+	"Too many Groups in Xref",             /* 10 */
 };
 
 const char *default_killf_phrases[] = {
@@ -55,7 +55,7 @@ const char *default_killp_phrases[] = {
 	"Out of memory processing killprg args",		/* 0 */
 	"Setting up pipes",
 	"Out of memory processing path",
-	"%v1%: Unable to find, sorry",	
+	"%v1%: Unable to find, sorry",
 	"Unable to write to child process",
 	"Unable to read from child process",			/* 5 */
 	"Process Error",
@@ -74,7 +74,7 @@ const char *default_killp_phrases[] = {
 	"killperl: Unable to log killed article",
 };
 
-const char *default_sucku_phrases[] = { 
+const char *default_sucku_phrases[] = {
 	"%v1%: Not a directory\n",		/* 0 */
 	"%v1%: Write permission denied\n",
 	"Lock File %v1%, Invalid PID, aborting\n",
@@ -97,7 +97,7 @@ const char *default_suck_phrases[] = {
 	"No local host name\n",
 	"Cleaning up after myself\n",
 	"Skipping Line: %v1%",
-	"Invalid Line: %v1%",	
+	"Invalid Line: %v1%",
 	"Invalid number for maxread field: %v1% : ignoring\n",	/* 10 */
 	"GROUP <%v1%> not found on host\n",
 	"GROUP <%v1%>, unexpected response, %v2%\n",
@@ -114,10 +114,10 @@ const char *default_suck_phrases[] = {
 	"Unable to write db record to disk, aborting\n",
 	"Signal received, will finish downloading article.\n",
 	"Notify programmer, problem with pause_signal()\n",	/* 25 */
-	"\nGot Pause Signal, swapping pause values\n",	
+	"\nGot Pause Signal, swapping pause values\n",
 	"Weird Response to Authorization: %v1%",
 	"Authorization Denied",
-	"***Unexpected response to command, %v1%\n%v2%\n", 
+	"***Unexpected response to command, %v1%\n%v2%\n",
 	"Moving newsrc to backup",				/* 30 */
 	"Moving newrc to newsrc",
 	"Removing Suck DB File",
@@ -204,14 +204,14 @@ const char *default_xover_phrases[] = {
 	"Xover - Invalid Author or early termination of line - %v1%",
 	"Xover - Invalid Date or early termination of line - %v1%",
 	"Xover - Invalid Article-ID or early termination of line - %v1%", /* 5 */
-	"Xover - Invalid Reference or early termination of line - %v1%", 
+	"Xover - Invalid Reference or early termination of line - %v1%",
 	"Xover - Invalid Byte Count - %v1%",
 	"Xover - Invalid Line Count - %v1%",
 	"ARTICLE KILLED XOVER: group %v1% - %v2% - MsgID %v3%\n",
 	"Xover=%v1%\n", /* 10 */
 	"Unable to log Xover-killed article",
 	"Out of memory, unable to process Xover killfiles",
-	"No Message-ID in XOVER-%v1%- skipping\n", 
+	"No Message-ID in XOVER-%v1%- skipping\n",
 };
 
 const char *default_xover_reasons[] = {

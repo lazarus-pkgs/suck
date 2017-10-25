@@ -39,11 +39,11 @@ char **both_phrases=default_both_phrases;
 struct {
 	const char *command;
 	int response;
-} cmds[]  = { { "help", 100 }, 
+} cmds[]  = { { "help", 100 },
 	      { "list", 215 },
 	      { "list newsgroups", 215 },
 	      { "newgroups", 231},
-	      { "list overview.fmt", 215},	      
+	      { "list overview.fmt", 215},
 };
 
 enum { CMD_HELP, CMD_LIST, CMD_DESC, CMD_NEWGRP, CMD_OVERVIEW };
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 		/* we have a regular phrases file make it the default */
 		phrases = N_PHRASES;
 	}
-	
+
 #endif
 
 	if(argc > 1 && argv[loop][0] != '-') {
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 	for(;loop<argc;loop++) {
 		if(argv[loop][0] == '-') {
 			switch(argv[loop][1]) {
-			  case 'a': 
+			  case 'a':
 				cmd = CMD_LIST;
 				break;
 			  case 'd':
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 				error_log(ERRLOG_SET_FILE, ERROR_LOG, NULL);
 				break;
 			  case 'E':	/* error log path */
-				if(loop+1 == argc) { 
+				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, test_phrases[2], NULL);
 					retval = RETVAL_ERROR;
 				}
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 				}
 				break;
 			  case 'S':	/* status log path */
-				if(loop+1 == argc) { 
+				if(loop+1 == argc) {
 					error_log(ERRLOG_REPORT, test_phrases[12], NULL);
 					retval = RETVAL_ERROR;
 				}
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 					error_log(ERRLOG_REPORT, test_phrases[5], NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					userid = argv[++loop];
 				}
 				break;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
 					error_log(ERRLOG_REPORT, test_phrases[6], NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					passwd = argv[++loop];
 				}
 				break;
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
 					error_log(ERRLOG_REPORT, test_phrases[11], NULL);
 					retval = RETVAL_ERROR;
 				}
-				else { 
+				else {
 					phrases = argv[++loop];
 				}
 				break;
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
 			if(quiet == FALSE) {
 				fprintf(fptr,"%s",ptr);	/* print it */
 			}
-			
+
 			if(response != 200 && response != 201) {
 				/* not a valid response */
 				retval = RETVAL_ERROR;
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 		if(sockfd >= 0) {
 			disconnect_from_nntphost(sockfd, do_ssl, &ssl_struct);
 		}
-		
+
 		if(retval == RETVAL_ERROR) {
 			error_log(ERRLOG_REPORT, test_phrases[8], host, NULL);
 		}
@@ -281,7 +281,7 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 		strcat(cmdstr, cmdargs);
 	}
 	strcat(cmdstr, "\r\n");
-	
+
 	sputline(sockfd, cmdstr, do_ssl, ssl_struct);		/* which command do I run? */
 	sgetline(sockfd, &buf, do_ssl, ssl_struct);			/* get response */
 
@@ -290,9 +290,9 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 		sprintf(buf2, "AUTHINFO USER %s\r\n", userid);
 		sputline(sockfd, buf2, do_ssl, ssl_struct);
 		len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
-		if( len < 0) {	
-			retval = RETVAL_ERROR;		  	
-		}					
+		if( len < 0) {
+			retval = RETVAL_ERROR;
+		}
 		else {
 			ptr  = number(buf, &response);
 			if(response != 381) {
@@ -303,17 +303,17 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 				sprintf(buf2, "AUTHINFO PASS %s\r\n", passwd);
 				sputline(sockfd, buf2, do_ssl, ssl_struct);
 				len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
-				if(len < 0) {	
-					retval = RETVAL_ERROR;		  	
-				}					
+				if(len < 0) {
+					retval = RETVAL_ERROR;
+				}
 				else {
 					number(buf, &response);
 					switch(response) {
 					  case 281: /* bingo resend original command*/
 						sputline(sockfd, cmdstr, do_ssl, ssl_struct);
 						len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
-						if( len < 0) {	
-							retval = RETVAL_ERROR;		  	
+						if( len < 0) {
+							retval = RETVAL_ERROR;
 						}
 						else {
 							ptr = number(buf,&response);
@@ -338,12 +338,12 @@ int do_a_command(int sockfd, int cmd, FILE *fptr, char *cmdargs, char *userid, c
 	}
 	else {
 		/* okay here we go */
-		fprintf(fptr, "%s", ptr); 
+		fprintf(fptr, "%s", ptr);
 		/* commands are ended by a . on a line by itself */
 
 		len = done = 0;
 		while( len >=0 && done == 0) {
-		
+
 			len = sgetline(sockfd, &buf, do_ssl, ssl_struct);
 
 			if(len == 2 && strcmp(buf, ".\n") == 0) {
@@ -364,9 +364,9 @@ int check_date_format(char *dates, char *indate, char *intime) {
 
 	/* if indate & intime are not valid format, return error */
 	/* when done, dates will be yymmdd hhmmss */
-	
-	int i, retval = RETVAL_OK;	
-	
+
+	int i, retval = RETVAL_OK;
+
 	/* now test my incoming args */
 	if(indate == NULL || intime == NULL) {
 		retval = RETVAL_ERROR;
@@ -396,9 +396,9 @@ void load_phrases(const char *phrases) {
 	int error=TRUE;
 	FILE *fpi;
 	char buf[MAXLINLEN];
-	
+
 	if(phrases != NULL) {
-		
+
 		if((fpi = fopen(phrases, "r")) == NULL) {
 			MyPerror(phrases);
 		}
@@ -421,7 +421,7 @@ void load_phrases(const char *phrases) {
 			test_phrases = default_test_phrases;
 			both_phrases = default_both_phrases;
 		}
-	}		
+	}
 }
 /*--------------------------------------------------------------------------------*/
 void free_phrases(void) {
@@ -432,5 +432,5 @@ void free_phrases(void) {
 		if(both_phrases != default_both_phrases) {
 			free_array(NR_BOTH_PHRASES, both_phrases);
 		}
-		
+
 }
