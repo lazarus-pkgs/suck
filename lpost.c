@@ -42,7 +42,7 @@ int main(int argc,char *argv[]) {
 			}
 		}
 		else {
-			(void) fput(line, pfp);
+			(void) fputs(line, pfp);
 		}
 	} /* end while */
 	exit(retval);
