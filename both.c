@@ -162,6 +162,11 @@ int connect_to_nntphost(const char *host, char * name, size_t namelen, FILE *msg
 	struct addrinfo * ai;
 	char buffer[60]; // if not given by caller. NI_MAXHOST would be better, but that's ok as well.
 
+	if (host == NULL) {
+		error_log(ERRLOG_REPORT, both_phrases[0], NULL);
+		return sockfd;
+	}
+
 #ifdef HAVE_LIBSSL
 	SSL *ssl_struct = NULL;
 	SSL_CTX *test1 = NULL;
