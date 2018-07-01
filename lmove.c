@@ -669,8 +669,10 @@ int do_lockfile(PMaster master, int option) {
 		sprintf(lockfile, "%s/%s", master->basedir, N_LMOVE_LOCKFILE);
 		if((f_lock = fopen(lockfile, "r")) != NULL) {
 			/* okay, let's try and see if this sucker is truly alive */
-			fscanf(f_lock, "%ld", (long *) &pid);
+			long tmp = 0; 
+			fscanf(f_lock, "%ld", &tmp);
 			fclose(f_lock);
+			pid = (pid_t)tmp;
 			if(pid <= 0) {
 				error_log(ERRLOG_REPORT,  lmove_phrases[14], lockfile, NULL);
 				retval = RETVAL_ERROR;

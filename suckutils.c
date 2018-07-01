@@ -177,8 +177,10 @@ int do_lockfile(PMaster master) {
 	lockfile = full_path(FP_GET, FP_TMPDIR, N_LOCKFILE);
 	if((f_lock = fopen(lockfile, "r")) != NULL) {
 		/* okay, let's try and see if this sucker is truly alive */
-		fscanf(f_lock, "%ld", (long *) &pid);
+		long tmp = 0; 
+		fscanf(f_lock, "%ld", &tmp);
 		fclose(f_lock);
+		pid = (pid_t)tmp;
 		if(pid <= 0) {
 			error_log(ERRLOG_REPORT,  sucku_phrases[2], lockfile, NULL);
 			retval = RETVAL_ERROR;
