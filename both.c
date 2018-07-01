@@ -626,7 +626,10 @@ void error_log(int mode, const char *fmt, ...) {
 		}
 		vprint_phrases(fptr, fmt, args);
 		if(debug == TRUE) {
+			va_list args;
+			va_start(args, fmt);
 			do_debug_vl(fmt, args);
+			va_end(args);
 		}
 		if(fptr != stderr) {
 			fclose(fptr);
