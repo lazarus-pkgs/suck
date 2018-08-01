@@ -1,5 +1,14 @@
 CHANGES
 =======
+-- Changes from suck-4.3.3 -> Suck-4.3.4
+
+- Fix invalid memory access in both.c (Debian bug #858040)
+- Fix SIGSEV in connect_to_nntphost (Debian bugs #716448, #716510, #716606)
+- Fix stack smash in lmove.c and suckutils.c (Debian bug #832265)
+- Fix manpage formatting (Debian bug #858262)
+
+August 01, 2018 - Suck-4.3.4 released
+
 -- Changes from suck-4.3.2 -> Suck-4.3.3
 
 - General code cleanup
