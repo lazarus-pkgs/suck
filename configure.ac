@@ -41,10 +41,10 @@ AC_HEADER_TIME
 dnl Checks for library functions.
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gettimeofday select strerror memmove setvbuf sigaction)
-if test "$with_inn_lib" ; then
+if test "x$with_inn_lib" != "xno" ; then
     LDFLAGS="${LDFLAGS} $DB_LIB -L${with_inn_lib}"
 fi
-if test "$with_inn_include" ; then
+if test "x$with_inn_include" != "xno" ; then
    testpath=$with_inn_include
 else
    testpath="/usr/include/inn /usr/local/include /usr/local/include/inn"
