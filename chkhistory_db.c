@@ -5,6 +5,7 @@
 /* be used. */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "suck_config.h"
 #include "suck.h"
