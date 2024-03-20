@@ -1,5 +1,13 @@
 CHANGES
 =======
+-- Changes from suck-4.3.4 -> Suck-4.3.5
+
+- Add missing <string.h> include (#4)
+- Fix usage of non-standard LDFLAGS (#5)
+- configure.ac: properly test $with_inn_{lib,include} (#5)
+
+March 20, 2024 - Suck-4.3.5 released
+
 -- Changes from suck-4.3.3 -> Suck-4.3.4
 
 - Fix invalid memory access in both.c (Debian bug #858040)
