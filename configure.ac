@@ -20,8 +20,6 @@ AC_SUBST(GCC)
 dnl Checks for libraries.
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_LIB(socks, Rconnect)
-AC_CHECK_LIB(socks5, SOCKSconnect)
 AC_CHECK_LIB(cV, fprintf)
 dnl Do I need -lcrypto????? for SSL
 AC_CHECK_LIB(ssl, SSL_get_error, [SSL_LIB="-lssl"; SSL_DEFS="-DHAVE_LIBSSL"])
@@ -30,7 +28,7 @@ dnl Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h limits.h regex.h sys/select.h net/socket.h arpa/inet.h socks.h)
+AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h limits.h regex.h sys/select.h net/socket.h arpa/inet.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
