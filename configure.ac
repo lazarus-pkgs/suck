@@ -4,6 +4,8 @@ dnl Autoconfigure input file for suck
 AC_INIT(suck.c)
 AC_CONFIG_HEADER(config.h)
 
+AC_ARG_ENABLE(ssl, AS_HELP_STRING([--disable-ssl], [Disable support for SSL/TLS]))
+
 AC_ARG_WITH(inn-lib, [ --with-inn-lib=path location of libinn.a])
 AC_ARG_WITH(inn-include, [ --with-inn-include=path location of inn include files])
 AC_ARG_WITH(perl-exe, [ --with-perl-exe=full path to perl executable eg: /usr/bin])
@@ -21,8 +23,10 @@ dnl Checks for libraries.
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(cV, fprintf)
-dnl Do I need -lcrypto????? for SSL
-AC_CHECK_LIB(ssl, SSL_get_error, [SSL_LIB="-lssl"; SSL_DEFS="-DHAVE_LIBSSL"])
+
+AS_IF([test "x$enable_ssl" != "xno"], [
+  PKG_CHECK_MODULES(SSL, libssl, [SSL_DEFS="-DHAVE_LIBSSL"])
+])
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -115,7 +119,6 @@ fi
 AC_SUBST(DB_TYPE)
 AC_SUBST(DB_LIB)
 AC_SUBST(HISTORY)
-AC_SUBST(SSL_LIB)
 AC_SUBST(SSL_DEFS)
 AC_SUBST(PERL_DEFS)
 AC_SUBST(PERL_LIB)
