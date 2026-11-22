@@ -46,8 +46,4 @@ enum { ERRLOG_SET_FILE, ERRLOG_SET_STDERR, ERRLOG_REPORT, ERRLOG_SET_DEBUG };
 extern int TimeOut;		/* used to pass TimeOut value to sgetline() */
 #endif
 
-#ifdef HAVE_SOCKS_H
-#include <socks.h>
-#endif
-
 #endif /* _SUCK_BOTH_H */

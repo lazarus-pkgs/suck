@@ -4,6 +4,8 @@ dnl Autoconfigure input file for suck
 AC_INIT(suck.c)
 AC_CONFIG_HEADER(config.h)
 
+AC_ARG_ENABLE(ssl, AS_HELP_STRING([--disable-ssl], [Disable support for SSL/TLS]))
+
 AC_ARG_WITH(inn-lib, [ --with-inn-lib=path location of libinn.a])
 AC_ARG_WITH(inn-include, [ --with-inn-include=path location of inn include files])
 AC_ARG_WITH(perl-exe, [ --with-perl-exe=full path to perl executable eg: /usr/bin])
@@ -20,17 +22,17 @@ AC_SUBST(GCC)
 dnl Checks for libraries.
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_LIB(socks, Rconnect)
-AC_CHECK_LIB(socks5, SOCKSconnect)
 AC_CHECK_LIB(cV, fprintf)
-dnl Do I need -lcrypto????? for SSL
-AC_CHECK_LIB(ssl, SSL_get_error, [SSL_LIB="-lssl"; SSL_DEFS="-DHAVE_LIBSSL"])
+
+AS_IF([test "x$enable_ssl" != "xno"], [
+  PKG_CHECK_MODULES(SSL, libssl, [SSL_DEFS="-DHAVE_LIBSSL"])
+])
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h limits.h regex.h sys/select.h net/socket.h arpa/inet.h socks.h)
+AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h limits.h regex.h sys/select.h net/socket.h arpa/inet.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -117,7 +119,6 @@ fi
 AC_SUBST(DB_TYPE)
 AC_SUBST(DB_LIB)
 AC_SUBST(HISTORY)
-AC_SUBST(SSL_LIB)
 AC_SUBST(SSL_DEFS)
 AC_SUBST(PERL_DEFS)
 AC_SUBST(PERL_LIB)
